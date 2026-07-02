@@ -1,5 +1,7 @@
 # Deployment Guide
 
+> **Language:** English | [中文](DEPLOY.zh-CN.md)
+
 Packaging and deployment for **Michelle DataHub** (catalog-driven ingestion + REST
 API) on **PostgreSQL**.
 
@@ -20,7 +22,7 @@ restarts don't interrupt fetching — set `DATAHUB_API_SCHEDULER=0` on the API.
 ## 1. Prerequisites
 
 - Python 3.10+ (image uses 3.12) and PostgreSQL 14+.
-- The Excel registry file (`doc/Michelle_Datasource_*.xlsx`) reachable at
+- The Excel registry file (`data/Michelle_Datasource_*.xlsx`) reachable at
   `DATAHUB_CATALOG_PATH`.
 
 ## 2. Configuration
@@ -55,7 +57,7 @@ datahub init-db
 Both produce the **same** schema (`deploy/schema.sql` is kept byte-compatible with
 the ORM in `datahub/models/`: `SERIAL` PKs, `JSONB` payloads, `TIMESTAMP` UTC,
 `uq_source(module,name,url)` / `uq_content(source_id,external_id)` dedup keys, and
-the supporting indexes). See [`deploy/schema.sql`](deploy/schema.sql) for the
+the supporting indexes). See [`deploy/schema.sql`](../deploy/schema.sql) for the
 authoritative definition. Then load the registry:
 
 ```bash
@@ -87,7 +89,7 @@ docker compose run --rm ingest          # 2. create schema + load the registry (
 docker compose up -d api scheduler      # 3. API on :8000 + scheduler worker
 ```
 
-The compose file mounts the project's `doc/` read-only into `/data` for the registry, puts
+The compose file mounts the project's `data/` read-only into `/data` for the registry, puts
 Postgres data on the `pgdata` volume, runs the API with the scheduler disabled, and
 runs a dedicated `scheduler` service that owns the 2-hour refresh. Reload the
 registry later without downtime:
@@ -149,4 +151,3 @@ datahub refresh --module news                       # force a fetch now (dedup)
   trend, not individual failures.
 - **Driver note:** the URL scheme must be `postgresql+psycopg://` (psycopg 3, from
   the `[postgres]` extra), **not** `postgresql://` (which defaults to psycopg2).
-```

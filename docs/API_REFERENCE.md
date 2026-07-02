@@ -1,5 +1,7 @@
 # API Reference — Michelle DataHub
 
+> **Language:** English | [中文](API_REFERENCE.zh-CN.md)
+
 REST API for the catalog-driven ingestion engine. All content is fetched from the
 data-source registry, stored in the database, refreshed every 2 hours (dedup), and
 served read-only through the endpoints below.
@@ -61,7 +63,7 @@ Liveness probe.
 
 **200** →
 ```json
-{ "status": "ok", "catalog_path": "doc/Michelle_Datasource_2026-06-02.xlsx" }
+{ "status": "ok", "catalog_path": "data/Michelle_Datasource_2026-06-02.xlsx" }
 ```
 
 ---
@@ -333,4 +335,3 @@ Standard FastAPI error envelope:
   new items — safe to poll and re-fetch.
 - `published_at` is null for sources that carry no timestamp; prefer `by=fetched`
   when you need "what arrived today" rather than "what was published today".
-```

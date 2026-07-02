@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 A catalog-driven backend that periodically ingests content from the data sources
-defined in `doc/Michelle_Datasource_2026-06-02.xlsx` and serves it over REST.
+defined in `data/Michelle_Datasource_2026-06-02.xlsx` and serves it over REST.
 The Excel workbook is the **source registry**, not just documentation: each of its
 9 tabs is a *module*, each row is a *data source* declaring how it is fetched
 (`方式` column) and how often (`频率` column). The system parses that registry into
@@ -37,9 +37,9 @@ pytest -q
 pytest tests/test_catalog.py::test_loads_all_modules   # single test
 ```
 
-`make install|init|ingest|serve|schedule|run|test` wrap the above.
+`make install|init|ingest|serve|schedule|run|refresh|test` wrap the above.
 
-`tests/test_catalog.py` is auto-skipped if `doc/Michelle_Datasource_*.xlsx` is
+`tests/test_catalog.py` is auto-skipped if `data/Michelle_Datasource_*.xlsx` is
 absent; `tests/test_frequency.py` is pure-unit and always runs.
 
 ## Architecture
@@ -74,7 +74,9 @@ Package responsibilities (`datahub/`):
   cross-module query (`GET /api/v1/content`) and a per-type feed
   (`GET /api/v1/content/{module}`) that defaults to *today's* items (UTC) and returns
   the latest N; `?by=published|fetched` chooses the date field. `storage/` — engine,
-  session, `init_db`. Full endpoint reference is `API_REFERENCE.md` (or the live `/docs`).
+  session, `init_db`. Full endpoint reference is `docs/API_REFERENCE.md` (or the live
+  `/docs`); Chinese versions are the `docs/*.zh-CN.md` twins — update both when
+  endpoints change.
 - `cli.py` — argparse entrypoint (the `datahub` console script).
 
 ## Key conventions
@@ -111,4 +113,4 @@ Package responsibilities (`datahub/`):
   must use the `postgresql+psycopg://` driver, from the `[postgres]` extra). JSON
   columns are `JSON().with_variant(JSONB, "postgresql")` — keep `deploy/schema.sql`
   byte-compatible with `models/` when changing a column (it's the canonical DDL and
-  must match `create_all`). Deployment (Docker/compose/systemd) is in `DEPLOY.md`.
+  must match `create_all`). Deployment (Docker/compose/systemd) is in `docs/DEPLOY.md`.

@@ -4,7 +4,7 @@
 #   docker compose run --rm ingest              # init schema + load the registry (once)
 #   docker compose up -d api scheduler          # serve API + run the 2h refresh loop
 #
-# The Excel registry lives at ../doc/Michelle_Datasource_*.xlsx (mounted into /data).
+# The Excel registry lives at ../data/Michelle_Datasource_*.xlsx (mounted into /data).
 
 x-app: &app
   build:
@@ -15,7 +15,7 @@ x-app: &app
     DATAHUB_CATALOG_PATH: /data/Michelle_Datasource_2026-06-02.xlsx
     DATAHUB_REFRESH_ALL_HOURS: ${DATAHUB_REFRESH_ALL_HOURS:-2}
   volumes:
-    - ../doc:/data:ro
+    - ../data:/data:ro
   depends_on:
     db:
       condition: service_healthy

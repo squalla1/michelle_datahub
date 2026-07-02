@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./datahub.db"
 
     # Catalog source (the Excel registry)
-    catalog_path: str = "doc/Michelle_Datasource_2026-06-02.xlsx"
+    catalog_path: str = "data/Michelle_Datasource_2026-06-02.xlsx"
 
     # Fetching
     request_timeout: float = 20.0

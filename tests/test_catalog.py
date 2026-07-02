@@ -5,7 +5,7 @@ import pytest
 from datahub.catalog import MODULES, load_catalog
 from datahub.fetchers.registry import resolve_fetcher
 
-CATALOG = Path(__file__).resolve().parents[1] / "doc" / "Michelle_Datasource_2026-06-02.xlsx"
+CATALOG = Path(__file__).resolve().parents[1] / "data" / "Michelle_Datasource_2026-06-02.xlsx"
 
 pytestmark = pytest.mark.skipif(not CATALOG.exists(), reason="registry workbook not present")
 
