@@ -1,7 +1,7 @@
 [project]
 name = "michelle-datahub"
 version = "0.1.0"
-description = "Catalog-driven ingestion engine + REST API for the Michelle multi-category data-source registry"
+description = "Multi-source intelligence data hub: continuously ingests news, global events, calendars, company, market and macro data from 1200+ sources, with scheduled fetching, dedup storage, and per-type daily REST APIs. 多源情报数据中台:持续聚合新闻、全球事件、日历、公司、市场、宏观等 1200+ 数据源,定时抓取、排重入库,按类型提供每日数据 REST 接口。"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.110",

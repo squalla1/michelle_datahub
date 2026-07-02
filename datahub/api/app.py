@@ -36,7 +36,12 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Michelle DataHub API",
         version="0.1.0",
-        description="Catalog-driven ingestion engine for the Michelle data-source registry.",
+        description=(
+            "Multi-source intelligence data hub: news, global events, calendars, "
+            "company, market and macro data from 1200+ sources — scheduled fetching, "
+            "dedup storage, per-type daily feeds. "
+            "多源情报数据中台:定时抓取、排重入库,按类型提供每日数据接口。"
+        ),
         lifespan=lifespan,
     )
 
