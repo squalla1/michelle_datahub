@@ -110,14 +110,19 @@ class SchedulerService:
             self.scheduler.shutdown(wait=False)
 
     def jobs(self) -> list[dict]:
-        return [
-            {
-                "id": j.id,
-                "next_run_time": j.next_run_time.isoformat() if j.next_run_time else None,
-                "trigger": str(j.trigger),
-            }
-            for j in self.scheduler.get_jobs()
-        ]
+        out = []
+        for j in self.scheduler.get_jobs():
+            # Jobs added while the scheduler is not running (e.g. the API process
+            # in split deployments) have no next_run_time attribute yet.
+            nrt = getattr(j, "next_run_time", None)
+            out.append(
+                {
+                    "id": j.id,
+                    "next_run_time": nrt.isoformat() if nrt else None,
+                    "trigger": str(j.trigger),
+                }
+            )
+        return out
 
 
 # Module-level singleton reused by the API process.
