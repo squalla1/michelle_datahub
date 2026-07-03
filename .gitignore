@@ -15,8 +15,8 @@ dist/
 # Environment / secrets
 .env
 
-# Runtime output (per-refresh stats reports)
-reports/
+# Runtime output (per-refresh stats reports) — root only; docs/reports/ is tracked
+/reports/
 
 # Test & tool caches
 .pytest_cache/
