@@ -104,17 +104,20 @@ systemctl daemon-reload && systemctl enable --now datahub-api datahub-scheduler
 注意:`DATAHUB_CATALOG_PATH`、`DATAHUB_REPORT_DIR` 默认是相对路径,基于
 `WorkingDirectory` 解析 —— 保持上面的配置即可,或在 `.env` 改为绝对路径。
 
-## 4. nginx 反向代理
+## 4. nginx 反向代理(HTTPS)
+
+nginx 装在宿主机,API 容器发布在宿主回环 `127.0.0.1:8000`(compose 默认),
+域名 `mai.polarisagi.com`,80 跳转 443:
 
 ```bash
 cp deploy/nginx.conf /etc/nginx/conf.d/datahub.conf
-vi /etc/nginx/conf.d/datahub.conf     # 改 server_name
+mkdir -p /etc/nginx/cert && cp polarisagi.com.{pem,key} /etc/nginx/cert/
+chmod 600 /etc/nginx/cert/polarisagi.com.key
 nginx -t && systemctl reload nginx
 ```
 
-配套:应用只监听回环 —— systemd 在 `.env` 设 `DATAHUB_API_HOST=127.0.0.1`;
-Docker 的 compose 已默认 `127.0.0.1:8000:8000`。该配置默认封禁外网访问
-`/api/v1/jobs`(API 无鉴权)。HTTPS:`certbot --nginx -d 你的域名`。
+该配置封禁外网访问 `/api/v1/jobs`(API 无鉴权);安全组只放行 80/443。
+阿里云证书为手动续期 —— 到期替换两个文件后 reload。
 
 ## 5. 验证
 

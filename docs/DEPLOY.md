@@ -107,18 +107,22 @@ Note: `DATAHUB_CATALOG_PATH` and `DATAHUB_REPORT_DIR` default to relative paths
 resolved against `WorkingDirectory` — keep it as above, or use absolute paths in
 `.env`.
 
-## 4. nginx reverse proxy
+## 4. nginx reverse proxy (HTTPS)
+
+nginx runs on the host; the API container publishes on the host loopback
+`127.0.0.1:8000` (compose default). Domain `mai.polarisagi.com`, port 80
+redirects to 443:
 
 ```bash
 cp deploy/nginx.conf /etc/nginx/conf.d/datahub.conf
-vi /etc/nginx/conf.d/datahub.conf     # set server_name
+mkdir -p /etc/nginx/cert && cp polarisagi.com.{pem,key} /etc/nginx/cert/
+chmod 600 /etc/nginx/cert/polarisagi.com.key
 nginx -t && systemctl reload nginx
 ```
 
-Pair it with the app listening on loopback only — systemd: `DATAHUB_API_HOST=127.0.0.1`
-in `.env`; Docker: compose already binds `127.0.0.1:8000:8000`. The config blocks
-external access to `/api/v1/jobs` (the API has no auth). HTTPS:
-`certbot --nginx -d your.domain`.
+The config blocks external access to `/api/v1/jobs` (the API has no auth); open
+only 80/443 in the security group. The Alibaba Cloud certificate renews manually —
+replace the two files and reload when it expires.
 
 ## 5. Verify
 
