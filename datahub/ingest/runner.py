@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
+from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
+from ..config import get_settings
 from ..fetchers import fetch_source
 from ..models import ContentItem, DataSource, FetchRun
 from ..storage import session_scope
@@ -86,7 +88,9 @@ def run_all_sources(module: str | None = None, only_enabled: bool = True) -> dic
     This is the global-refresh entrypoint: it loops `run_source` over each
     matching source id, so the same (source_id, external_id) dedup applies and
     repeated refreshes only persist genuinely new items. Returns an aggregate
-    summary. Individual source failures are logged and never abort the sweep."""
+    summary and writes a per-run stats report to `settings.report_dir`.
+    Individual source failures are logged and never abort the sweep."""
+    started_at = datetime.now(timezone.utc)
     with session_scope() as session:
         stmt = select(DataSource.id)
         if only_enabled:
@@ -96,6 +100,7 @@ def run_all_sources(module: str | None = None, only_enabled: bool = True) -> dic
         ids = list(session.scalars(stmt))
 
     totals = {"sources": len(ids), "ok": 0, "error": 0, "skipped": 0, "new_items": 0}
+    per_module: dict[str, dict] = {}
     for sid in ids:
         try:
             summary = run_source(sid)
@@ -107,5 +112,68 @@ def run_all_sources(module: str | None = None, only_enabled: bool = True) -> dic
         if status in totals:
             totals[status] += 1
         totals["new_items"] += summary.get("new", 0) or 0
+        mod = summary.get("module") or "?"
+        m = per_module.setdefault(
+            mod, {"sources": 0, "ok": 0, "error": 0, "skipped": 0, "new_items": 0}
+        )
+        m["sources"] += 1
+        if status in m:
+            m[status] += 1
+        m["new_items"] += summary.get("new", 0) or 0
+
+    finished_at = datetime.now(timezone.utc)
+    report = _write_refresh_report(totals, per_module, started_at, finished_at)
+    if report:
+        totals["report"] = str(report)
     logger.info("refresh complete: %s", totals)
     return totals
+
+
+def _write_refresh_report(
+    totals: dict, per_module: dict[str, dict], started_at: datetime, finished_at: datetime
+) -> Path | None:
+    """Write one markdown stats file per refresh run into settings.report_dir.
+
+    Reporting must never break the refresh itself: any failure is logged and
+    swallowed."""
+    settings = get_settings()
+    if not settings.report_dir:
+        return None
+    try:
+        with session_scope() as session:
+            db_counts = dict(
+                session.execute(
+                    select(ContentItem.module, func.count()).group_by(ContentItem.module)
+                ).all()
+            )
+            db_total = session.scalar(select(func.count()).select_from(ContentItem))
+
+        duration = int((finished_at - started_at).total_seconds())
+        stamp = started_at.strftime("%Y%m%dT%H%M%SZ")
+        lines = [
+            f"# Refresh Report — {started_at.strftime('%Y-%m-%d %H:%M:%S')} UTC",
+            "",
+            f"- window: {started_at.isoformat()} → {finished_at.isoformat()} "
+            f"({duration // 60}m{duration % 60:02d}s)",
+            f"- sources: {totals['sources']} | ok {totals['ok']} | "
+            f"error {totals['error']} | skipped {totals['skipped']}",
+            f"- new items this run: {totals['new_items']}",
+            f"- content_item total in DB: {db_total}",
+            "",
+            "| module | sources | ok | error | skipped | new items | total in DB |",
+            "|---|---|---|---|---|---|---|",
+        ]
+        for mod in sorted(per_module, key=lambda k: -per_module[k]["new_items"]):
+            m = per_module[mod]
+            lines.append(
+                f"| {mod} | {m['sources']} | {m['ok']} | {m['error']} | "
+                f"{m['skipped']} | {m['new_items']} | {db_counts.get(mod, 0)} |"
+            )
+        out_dir = Path(settings.report_dir) / "refresh"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        path = out_dir / f"refresh_{stamp}.md"
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return path
+    except Exception:
+        logger.exception("failed to write refresh report")
+        return None

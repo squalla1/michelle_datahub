@@ -68,6 +68,8 @@ Package responsibilities (`datahub/`):
   `service.py` builds an APScheduler job per schedulable source, plus one global
   `refresh-all` cron job (every `refresh_all_hours`, default 2h) that re-fetches
   every enabled source via `ingest.runner.run_all_sources` (dedup makes it idempotent).
+  Every `run_all_sources` sweep writes a per-run stats report (markdown) to
+  `reports/refresh/` (`DATAHUB_REPORT_DIR`; empty disables; gitignored).
 - `ingest/` — `catalog_ingest.py` (idempotent upsert of the registry),
   `runner.py` (`run_source` = fetch + dedup-store + record a FetchRun).
 - `api/` — `app.py` factory + `routes/`. `routes/content.py` serves both a generic

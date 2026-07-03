@@ -15,6 +15,9 @@ dist/
 # Environment / secrets
 .env
 
+# Runtime output (per-refresh stats reports)
+reports/
+
 # Test & tool caches
 .pytest_cache/
 .mypy_cache/

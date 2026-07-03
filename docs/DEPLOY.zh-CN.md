@@ -141,5 +141,7 @@ datahub refresh --module news                       # 立即强制抓取(排重)
   `SERIAL`(int32),接近 ~21 亿行前应改为 `BIGINT IDENTITY`。
 - **监控:** 轮询 `GET /api/v1/jobs`;对 `fetch_run.status='error'` 比例告警。
   约 30% 的在线源存在瞬时失败(404/403/SSL/限流)—— 关注趋势而非单点失败。
+  每次刷新还会输出统计报告(ok/error/skipped + 各模块新增条数)到
+  `reports/refresh/*.md`(`DATAHUB_REPORT_DIR`)—— 查看单轮结果最快的入口。
 - **驱动注意:** URL scheme 必须是 `postgresql+psycopg://`(psycopg 3,来自
   `[postgres]` extra),**不是** `postgresql://`(默认走 psycopg2)。

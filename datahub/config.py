@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     # independent of each source's 频率. Dedup keeps repeated fetches idempotent.
     # Set to 0 to disable the global refresh job.
     refresh_all_hours: int = 2
+    # Directory where each refresh writes its stats report (markdown, one file
+    # per run). Empty string disables report writing.
+    report_dir: str = "reports"
 
     # REST API
     api_host: str = "0.0.0.0"

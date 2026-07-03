@@ -148,6 +148,8 @@ datahub refresh --module news                       # force a fetch now (dedup)
   approaching ~2.1B rows.
 - **Monitoring:** poll `GET /api/v1/jobs`; alert on `fetch_run.status='error'`
   rates. ~30% of live sources fail transiently (404/403/SSL/rate-limit) — track the
-  trend, not individual failures.
+  trend, not individual failures. Each refresh also writes a stats report
+  (ok/error/skipped + per-module new items) to `reports/refresh/*.md`
+  (`DATAHUB_REPORT_DIR`) — the quickest place to see a sweep's outcome.
 - **Driver note:** the URL scheme must be `postgresql+psycopg://` (psycopg 3, from
   the `[postgres]` extra), **not** `postgresql://` (which defaults to psycopg2).
