@@ -271,6 +271,10 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 
 ## Jobs(调度控制)
 
+> 这些接口操作的是 **API 进程内嵌的调度器**。分离部署时(`DATAHUB_API_SCHEDULER=0`
+> + 独立 `datahub schedule` worker)它们返回 `running: false` / 不产生任何影响 ——
+> 应直接管理 worker 进程(重启即重建任务)。
+
 ### `GET /api/v1/jobs`
 
 调度器状态与当前任务表(各源`频率`任务 + 每 2 小时的全局 `refresh-all` 任务)。

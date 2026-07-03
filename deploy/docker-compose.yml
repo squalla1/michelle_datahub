@@ -11,7 +11,9 @@ x-app: &app
     context: ..
     dockerfile: deploy/Dockerfile
   environment: &app-env
-    DATAHUB_DATABASE_URL: postgresql+psycopg://datahub:${POSTGRES_PASSWORD:-datahub}@db:5432/datahub
+    # Defaults to the bundled db service; export DATAHUB_DATABASE_URL to use a
+    # managed instance (e.g. RDS) instead.
+    DATAHUB_DATABASE_URL: ${DATAHUB_DATABASE_URL:-postgresql+psycopg://datahub:${POSTGRES_PASSWORD:-datahub}@db:5432/datahub}
     DATAHUB_CATALOG_PATH: /data/Michelle_Datasource_2026-06-02.xlsx
     DATAHUB_REFRESH_ALL_HOURS: ${DATAHUB_REFRESH_ALL_HOURS:-2}
   volumes:
@@ -22,7 +24,7 @@ x-app: &app
 
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: datahub
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-datahub}
@@ -55,9 +57,13 @@ services:
     restart: unless-stopped
 
   # Standalone scheduler: per-source 频率 jobs + the global 2-hour refresh.
+  # Refresh stats reports are written to the host's ../reports (survives rebuilds).
   scheduler:
     <<: *app
     command: ["datahub", "schedule"]
+    volumes:
+      - ../data:/data:ro
+      - ../reports:/app/reports
     restart: unless-stopped
 
 volumes:

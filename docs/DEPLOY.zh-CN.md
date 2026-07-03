@@ -20,7 +20,7 @@
 
 ## 1. 前置条件
 
-- Python 3.10+(镜像用 3.12)、PostgreSQL 14+。
+- Python 3.10+(镜像用 3.12)、PostgreSQL 14+(已在 18.3 上验证)。
 - Excel 注册表文件(`data/Michelle_Datasource_*.xlsx`)可通过
   `DATAHUB_CATALOG_PATH` 访问。
 
@@ -87,37 +87,87 @@ docker compose run --rm ingest          # 2. 建 schema + 载入注册表(一次
 docker compose up -d api scheduler      # 3. API(:8000)+ 调度器 worker
 ```
 
-compose 将项目 `data/` 只读挂载到容器 `/data` 提供注册表,Postgres 数据落在
-`pgdata` 卷;API 服务关闭内嵌调度器,由独立的 `scheduler` 服务负责 2 小时刷新。
-后续更新注册表可不停机:
+compose 将项目 `data/` 只读挂载到容器 `/data` 提供注册表,`reports/` 读写挂载给
+scheduler(刷新统计报告落在宿主机),Postgres 数据落在 `pgdata` 卷;API 服务关闭
+内嵌调度器,由独立的 `scheduler` 服务负责 2 小时刷新。后续更新注册表:
 
 ```bash
-docker compose run --rm ingest
-curl -X POST localhost:8000/api/v1/jobs/reload    # 重建调度任务
+docker compose run --rm ingest          # 重新解析工作簿(幂等 upsert)
+docker compose restart scheduler        # worker 启动时重建任务
 ```
+
+> 注意:`POST /api/v1/jobs/reload` 只重建**其所在进程内嵌调度器**的任务。此分离
+> 部署中 API 设了 `DATAHUB_API_SCHEDULER=0`,该接口**不会**影响 worker —— 应重启
+> `scheduler` 服务。
+
+### 使用托管数据库(如阿里云 RDS)
+
+完全跳过自带的 `db` 服务:把 `DATAHUB_DATABASE_URL` 指向托管实例,只启动应用服务。
+
+```bash
+export DATAHUB_DATABASE_URL="postgresql+psycopg://USER:PASS@your-instance.pgsql.japan.rds.aliyuncs.com:5432/DBNAME"
+docker compose run --rm --no-deps ingest
+docker compose up -d --no-deps api scheduler
+```
+
+(或直接改 `docker-compose.yml` 中 `x-app` 块的 `DATAHUB_DATABASE_URL`。)
+记得把服务器出口 IP 加入 RDS 白名单。
 
 ## 5. 无 Docker 部署(systemd)
 
 ```bash
+git clone <repo> /opt/datahub/app
 python -m venv /opt/datahub/.venv
-/opt/datahub/.venv/bin/pip install ".[postgres]"
+/opt/datahub/.venv/bin/pip install -e "/opt/datahub/app[postgres]"
+cp /opt/datahub/app/.env.example /opt/datahub/.env   # 然后按 §2 编辑
 ```
+
+`WorkingDirectory` 很关键:默认的 `DATAHUB_CATALOG_PATH`(`data/...`)和
+`DATAHUB_REPORT_DIR`(`reports`)是相对路径,基于工作目录解析。要么保持
+`WorkingDirectory=/opt/datahub/app`,要么在 `.env` 里都改成绝对路径。
 
 两个 unit 共用一份 `EnvironmentFile=/opt/datahub/.env`:
 
 ```ini
 # /etc/systemd/system/datahub-api.service
+[Unit]
+Description=Michelle DataHub API
+After=network-online.target
+Wants=network-online.target
+
 [Service]
+WorkingDirectory=/opt/datahub/app
 EnvironmentFile=/opt/datahub/.env
 Environment=DATAHUB_API_SCHEDULER=0
 ExecStart=/opt/datahub/.venv/bin/datahub serve
 Restart=always
+RestartSec=5
 
+[Install]
+WantedBy=multi-user.target
+```
+
+```ini
 # /etc/systemd/system/datahub-scheduler.service
+[Unit]
+Description=Michelle DataHub scheduler(各源任务 + 2h 全量刷新)
+After=network-online.target
+Wants=network-online.target
+
 [Service]
+WorkingDirectory=/opt/datahub/app
 EnvironmentFile=/opt/datahub/.env
 ExecStart=/opt/datahub/.venv/bin/datahub schedule
 Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+systemctl daemon-reload
+systemctl enable --now datahub-api datahub-scheduler
 ```
 
 负载均衡下多副本 API 时,调度器进程**必须只有一个**(单写者);此处的
@@ -129,9 +179,13 @@ APScheduler 是进程内存态,多个调度器会重复抓取(排重使其无害
 curl localhost:8000/health
 curl localhost:8000/api/v1/modules                 # 9 种类型 + 源计数
 curl "localhost:8000/api/v1/content/news?limit=5"  # 今天最新 5 条新闻
-curl localhost:8000/api/v1/jobs                     # 调度状态(含 refresh-all)
 datahub refresh --module news                       # 立即强制抓取(排重)
 ```
+
+验证调度 worker:看它的日志(`docker compose logs scheduler` /
+`journalctl -u datahub-scheduler`)中的 "scheduler running. job kinds: ...",并观察
+`reports/refresh/` 是否持续生成。`GET /api/v1/jobs` 只反映 API 进程**内嵌**调度器
+的状态 —— 分离部署下它返回 `running: false` 是正常现象,不是故障。
 
 ## 7. 运维
 
@@ -139,9 +193,11 @@ datahub refresh --module news                       # 立即强制抓取(排重)
 - **增长:** `content_item` 是热点表。数据量大时按 `fetched_at` 做月分区,和/或
   启用 `schema.sql` 中注释掉的 `ix_content_module_published` 复合索引。主键为
   `SERIAL`(int32),接近 ~21 亿行前应改为 `BIGINT IDENTITY`。
-- **监控:** 轮询 `GET /api/v1/jobs`;对 `fetch_run.status='error'` 比例告警。
-  约 30% 的在线源存在瞬时失败(404/403/SSL/限流)—— 关注趋势而非单点失败。
-  每次刷新还会输出统计报告(ok/error/skipped + 各模块新增条数)到
-  `reports/refresh/*.md`(`DATAHUB_REPORT_DIR`)—— 查看单轮结果最快的入口。
+- **监控:** 最快的信号是每轮刷新的统计报告 `reports/refresh/*.md`
+  (`DATAHUB_REPORT_DIR`)—— 每轮的 ok/error/skipped + 各模块新增条数。告警建议
+  直接查 SQL:`fetch_run` 的新鲜度与错误率(如 `select max(started_at) from
+  fetch_run` 应始终落在刷新周期内)。约 30% 的在线源存在瞬时失败
+  (404/403/SSL/限流)—— 关注趋势而非单点失败。`GET /api/v1/jobs` 仅在 API 内嵌
+  调度器时(`DATAHUB_API_SCHEDULER=1`)有意义。
 - **驱动注意:** URL scheme 必须是 `postgresql+psycopg://`(psycopg 3,来自
   `[postgres]` extra),**不是** `postgresql://`(默认走 psycopg2)。

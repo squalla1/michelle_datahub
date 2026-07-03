@@ -277,6 +277,11 @@ Recent fetch-run audit records, newest first.
 
 ## Jobs (scheduler control)
 
+> These endpoints operate on the **embedded scheduler of the API process**. In a
+> split deployment (`DATAHUB_API_SCHEDULER=0` + separate `datahub schedule`
+> worker) they report `running: false` / affect nothing — manage the worker
+> process directly instead (restart it to reload jobs).
+
 ### `GET /api/v1/jobs`
 
 Scheduler status and the current job table (per-source `频率` jobs + the global

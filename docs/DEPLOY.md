@@ -21,7 +21,7 @@ restarts don't interrupt fetching — set `DATAHUB_API_SCHEDULER=0` on the API.
 
 ## 1. Prerequisites
 
-- Python 3.10+ (image uses 3.12) and PostgreSQL 14+.
+- Python 3.10+ (image uses 3.12) and PostgreSQL 14+ (verified on 18.3).
 - The Excel registry file (`data/Michelle_Datasource_*.xlsx`) reachable at
   `DATAHUB_CATALOG_PATH`.
 
@@ -89,38 +89,91 @@ docker compose run --rm ingest          # 2. create schema + load the registry (
 docker compose up -d api scheduler      # 3. API on :8000 + scheduler worker
 ```
 
-The compose file mounts the project's `data/` read-only into `/data` for the registry, puts
-Postgres data on the `pgdata` volume, runs the API with the scheduler disabled, and
-runs a dedicated `scheduler` service that owns the 2-hour refresh. Reload the
-registry later without downtime:
+The compose file mounts the project's `data/` read-only into `/data` for the registry,
+mounts `reports/` read-write into the scheduler (so refresh stats reports land on the
+host), puts Postgres data on the `pgdata` volume, runs the API with the scheduler
+disabled, and runs a dedicated `scheduler` service that owns the 2-hour refresh.
+Reload the registry later:
 
 ```bash
-docker compose run --rm ingest
-curl -X POST localhost:8000/api/v1/jobs/reload    # rebuild scheduler jobs
+docker compose run --rm ingest          # re-parse the workbook (idempotent upsert)
+docker compose restart scheduler        # worker rebuilds its jobs on startup
 ```
+
+> Note: `POST /api/v1/jobs/reload` only rebuilds jobs inside the process that owns
+> the embedded scheduler. In this split deployment the API runs with
+> `DATAHUB_API_SCHEDULER=0`, so the endpoint does **not** affect the worker —
+> restart the `scheduler` service instead.
+
+### Using a managed database (e.g. Alibaba Cloud RDS)
+
+Skip the bundled `db` service entirely: point `DATAHUB_DATABASE_URL` at the managed
+instance and start only the app services.
+
+```bash
+export DATAHUB_DATABASE_URL="postgresql+psycopg://USER:PASS@your-instance.pgsql.japan.rds.aliyuncs.com:5432/DBNAME"
+docker compose run --rm --no-deps ingest
+docker compose up -d --no-deps api scheduler
+```
+
+(Or edit the `DATAHUB_DATABASE_URL` in `docker-compose.yml`'s `x-app` block.)
+Remember to whitelist the server's outbound IP in the RDS access-control list.
 
 ## 5. Deploy without Docker (systemd)
 
 ```bash
+git clone <repo> /opt/datahub/app
 python -m venv /opt/datahub/.venv
-/opt/datahub/.venv/bin/pip install ".[postgres]"
+/opt/datahub/.venv/bin/pip install -e "/opt/datahub/app[postgres]"
+cp /opt/datahub/app/.env.example /opt/datahub/.env   # then edit (see §2)
 ```
+
+`WorkingDirectory` matters: the default `DATAHUB_CATALOG_PATH` (`data/...`) and
+`DATAHUB_REPORT_DIR` (`reports`) are relative paths, resolved against it. Either
+keep `WorkingDirectory=/opt/datahub/app` or set both to absolute paths in `.env`.
 
 Two units sharing one `EnvironmentFile=/opt/datahub/.env`:
 
 ```ini
 # /etc/systemd/system/datahub-api.service
+[Unit]
+Description=Michelle DataHub API
+After=network-online.target
+Wants=network-online.target
+
 [Service]
+WorkingDirectory=/opt/datahub/app
 EnvironmentFile=/opt/datahub/.env
 Environment=DATAHUB_API_SCHEDULER=0
 ExecStart=/opt/datahub/.venv/bin/datahub serve
 Restart=always
+RestartSec=5
 
+[Install]
+WantedBy=multi-user.target
+```
+
+```ini
 # /etc/systemd/system/datahub-scheduler.service
+[Unit]
+Description=Michelle DataHub scheduler (per-source jobs + 2h refresh)
+After=network-online.target
+Wants=network-online.target
+
 [Service]
+WorkingDirectory=/opt/datahub/app
 EnvironmentFile=/opt/datahub/.env
 ExecStart=/opt/datahub/.venv/bin/datahub schedule
 Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+systemctl daemon-reload
+systemctl enable --now datahub-api datahub-scheduler
 ```
 
 For multiple API replicas behind a load balancer, keep exactly **one** scheduler
@@ -134,9 +187,14 @@ wasteful).
 curl localhost:8000/health
 curl localhost:8000/api/v1/modules                 # 9 types + source counts
 curl "localhost:8000/api/v1/content/news?limit=5"  # latest 5 news today
-curl localhost:8000/api/v1/jobs                     # scheduler state (incl. refresh-all)
 datahub refresh --module news                       # force a fetch now (dedup)
 ```
+
+To verify the scheduler worker, check its logs (`docker compose logs scheduler` /
+`journalctl -u datahub-scheduler`) for "scheduler running. job kinds: ...", and
+watch `reports/refresh/` fill up. `GET /api/v1/jobs` reflects only the **embedded**
+scheduler of the API process — in the split deployment it correctly reports
+`running: false`; that is not an error.
 
 ## 7. Operations
 
@@ -146,10 +204,12 @@ datahub refresh --module news                       # force a fetch now (dedup)
   `fetched_at` (month) and/or add `ix_content_module_published` (commented in
   `schema.sql`). PKs are `SERIAL` (int32) — switch to `BIGINT IDENTITY` before
   approaching ~2.1B rows.
-- **Monitoring:** poll `GET /api/v1/jobs`; alert on `fetch_run.status='error'`
-  rates. ~30% of live sources fail transiently (404/403/SSL/rate-limit) — track the
-  trend, not individual failures. Each refresh also writes a stats report
-  (ok/error/skipped + per-module new items) to `reports/refresh/*.md`
-  (`DATAHUB_REPORT_DIR`) — the quickest place to see a sweep's outcome.
+- **Monitoring:** the quickest signal is the per-refresh stats report in
+  `reports/refresh/*.md` (`DATAHUB_REPORT_DIR`) — ok/error/skipped + per-module new
+  items for every sweep. For alerting, watch `fetch_run` freshness and error rates
+  in SQL (e.g. `select max(started_at) from fetch_run` should stay within the
+  refresh cadence). ~30% of live sources fail transiently (404/403/SSL/rate-limit)
+  — track the trend, not individual failures. `GET /api/v1/jobs` is only meaningful
+  when the API embeds the scheduler (`DATAHUB_API_SCHEDULER=1`).
 - **Driver note:** the URL scheme must be `postgresql+psycopg://` (psycopg 3, from
   the `[postgres]` extra), **not** `postgresql://` (which defaults to psycopg2).
