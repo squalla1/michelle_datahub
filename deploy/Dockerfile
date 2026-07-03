@@ -13,10 +13,9 @@ COPY pyproject.toml README.md ./
 COPY datahub ./datahub
 RUN pip install --upgrade pip && pip install ".[postgres]"
 
-# The Excel registry is mounted/copied at runtime; default path matches config.
-# Override via DATAHUB_CATALOG_PATH.
-ENV DATAHUB_DATABASE_URL="postgresql+psycopg://datahub:datahub@db:5432/datahub" \
-    DATAHUB_CATALOG_PATH="/data/Michelle_Datasource_2026-06-02.xlsx" \
+# The Excel registry is mounted at runtime; DATAHUB_DATABASE_URL must be
+# injected (env_file / -e) — there is deliberately no baked-in database default.
+ENV DATAHUB_CATALOG_PATH="/data/Michelle_Datasource_2026-06-02.xlsx" \
     DATAHUB_API_HOST="0.0.0.0" \
     DATAHUB_API_PORT="8000"
 

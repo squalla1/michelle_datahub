@@ -1,51 +1,31 @@
-# Michelle DataHub — full stack: PostgreSQL + API + scheduler worker.
+# Michelle DataHub — API + scheduler worker, against a managed PostgreSQL
+# (e.g. Alibaba Cloud RDS). No bundled database.
 #
-#   cd deploy && docker compose up -d db        # start Postgres
-#   docker compose run --rm ingest              # init schema + load the registry (once)
-#   docker compose up -d api scheduler          # serve API + run the 2h refresh loop
+# The DB connection comes from the project root .env (DATAHUB_DATABASE_URL):
 #
-# The Excel registry lives at ../data/Michelle_Datasource_*.xlsx (mounted into /data).
+#   cp .env.example .env        # project root; set DATAHUB_DATABASE_URL
+#   cd deploy
+#   docker compose run --rm ingest        # once: create tables + load registry
+#   docker compose up -d api scheduler
 
 x-app: &app
   build:
     context: ..
     dockerfile: deploy/Dockerfile
+  env_file: ../.env
   environment: &app-env
-    # Defaults to the bundled db service; export DATAHUB_DATABASE_URL to use a
-    # managed instance (e.g. RDS) instead.
-    DATAHUB_DATABASE_URL: ${DATAHUB_DATABASE_URL:-postgresql+psycopg://datahub:${POSTGRES_PASSWORD:-datahub}@db:5432/datahub}
     DATAHUB_CATALOG_PATH: /data/Michelle_Datasource_2026-06-02.xlsx
-    DATAHUB_REFRESH_ALL_HOURS: ${DATAHUB_REFRESH_ALL_HOURS:-2}
   volumes:
     - ../data:/data:ro
-  depends_on:
-    db:
-      condition: service_healthy
 
 services:
-  db:
-    image: postgres:18-alpine
-    environment:
-      POSTGRES_USER: datahub
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-datahub}
-      POSTGRES_DB: datahub
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U datahub -d datahub"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
-  # One-shot: create schema (create_all) + parse the Excel registry into the DB.
+  # One-shot: create tables (idempotent) + parse the Excel registry into the DB.
   ingest:
     <<: *app
     command: ["sh", "-c", "datahub init-db && datahub ingest"]
     restart: "no"
 
-  # REST API only — scheduler disabled here; the dedicated worker owns it.
+  # REST API only — the dedicated scheduler worker owns all fetching.
   api:
     <<: *app
     environment:
@@ -56,8 +36,8 @@ services:
       - "8000:8000"
     restart: unless-stopped
 
-  # Standalone scheduler: per-source 频率 jobs + the global 2-hour refresh.
-  # Refresh stats reports are written to the host's ../reports (survives rebuilds).
+  # Scheduler: per-source 频率 jobs + the global 2-hour refresh.
+  # Refresh stats reports land on the host in ../reports.
   scheduler:
     <<: *app
     command: ["datahub", "schedule"]
@@ -65,6 +45,3 @@ services:
       - ../data:/data:ro
       - ../reports:/app/reports
     restart: unless-stopped
-
-volumes:
-  pgdata:
