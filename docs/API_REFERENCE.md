@@ -38,6 +38,51 @@ Content is organized into **9 module types**. Every `{module}` path parameter an
 
 ---
 
+## Data-source landscape (what the API can serve)
+
+Content comes from **1232 registered sources**, of which **767 (62%) are fetchable
+by the current code and ~70% of those actually return data**; the rest await API
+keys (297), provider plugins (99), or a mailbox bridge (21). This directly shapes
+how much data each module endpoint serves:
+
+| module | sources | fetchable (probed) | availability notes |
+|---|---|---|---|
+| `news` | 385 | 345 | ✅ richest; thousands of new items/day |
+| `channel` | 316 | 129 | ✅ podcasts/blogs/YouTube; 39 source URLs need cleanup |
+| `person` | 286 | 21 | ⚠️ **262 sources are twitterapi.io — nearly empty until the key is set** |
+| `market` | 59 | 4 | ⚠️ mostly behind paid keys (FMP …) |
+| `macro` | 50 | 5 | ⚠️ mostly awaits central-bank/stats API plugins |
+| `opinion` | 42 | 10 | ⚠️ Weibo/Zhihu/Reddit anti-bot; needs self-hosted RSSHub |
+| `calendar` | 39 | 12 | partial |
+| `company` | 33 | 13 | partial |
+| `events` | 22 | 3 | ⚠️ public GDELT API heavily rate-limited |
+
+Full analysis (failure taxonomy, unlock roadmap):
+[SOURCES_CONNECTIVITY.zh-CN.md](SOURCES_CONNECTIVITY.zh-CN.md); per-source detail:
+[reports/connectivity_report.csv](reports/connectivity_report.csv).
+
+**Inspecting sources through the API** (metadata and connectivity are queryable online):
+
+```bash
+# a module's source list (url / method / cadence / priority)
+curl "https://mai.polarisagi.com/api/v1/sources?module=opinion&limit=1"
+# [{"id":589,"module":"opinion","l1_category":"1. 微博","name":"微博财经话题榜",
+#   "url":"https://s.weibo.com/top/summary?cate=socialevent","method":"RSSHub·微博",
+#   "frequency":"每15分钟","priority":"P1","enabled":true}]
+
+# all twitterapi.io sources awaiting the key (the person-module gap)
+curl "https://mai.polarisagi.com/api/v1/sources?method=twitterapi&limit=1"
+# [{"id":947,"module":"person","name":"Fei-Fei Li","url":"https://x.com/drfeifei",
+#   "method":"twitterapi.io","paid":"$0.15/千条,按量无月费","frequency":"实时","priority":"P1"}]
+
+# is a source healthy? check its fetch history (here: GDELT rate-limited)
+curl "https://mai.polarisagi.com/api/v1/sources/386/runs?limit=1"
+# [{"id":4108,"source_id":386,"status":"error","item_count":0,
+#   "error":"gdelt: Client error '429 Too Many Requests' …"}]
+```
+
+---
+
 ## Endpoint index
 
 | Method | Path | Purpose |
