@@ -19,6 +19,7 @@ per-module content standard, and serves everything via HTTP.
 |---|---|
 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | full REST API reference ([中文](docs/API_REFERENCE.zh-CN.md)) |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | packaging & deployment on PostgreSQL ([中文](docs/DEPLOY.zh-CN.md)) |
+| [docs/SOURCES_CONNECTIVITY.zh-CN.md](docs/SOURCES_CONNECTIVITY.zh-CN.md) | per-source fetchability report (direct vs proxy, unlock roadmap) |
 | [deploy/schema.sql](deploy/schema.sql) | canonical PostgreSQL DDL |
 | `/docs` (running server) | auto-generated Swagger UI |
 

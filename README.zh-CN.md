@@ -16,6 +16,7 @@
 |---|---|
 | [docs/API_REFERENCE.zh-CN.md](docs/API_REFERENCE.zh-CN.md) | REST API 完整参考([English](docs/API_REFERENCE.md)) |
 | [docs/DEPLOY.zh-CN.md](docs/DEPLOY.zh-CN.md) | PostgreSQL 打包部署指南([English](docs/DEPLOY.md)) |
+| [docs/SOURCES_CONNECTIVITY.zh-CN.md](docs/SOURCES_CONNECTIVITY.zh-CN.md) | 信息源连通性报告(直连 vs 代理、解锁路线) |
 | [deploy/schema.sql](deploy/schema.sql) | PostgreSQL 权威建表 DDL |
 | `/docs`(服务运行后) | 自动生成的 Swagger 交互文档 |
 
