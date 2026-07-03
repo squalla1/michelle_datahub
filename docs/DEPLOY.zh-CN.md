@@ -104,7 +104,19 @@ systemctl daemon-reload && systemctl enable --now datahub-api datahub-scheduler
 注意:`DATAHUB_CATALOG_PATH`、`DATAHUB_REPORT_DIR` 默认是相对路径,基于
 `WorkingDirectory` 解析 —— 保持上面的配置即可,或在 `.env` 改为绝对路径。
 
-## 4. 验证
+## 4. nginx 反向代理
+
+```bash
+cp deploy/nginx.conf /etc/nginx/conf.d/datahub.conf
+vi /etc/nginx/conf.d/datahub.conf     # 改 server_name
+nginx -t && systemctl reload nginx
+```
+
+配套:应用只监听回环 —— systemd 在 `.env` 设 `DATAHUB_API_HOST=127.0.0.1`;
+Docker 的 compose 已默认 `127.0.0.1:8000:8000`。该配置默认封禁外网访问
+`/api/v1/jobs`(API 无鉴权)。HTTPS:`certbot --nginx -d 你的域名`。
+
+## 5. 验证
 
 ```bash
 curl localhost:8000/health
@@ -116,7 +128,7 @@ ls reports/refresh/          # 每轮刷新生成一份统计报告
 分离部署下 `GET /api/v1/jobs` 返回 `running: false` 是正常现象(它反映的是 API
 进程,不是 worker)。
 
-## 5. 运维
+## 6. 运维
 
 - **看结果**:`reports/refresh/*.md`(每轮 ok/error/skipped + 各模块新增)。
 - **告警**:`select max(started_at) from fetch_run` 应落在刷新周期内;error 率看

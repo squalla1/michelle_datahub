@@ -107,7 +107,20 @@ Note: `DATAHUB_CATALOG_PATH` and `DATAHUB_REPORT_DIR` default to relative paths
 resolved against `WorkingDirectory` — keep it as above, or use absolute paths in
 `.env`.
 
-## 4. Verify
+## 4. nginx reverse proxy
+
+```bash
+cp deploy/nginx.conf /etc/nginx/conf.d/datahub.conf
+vi /etc/nginx/conf.d/datahub.conf     # set server_name
+nginx -t && systemctl reload nginx
+```
+
+Pair it with the app listening on loopback only — systemd: `DATAHUB_API_HOST=127.0.0.1`
+in `.env`; Docker: compose already binds `127.0.0.1:8000:8000`. The config blocks
+external access to `/api/v1/jobs` (the API has no auth). HTTPS:
+`certbot --nginx -d your.domain`.
+
+## 5. Verify
 
 ```bash
 curl localhost:8000/health
@@ -119,7 +132,7 @@ ls reports/refresh/          # one stats report per refresh sweep
 In the split deployment `GET /api/v1/jobs` returning `running: false` is normal —
 it reflects the API process, not the worker.
 
-## 5. Operations
+## 6. Operations
 
 - **Outcomes:** `reports/refresh/*.md` — per-sweep ok/error/skipped + per-module
   new items.

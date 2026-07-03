@@ -33,7 +33,7 @@ services:
       DATAHUB_API_SCHEDULER: "0"
     command: ["datahub", "serve"]
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"   # loopback only — expose via the nginx reverse proxy
     restart: unless-stopped
 
   # Scheduler: per-source 频率 jobs + the global 2-hour refresh.
