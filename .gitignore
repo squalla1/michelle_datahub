@@ -25,3 +25,7 @@ reports/
 
 # OS junk
 .DS_Store
+
+# TLS certificates — never commit
+*.pem
+*.key

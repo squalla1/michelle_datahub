@@ -6,10 +6,11 @@ REST API for the catalog-driven ingestion engine. All content is fetched from th
 data-source registry, stored in the database, refreshed every 2 hours (dedup), and
 served read-only through the endpoints below.
 
-- **Base URL:** `http://<host>:8000` (default port `8000`)
+- **Base URL:** production `https://mai.polarisagi.com`; local `http://<host>:8000`
 - **Prefix:** every data endpoint is under `/api/v1`
 - **Format:** JSON; all timestamps are **UTC** (ISO 8601)
-- **Auth:** none (deploy behind a gateway/reverse proxy if exposure matters)
+- **Auth:** none — in production nginx blocks `/api/v1/jobs` from external access;
+  everything else is publicly readable
 - **Live/interactive docs:** `GET /docs` (Swagger UI), `GET /redoc`, `GET /openapi.json`
   — auto-generated from the code and always authoritative.
 

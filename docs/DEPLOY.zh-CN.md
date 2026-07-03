@@ -122,8 +122,9 @@ nginx -t && systemctl reload nginx
 ## 5. 验证
 
 ```bash
-curl localhost:8000/health
-curl "localhost:8000/api/v1/content/news?limit=5"
+curl localhost:8000/health                          # 直连应用
+curl https://mai.polarisagi.com/health              # 经 nginx(80 应 301 → 443)
+curl "https://mai.polarisagi.com/api/v1/content/news?limit=5"
 journalctl -u datahub-scheduler | grep "scheduler running"   # 或 docker compose logs scheduler
 ls reports/refresh/          # 每轮刷新生成一份统计报告
 ```

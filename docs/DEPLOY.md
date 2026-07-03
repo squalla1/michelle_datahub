@@ -127,8 +127,9 @@ replace the two files and reload when it expires.
 ## 5. Verify
 
 ```bash
-curl localhost:8000/health
-curl "localhost:8000/api/v1/content/news?limit=5"
+curl localhost:8000/health                          # app directly
+curl https://mai.polarisagi.com/health              # via nginx (80 should 301 → 443)
+curl "https://mai.polarisagi.com/api/v1/content/news?limit=5"
 journalctl -u datahub-scheduler | grep "scheduler running"   # or: docker compose logs scheduler
 ls reports/refresh/          # one stats report per refresh sweep
 ```
