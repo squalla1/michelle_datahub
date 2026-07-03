@@ -52,6 +52,81 @@
 
 ---
 
+## 使用示例(每个接口一个 case,真实响应)
+
+以下响应均对生产数据库实测采集,长内容以 `…` 截断。
+
+**1. 健康检查** —— 负载均衡/监控探活:
+```bash
+curl https://mai.polarisagi.com/health
+# {"status":"ok","catalog_path":"data/Michelle_Datasource_2026-06-02.xlsx"}
+```
+
+**2. 发现 9 种内容类型** —— 客户端初始化时拉一次,获知类型与 payload 字段:
+```bash
+curl https://mai.polarisagi.com/api/v1/modules
+# [{"key":"news","tab":"1_新闻","display_name":"新闻","item_title":"新闻标题",
+#   "payload_fields":["region","topic","lang"],"source_count":385}, … 共9个]
+```
+
+**3. 按类型取当天最新 N 条**(核心接口)—— 例:每小时拉一次今日新闻流:
+```bash
+curl "https://mai.polarisagi.com/api/v1/content/news?limit=20&by=fetched"
+# [{"id":…,"module":"news","title":"Daniel W. Drezner - Bulletin of the Atomic Scientists",
+#   "url":"https://news.google.com/rss/articles/…","published_at":"2026-07-03T…","payload":{…}}, …]
+```
+变体:`?date=2026-07-01` 取历史某天;`by=published`(默认)按发布时间、`by=fetched` 按入库时间。
+
+**4. 跨类型搜索** —— 例:全库标题搜 "AI":
+```bash
+curl "https://mai.polarisagi.com/api/v1/content?q=AI&limit=10"
+# [{"title":"Hong Kong bookseller Lam Wing-kee, once detained by China, dies in Taipei", …}]
+```
+变体:`?module=macro&since=2026-07-01T00:00:00` 增量拉取;`?source_id=2` 看单源内容。
+
+**5. 筛选数据源目录** —— 例:查看新闻类 P1 优先级的源:
+```bash
+curl "https://mai.polarisagi.com/api/v1/sources?module=news&priority=P1&limit=2"
+# [{"id":1,"name":"Asia News","method":"Google News RSS","frequency":"10-15分钟",
+#   "priority":"P1","enabled":true}, …]
+```
+变体:`?method=RSSHub` 按方式子串筛;`?enabled=false` 找被禁用的源。
+
+**6. 单个源详情:**
+```bash
+curl https://mai.polarisagi.com/api/v1/sources/2
+# {"id":2,"name":"South China Morning Post","url":"https://www.scmp.com/rss/91/feed/",
+#  "method":"官方RSS","frequency":"10-15分钟","priority":"P1","enabled":true}
+```
+
+**7. 立即抓取一个源**(同步)—— 例:调试某个源是否正常:
+```bash
+curl -X POST https://mai.polarisagi.com/api/v1/sources/2/fetch
+# {"source_id":2,"name":"South China Morning Post","status":"ok","fetched":50,"new":25,"note":null}
+```
+
+**8. 查看某源抓取历史**(审计)—— 例:排查一个源为什么没数据:
+```bash
+curl "https://mai.polarisagi.com/api/v1/sources/2/runs?limit=2"
+# [{"id":2489,"started_at":"2026-07-03T21:23:48","status":"ok","item_count":50,
+#   "new_count":25,"error":null}, …]
+```
+
+**9–11. 调度控制** —— nginx 已封禁外网访问,只能在服务器本机调用。分离部署下它们
+只反映 API 进程;要管理 worker 请直接重启 scheduler 服务:
+```bash
+curl http://127.0.0.1:8000/api/v1/jobs
+# {"running":false,"jobs":[]}        ← 分离部署下 false 是正常的
+
+curl -X POST http://127.0.0.1:8000/api/v1/jobs/reload
+# {"reloaded":true,"by_kind":{"interval":774,"cron":414,"manual":44,"refresh":1},"total_jobs":1189}
+
+curl -X POST http://127.0.0.1:8000/api/v1/jobs/catalog/reload   # Excel 注册表更新后
+# {"catalog":{"created":0,"updated":1232,"skipped":1,"total":1233}, …}
+```
+
+---
+
 ## Health
 
 ### `GET /health`

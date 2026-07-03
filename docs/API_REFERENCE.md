@@ -56,6 +56,82 @@ Content is organized into **9 module types**. Every `{module}` path parameter an
 
 ---
 
+## Usage cookbook (one case per endpoint, real responses)
+
+Responses below were captured against the production database and trimmed with `…`.
+
+**1. Health check** — liveness probe for LB/monitoring:
+```bash
+curl https://mai.polarisagi.com/health
+# {"status":"ok","catalog_path":"data/Michelle_Datasource_2026-06-02.xlsx"}
+```
+
+**2. Discover the 9 content types** — call once at client startup to learn types and payload fields:
+```bash
+curl https://mai.polarisagi.com/api/v1/modules
+# [{"key":"news","tab":"1_新闻","display_name":"新闻","item_title":"新闻标题",
+#   "payload_fields":["region","topic","lang"],"source_count":385}, … 9 items]
+```
+
+**3. Per-type daily feed** (the main endpoint) — e.g. pull today's news every hour:
+```bash
+curl "https://mai.polarisagi.com/api/v1/content/news?limit=20&by=fetched"
+# [{"id":…,"module":"news","title":"Daniel W. Drezner - Bulletin of the Atomic Scientists",
+#   "url":"https://news.google.com/rss/articles/…","published_at":"2026-07-03T…","payload":{…}}, …]
+```
+Variants: `?date=2026-07-01` for a past day; `by=published` (default) vs `by=fetched`.
+
+**4. Cross-type search** — e.g. title search "AI" across all modules:
+```bash
+curl "https://mai.polarisagi.com/api/v1/content?q=AI&limit=10"
+# [{"title":"Hong Kong bookseller Lam Wing-kee, once detained by China, dies in Taipei", …}]
+```
+Variants: `?module=macro&since=2026-07-01T00:00:00` for incremental pulls; `?source_id=2` for one source.
+
+**5. Filter the source catalog** — e.g. P1-priority news sources:
+```bash
+curl "https://mai.polarisagi.com/api/v1/sources?module=news&priority=P1&limit=2"
+# [{"id":1,"name":"Asia News","method":"Google News RSS","frequency":"10-15分钟",
+#   "priority":"P1","enabled":true}, …]
+```
+Variants: `?method=RSSHub` (substring match); `?enabled=false` to find disabled sources.
+
+**6. One source's detail:**
+```bash
+curl https://mai.polarisagi.com/api/v1/sources/2
+# {"id":2,"name":"South China Morning Post","url":"https://www.scmp.com/rss/91/feed/",
+#  "method":"官方RSS","frequency":"10-15分钟","priority":"P1","enabled":true}
+```
+
+**7. Fetch one source now** (synchronous) — e.g. debug whether a source works:
+```bash
+curl -X POST https://mai.polarisagi.com/api/v1/sources/2/fetch
+# {"source_id":2,"name":"South China Morning Post","status":"ok","fetched":50,"new":25,"note":null}
+```
+
+**8. A source's fetch history** (audit) — e.g. investigate why a source has no data:
+```bash
+curl "https://mai.polarisagi.com/api/v1/sources/2/runs?limit=2"
+# [{"id":2489,"started_at":"2026-07-03T21:23:48","status":"ok","item_count":50,
+#   "new_count":25,"error":null}, …]
+```
+
+**9–11. Scheduler control** — blocked from the internet by nginx; call on the server
+itself. In the split deployment these reflect the API process only; to manage the
+worker, restart the scheduler service instead:
+```bash
+curl http://127.0.0.1:8000/api/v1/jobs
+# {"running":false,"jobs":[]}        ← false is normal in split mode
+
+curl -X POST http://127.0.0.1:8000/api/v1/jobs/reload
+# {"reloaded":true,"by_kind":{"interval":774,"cron":414,"manual":44,"refresh":1},"total_jobs":1189}
+
+curl -X POST http://127.0.0.1:8000/api/v1/jobs/catalog/reload   # after updating the Excel registry
+# {"catalog":{"created":0,"updated":1232,"skipped":1,"total":1233}, …}
+```
+
+---
+
 ## Health
 
 ### `GET /health`
