@@ -186,6 +186,7 @@ fields live inside `payload`.
 | `title` | string \| null | headline / item title |
 | `url` | string \| null | link to the item |
 | `summary` | string \| null | short text/summary |
+| `fulltext` | string \| null | extracted article body (`null` = not attempted yet, `""` = extraction failed) |
 | `published_at` | datetime \| null | when the source published it (UTC) |
 | `fetched_at` | datetime | when we ingested it (UTC) |
 | `payload` | object | module-specific fields (see per-module standards below) |
@@ -417,3 +418,8 @@ Standard FastAPI error envelope:
   new items — safe to poll and re-fetch.
 - `published_at` is null for sources that carry no timestamp; prefer `by=fetched`
   when you need "what arrived today" rather than "what was published today".
+- `fulltext` is filled asynchronously by the enrichment job (every ~15 min after
+  ingestion); expect `null` on very fresh items and `""` where extraction failed
+  (paywall/anti-bot/redirects — common for Google News links).
+- **Retention:** only the last 7 days of content are kept
+  (`DATAHUB_RETENTION_DAYS`); older rows are purged daily.

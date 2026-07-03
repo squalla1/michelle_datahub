@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS content_item (
     title         TEXT,
     url           TEXT,
     summary       TEXT,
+    fulltext      TEXT,          -- extracted body: NULL = not attempted, '' = failed
     published_at  TIMESTAMP,
     payload       JSONB         NOT NULL DEFAULT '{}'::jsonb,
     fetched_at    TIMESTAMP     NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),

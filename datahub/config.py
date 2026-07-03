@@ -38,6 +38,17 @@ class Settings(BaseSettings):
     # per run). Empty string disables report writing.
     report_dir: str = "reports"
 
+    # Full-text enrichment: fetch each stored item's URL and extract the article
+    # body into content_item.fulltext (null = not attempted, "" = failed).
+    fulltext_enabled: bool = True
+    fulltext_interval_minutes: int = 15   # scheduler cadence for the enrich job
+    fulltext_batch_size: int = 200        # items per enrich run
+    fulltext_max_chars: int = 200_000     # truncate extracted text beyond this
+
+    # Retention: delete content_item / fetch_run rows older than this many days
+    # (by fetched_at / started_at). 0 disables purging.
+    retention_days: int = 7
+
     # REST API
     api_host: str = "0.0.0.0"
     api_port: int = 8000

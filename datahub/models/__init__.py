@@ -90,6 +90,8 @@ class ContentItem(Base):
     title: Mapped[str | None] = mapped_column(Text)
     url: Mapped[str | None] = mapped_column(Text)
     summary: Mapped[str | None] = mapped_column(Text)
+    # Extracted article body: null = not attempted yet, "" = attempted but failed.
+    fulltext: Mapped[str | None] = mapped_column(Text)
     published_at: Mapped[datetime | None] = mapped_column(DateTime, index=True)
     payload: Mapped[dict] = mapped_column(JSONType, default=dict)
     fetched_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)

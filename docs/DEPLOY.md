@@ -144,6 +144,9 @@ it reflects the API process, not the worker.
 - **Alerting:** `select max(started_at) from fetch_run` must stay within the
   refresh cadence; watch the error-rate trend (~30% transient failures among live
   sources is normal).
+- **Storage:** the enrichment job extracts article fulltext every 15 min; retention
+  is 7 days (`DATAHUB_RETENTION_DAYS`) with a daily 04:30 UTC purge — table size is
+  naturally capped.
 - **Backups:** `pg_dump`; content is re-fetchable, `fetch_run` history and dedup
   state are not.
 - **DDL reference:** `deploy/schema.sql` is the canonical DDL, identical to what

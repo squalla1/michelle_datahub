@@ -15,6 +15,8 @@ from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy import select
 
 from ..config import get_settings
+from ..ingest.enrich import enrich_fulltext
+from ..ingest.retention import purge_old_content
 from ..ingest.runner import run_all_sources, run_source
 from ..models import DataSource
 from ..storage import session_scope
@@ -23,6 +25,8 @@ from .frequency import parse_frequency
 logger = logging.getLogger("datahub.scheduler")
 
 REFRESH_JOB_ID = "refresh-all"
+ENRICH_JOB_ID = "fulltext-enrich"
+PURGE_JOB_ID = "retention-purge"
 
 
 def _job(source_id: int) -> None:
@@ -41,6 +45,20 @@ def _refresh_all_job() -> None:
         logger.exception("global refresh job failed")
 
 
+def _enrich_job() -> None:
+    try:
+        enrich_fulltext()
+    except Exception:
+        logger.exception("fulltext enrich job failed")
+
+
+def _purge_job() -> None:
+    try:
+        purge_old_content()
+    except Exception:
+        logger.exception("retention purge job failed")
+
+
 class SchedulerService:
     def __init__(self) -> None:
         self.scheduler = BackgroundScheduler()
@@ -49,6 +67,8 @@ class SchedulerService:
         """(Re)build the job table from the catalog. Returns a counts summary."""
         counts = {"interval": 0, "cron": 0, "manual": 0, "refresh": 0}
         counts["refresh"] = self._load_refresh_job()
+        counts["enrich"] = self._load_enrich_job()
+        counts["purge"] = self._load_purge_job()
         with session_scope() as session:
             sources = session.scalars(
                 select(DataSource).where(DataSource.enabled.is_(True))
@@ -95,6 +115,41 @@ class SchedulerService:
             id=REFRESH_JOB_ID,
             replace_existing=True,
             misfire_grace_time=600,
+            coalesce=True,
+            max_instances=1,
+        )
+        return 1
+
+    def _load_enrich_job(self) -> int:
+        """Fulltext enrichment every fulltext_interval_minutes (0/disabled -> off)."""
+        s = get_settings()
+        if not s.fulltext_enabled or s.fulltext_interval_minutes <= 0:
+            if self.scheduler.get_job(ENRICH_JOB_ID):
+                self.scheduler.remove_job(ENRICH_JOB_ID)
+            return 0
+        self.scheduler.add_job(
+            _enrich_job,
+            trigger=IntervalTrigger(minutes=s.fulltext_interval_minutes),
+            id=ENRICH_JOB_ID,
+            replace_existing=True,
+            misfire_grace_time=300,
+            coalesce=True,
+            max_instances=1,
+        )
+        return 1
+
+    def _load_purge_job(self) -> int:
+        """Daily retention purge at 04:30 UTC (retention_days <= 0 -> off)."""
+        if get_settings().retention_days <= 0:
+            if self.scheduler.get_job(PURGE_JOB_ID):
+                self.scheduler.remove_job(PURGE_JOB_ID)
+            return 0
+        self.scheduler.add_job(
+            _purge_job,
+            trigger=CronTrigger(hour=4, minute=30),
+            id=PURGE_JOB_ID,
+            replace_existing=True,
+            misfire_grace_time=3600,
             coalesce=True,
             max_instances=1,
         )

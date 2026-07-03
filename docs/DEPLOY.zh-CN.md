@@ -137,6 +137,8 @@ ls reports/refresh/          # 每轮刷新生成一份统计报告
 - **看结果**:`reports/refresh/*.md`(每轮 ok/error/skipped + 各模块新增)。
 - **告警**:`select max(started_at) from fetch_run` 应落在刷新周期内;error 率看
   趋势(约 30% 在线源存在瞬时失败属正常)。
+- **存储**:正文富化任务每 15 分钟抽取一批全文;保留期 7 天
+  (`DATAHUB_RETENTION_DAYS`),每日 04:30 UTC 自动清理过期内容 —— 表大小自然封顶。
 - **备份**:`pg_dump`;内容可重抓,`fetch_run` 历史与排重状态不可重建。
 - **建表参考**:`deploy/schema.sql` 是权威 DDL,与 `datahub init-db` 产出一致,
   DBA 可直接 `psql -f` 执行。

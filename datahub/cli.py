@@ -6,6 +6,8 @@
     datahub run --source ID         fetch one source now
     datahub run --module m [--limit N]   fetch sources of a module now
     datahub refresh [--module m]    fetch ALL enabled sources once (dedup)
+    datahub enrich [--limit N]      extract article fulltext for stored items
+    datahub purge [--days N]        delete content older than the retention window
     datahub serve                   run the REST API (uvicorn)
     datahub schedule                run the scheduler in the foreground
 """
@@ -17,7 +19,13 @@ import logging
 import time
 
 from .config import get_settings
-from .ingest import ingest_catalog, run_all_sources, run_source
+from .ingest import (
+    enrich_fulltext,
+    ingest_catalog,
+    purge_old_content,
+    run_all_sources,
+    run_source,
+)
 from .storage import init_db, session_scope
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -74,6 +82,16 @@ def _cmd_refresh(args) -> None:
     print(run_all_sources(module=args.module))
 
 
+def _cmd_enrich(args) -> None:
+    init_db()
+    print(enrich_fulltext(limit=args.limit, module=args.module))
+
+
+def _cmd_purge(args) -> None:
+    init_db()
+    print(purge_old_content(days=args.days))
+
+
 def _cmd_serve(_args) -> None:
     import uvicorn
 
@@ -121,6 +139,15 @@ def build_parser() -> argparse.ArgumentParser:
     prf = sub.add_parser("refresh", help="fetch ALL enabled sources once (dedup)")
     prf.add_argument("--module", help="limit the refresh to one module")
     prf.set_defaults(func=_cmd_refresh)
+
+    pe = sub.add_parser("enrich", help="extract article fulltext for stored items")
+    pe.add_argument("--limit", type=int, default=None, help="items per run (default: config)")
+    pe.add_argument("--module", help="limit to one module")
+    pe.set_defaults(func=_cmd_enrich)
+
+    pp = sub.add_parser("purge", help="delete content older than the retention window")
+    pp.add_argument("--days", type=int, default=None, help="override retention_days")
+    pp.set_defaults(func=_cmd_purge)
 
     sub.add_parser("serve").set_defaults(func=_cmd_serve)
     sub.add_parser("schedule").set_defaults(func=_cmd_schedule)

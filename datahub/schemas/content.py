@@ -119,4 +119,5 @@ class ContentItemOut(BaseContentItem):
     id: int
     source_id: int
     module: str
+    fulltext: str | None = None  # extracted article body (null=not tried, ""=failed)
     fetched_at: datetime

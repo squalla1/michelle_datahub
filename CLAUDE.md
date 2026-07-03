@@ -29,6 +29,8 @@ datahub list --module news --limit 5  # inspect the catalog
 datahub run --source 2                # fetch ONE source now (synchronous)
 datahub run --module news --priority P1 --limit 5   # fetch a batch now
 datahub refresh [--module news]       # fetch ALL enabled sources once (dedup); manual twin of the 2h job
+datahub enrich [--limit N]            # extract article fulltext into content_item.fulltext
+datahub purge [--days N]              # delete content older than the retention window (default 7d)
 datahub serve                         # REST API + in-process scheduler -> :8000/docs
 datahub schedule                      # run the scheduler as a standalone foreground worker
 
@@ -70,6 +72,10 @@ Package responsibilities (`datahub/`):
   every enabled source via `ingest.runner.run_all_sources` (dedup makes it idempotent).
   Every `run_all_sources` sweep writes a per-run stats report (markdown) to
   `reports/refresh/` (`DATAHUB_REPORT_DIR`; empty disables; gitignored).
+  Two more built-in jobs: `fulltext-enrich` (every `fulltext_interval_minutes`,
+  extracts article bodies via trafilatura into `content_item.fulltext` — null=not
+  tried, ""=failed, never retried) and `retention-purge` (daily 04:30 UTC, deletes
+  content/runs older than `retention_days`, default 7).
 - `ingest/` — `catalog_ingest.py` (idempotent upsert of the registry),
   `runner.py` (`run_source` = fetch + dedup-store + record a FetchRun).
 - `api/` — `app.py` factory + `routes/`. `routes/content.py` serves both a generic

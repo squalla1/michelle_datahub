@@ -180,6 +180,7 @@ curl localhost:8000/api/v1/modules
 | `title` | string \| null | 标题 |
 | `url` | string \| null | 条目链接 |
 | `summary` | string \| null | 摘要 |
+| `fulltext` | string \| null | 抽取的正文全文(`null`=尚未尝试,`""`=抽取失败) |
 | `published_at` | datetime \| null | 源发布时间(UTC) |
 | `fetched_at` | datetime | 入库时间(UTC) |
 | `payload` | object | 模块专属字段(见下方各模块标准) |
@@ -404,3 +405,6 @@ curl "localhost:8000/api/v1/content/events?q=oil"
   都是安全的。
 - 无时间戳的源其 `published_at` 为空;想看"今天到了什么"而非"今天发布了什么",
   用 `by=fetched`。
+- `fulltext` 由富化任务异步填充(入库后约 15 分钟内);刚入库的条目可能还是
+  `null`,`""` 表示抽取失败(付费墙/反爬/跳转 —— Google News 链接较常见)。
+- **保留期:** 只保留最近 7 天的内容(`DATAHUB_RETENTION_DAYS`),更早的每日清理。
