@@ -14,7 +14,8 @@
 
 | 文档 | 用途 |
 |---|---|
-| [docs/API_REFERENCE.zh-CN.md](docs/API_REFERENCE.zh-CN.md) | REST API 完整参考([English](docs/API_REFERENCE.md)) |
+| [docs/API.zh-CN.md](docs/API.zh-CN.md) | **API 文档(汇总表 + 逐接口详情与示例)** |
+| [docs/API_REFERENCE.zh-CN.md](docs/API_REFERENCE.zh-CN.md) | REST API 完整参考(含数据源现状,[English](docs/API_REFERENCE.md)) |
 | [docs/DEPLOY.zh-CN.md](docs/DEPLOY.zh-CN.md) | PostgreSQL 打包部署指南([English](docs/DEPLOY.md)) |
 | [docs/SOURCES_CONNECTIVITY.zh-CN.md](docs/SOURCES_CONNECTIVITY.zh-CN.md) | 信息源连通性报告(联通实测 + 付费验证标注) |
 | [deploy/schema.sql](deploy/schema.sql) | PostgreSQL 权威建表 DDL |
