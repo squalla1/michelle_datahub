@@ -14,7 +14,8 @@ For more informa",error,0,http: timed out
 419,calendar,P1,HKEX/巨潮 公司行动公告,爬虫,https://www1.hkexnews.hk/,ScraperFetcher,LIVE_SCRAPE,ok,5,generic link extraction,ok,5,generic link extraction
 420,calendar,P3,Wall Street Horizon (机构选配),WSH API,https://www.wallstreethorizon.com/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
 421,calendar,P1,头部公司 IR 页 RSS,官方RSS,https://www.apple.com/investor/,RssFetcher,LIVE_RSS,error,0,"http: Client error '403 Forbidden' for url 'https://www.apple.com/investor/'
-For more information check: https://develop",ok,0,feed parsed but empty
+For more information check: https://develop",error,0,"http: Client error '403 Forbidden' for url 'https://www.apple.com/investor/'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/"
 422,calendar,P2,业绩说明会日期 (FMP),FMP API,https://site.financialmodelingprep.com/developer/docs,ApiFetcher,SKIP_NEEDS_KEY,,,,,,
 423,calendar,P1,SEC EDGAR Filing,官方RSS,https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,0,feed parsed but empty
 424,calendar,P1,BioPharmCatalyst FDA Calendar,爬虫,https://www.biopharmcatalyst.com/calendars/fda-calendar,ScraperFetcher,LIVE_SCRAPE,ok,0,generic link extraction,ok,0,generic link extraction
@@ -450,7 +451,7 @@ For more information check: https://developer.mozilla.org/en-US/do"
 851,channel,P1,Money Stuff,官方RSS,https://www.bloomberg.com/account/newsletters/money-stuff/feed,RssFetcher,LIVE_RSS,error,0,"http: Client error '403 Forbidden' for url 'https://www.bloomberg.com/account/newsletters/money-stuff/feed'
 For more inf",error,0,"http: Client error '404 Not Found' for url 'https://www.bloomberg.com/account/newsletters/money-stuff/feed'
 For more information check: https://develo"
-852,channel,P2,Net Interest,官方RSS,https://netinterest.substack.com/feed,RssFetcher,LIVE_RSS,ok,20,,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+852,channel,P2,Net Interest,官方RSS,https://netinterest.substack.com/feed,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 853,channel,P2,Slow Boring,官方RSS,https://www.slowboring.com/feed,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 854,channel,P1,The Diff,官方RSS,https://www.thediff.co/feed,RssFetcher,LIVE_RSS,ok,5,,ok,5,
 855,channel,P2,Astral Codex Ten,官方RSS,https://www.astralcodexten.com/feed,RssFetcher,LIVE_RSS,ok,20,,ok,20,
@@ -474,7 +475,8 @@ For more information check: https://developer."
 871,channel,P2,Financial Times – Unhedged,邮件订阅,,EmailSubscriptionFetcher,SKIP_EMAIL,,,,,,
 872,channel,P2,MIT Technology Review – The Download,官方RSS,https://www.technologyreview.com/feed/,RssFetcher,LIVE_RSS,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010),error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
 873,channel,P3,Macro Hive,官方RSS,https://macrohive.com/feed/,RssFetcher,LIVE_RSS,error,0,"http: Client error '403 Forbidden' for url 'https://macrohive.com/feed/'
-For more information check: https://developer.m",ok,10,
+For more information check: https://developer.m",error,0,"http: Client error '403 Forbidden' for url 'https://macrohive.com/feed/'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP"
 874,channel,P2,Morning Brew (Daily),邮件订阅,,EmailSubscriptionFetcher,SKIP_EMAIL,,,,,,
 875,channel,P2,NBER Digest,官方RSS,https://www.nber.org/rss/new.xml,RssFetcher,LIVE_RSS,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010),error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
 876,channel,P2,Nikkei Asia – Newsletters,官方RSS,https://asia.nikkei.com/rss/feed/nar,RssFetcher,LIVE_RSS,ok,50,,ok,50,
@@ -561,7 +563,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/"
 451,company,P3,OpenCorporates,OpenCorporates API,https://opencorporates.com/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
 452,company,P3,Crunchbase,Crunchbase API,https://www.crunchbase.com/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
 453,company,P3,IT桔子,IT桔子 API,https://www.itjuzi.com/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
-454,company,P3,胡润研究院 独角兽榜,爬虫,https://www.hurun.net/,ScraperFetcher,LIVE_SCRAPE,ok,59,generic link extraction,error,0,http: The read operation timed out
+454,company,P3,胡润研究院 独角兽榜,爬虫,https://www.hurun.net/,ScraperFetcher,LIVE_SCRAPE,ok,59,generic link extraction,ok,59,generic link extraction
 455,company,P1,Caplight,Caplight API,https://www.caplight.com/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
 456,company,P3,CB Insights Unicorn Tracker,爬虫,https://www.cbinsights.com/research-unicorn-companies,ScraperFetcher,LIVE_SCRAPE,ok,100,generic link extraction,ok,100,generic link extraction
 457,company,P1,AKShare,AKShare API (Python库),https://akshare.akfamily.xyz/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
@@ -587,28 +589,28 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/"
 477,company,P1,Stocktwits,公开API,https://api.stocktwits.com/developers/docs,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
 478,company,P2,Reddit r/wallstreetbets ticker mentions,官方RSS,https://www.reddit.com/r/wallstreetbets/.rss,RssFetcher,LIVE_RSS,ok,25,,ok,25,
 479,company,P3,AlphaSense,AlphaSense API,https://www.alpha-sense.com/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
-386,events,P1,GDELT 2.0 (Events+GKG+DOC),GDELT DOC API,https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/,ApiFetcher,LIVE_API,ok,75,,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E8%B7%A8%E5%9F%9F%E5%8F%91%E7%8E%B0%E5%BC%95%E
+386,events,P1,GDELT 2.0 (Events+GKG+DOC),GDELT DOC API,https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/,ApiFetcher,LIVE_API,ok,75,,ok,75,
 387,events,P3,Event Registry (newsapi.ai),Event Registry API,https://newsapi.ai/pricing,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
-388,events,P1,GDELT (TECH/SCIENCE 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,ok,75,,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B0%E5%BC%95%E6%93%8E&mode=ArtLi
+388,events,P1,GDELT (TECH/SCIENCE 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,ok,75,,ok,75,
 389,events,P2,GitHub Trending + Show HN,GitHub API / hnrss,https://hnrss.org/show,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 390,events,P1,ACLED,ACLED API,https://acleddata.com/data-export-tool/,ApiFetcher,SKIP_NEEDS_KEY,,,,,,
 391,events,P2,UCDP (Uppsala),UCDP API,https://ucdp.uu.se/apidocs/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
 392,events,P2,ISW / Liveuamap,官方RSS/爬虫,https://www.understandingwar.org/,ScraperFetcher,LIVE_SCRAPE,ok,72,generic link extraction,ok,71,generic link extraction
-393,events,P1,GDELT (政治 CAMEO),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,ok,75,,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B0%E5%BC%95%E6%93%8E&mode=ArtLi
-394,events,P1,GDELT (外交 CAMEO),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B0%E5%BC%95%E6%93%8E&mode=ArtLi
-395,events,P1,GDELT (UNREST 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,ok,75,,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B0%E5%BC%95%E6%93%8E&mode=ArtLi
+393,events,P1,GDELT (政治 CAMEO),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,ok,75,,ok,75,
+394,events,P1,GDELT (外交 CAMEO),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,ok,75,
+395,events,P1,GDELT (UNREST 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,ok,75,,ok,75,
 396,events,P2,ACLED (骚乱/暴力),ACLED API,https://acleddata.com/data-export-tool/,ApiFetcher,SKIP_NEEDS_KEY,,,,,,
 397,events,P1,OFAC 制裁名单更新,OFAC API/RSS,https://ofac.treasury.gov/recent-actions,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,0,feed parsed but empty
-398,events,P2,GDELT (SANCTIONS 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B0%E5%BC%95%E6%93%8E&mode=ArtLi
-399,events,P1,GDELT (经济/央行 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B0%E5%BC%95%E6%93%8E&mode=ArtLi
+398,events,P2,GDELT (SANCTIONS 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,ok,75,
+399,events,P1,GDELT (经济/央行 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,ok,75,
 400,events,P1,ACLED (抗议事件),ACLED API,https://acleddata.com/data-export-tool/,ApiFetcher,SKIP_NEEDS_KEY,,,,,,
-401,events,P2,GDELT (PROTEST 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B0%E5%BC%95%E6%93%8E&mode=ArtLi
+401,events,P2,GDELT (PROTEST 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,ok,75,
 402,events,P1,FMP (财报/M&A/IPO 事件),FMP API,https://site.financialmodelingprep.com/developer/docs,ApiFetcher,SKIP_NEEDS_KEY,,,,,,
 403,events,P3,RavenPack / Bigdata.com,RavenPack API,https://bigdata.com/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
-404,events,P2,GDELT (公司实体),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B0%E5%BC%95%E6%93%8E&mode=ArtLi
-405,events,P1,GDELT (市场/波动 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B0%E5%BC%95%E6%93%8E&mode=ArtLi
+404,events,P2,GDELT (公司实体),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,ok,75,
+405,events,P1,GDELT (市场/波动 主题),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,ok,75,
 406,events,P1,FMP (IPO/M&A/增发回购),FMP API,https://site.financialmodelingprep.com/developer/docs,ApiFetcher,SKIP_NEEDS_KEY,,,,,,
-407,events,P2,GDELT (资本市场),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B0%E5%BC%95%E6%93%8E&mode=ArtLi
+407,events,P2,GDELT (资本市场),GDELT DOC API,https://www.gdeltproject.org/,ApiFetcher,LIVE_API,error,0,gdelt: Client error '429 Too Many Requests' for url 'https://api.gdeltproject.org/api/v2/doc/doc?query=%E5%8F%91%E7%8E%B,ok,75,
 539,macro,P1,BEA (Bureau of Economic Analysis),BEA API,https://www.bea.gov/data/api,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
 540,macro,P1,ISM Manufacturing/Services PMI,爬虫,https://www.ismworld.org/supply-management-news-and-reports/reports/,ScraperFetcher,LIVE_SCRAPE,ok,96,generic link extraction,ok,96,generic link extraction
 541,macro,P1,BLS (Bureau of Labor Statistics),BLS API,https://www.bls.gov/developers/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
@@ -676,8 +678,8 @@ For more information check: https://developer.mozilla.org/"
 486,market,P2,IT桔子,IT桔子 API,https://www.itjuzi.com/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
 487,market,P2,鲸准 / Rhino Data,鲸准 Rhino API,https://rong.36kr.com/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
 488,market,P2,投中网 CVSource,投中 CVSource API,https://www.cvsource.com.cn/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
-489,market,P3,Demo Day News,Google News RSS,"https://news.google.com/rss/search?q=(""demo+day""+OR+""YC+batch""+OR+""accelerator+batch"")+startup+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,42,,ok,19,
-490,market,P3,Unicorn News,Google News RSS,"https://news.google.com/rss/search?q=(""unicorn+startup""+OR+""unicorn+valuation""+OR+""$1+billion+valuation"")+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,34,
+489,market,P3,Demo Day News,Google News RSS,"https://news.google.com/rss/search?q=(""demo+day""+OR+""YC+batch""+OR+""accelerator+batch"")+startup+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,42,,ok,18,
+490,market,P3,Unicorn News,Google News RSS,"https://news.google.com/rss/search?q=(""unicorn+startup""+OR+""unicorn+valuation""+OR+""$1+billion+valuation"")+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,35,
 491,market,P1,上交所 (SSE),AKShare API,https://akshare.akfamily.xyz/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
 492,market,P1,深交所 (SZSE),AKShare API,https://akshare.akfamily.xyz/,ApiFetcher,SKIP_NO_PROVIDER,,,,,,
 493,market,P2,LSE (伦交所),FMP API,https://site.financialmodelingprep.com/developer/docs,ApiFetcher,SKIP_NEEDS_KEY,,,,,,
@@ -731,8 +733,8 @@ For more information check: https://developer.mozil"
 1,news,P1,Asia News,Google News RSS,https://news.google.com/rss/search?q=(China+OR+Japan+OR+Korea+OR+India+OR+ASEAN)+when:2d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 2,news,P1,South China Morning Post,官方RSS,https://www.scmp.com/rss/91/feed/,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 3,news,P1,Reuters Asia,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:reuters.com+(China+OR+Japan+OR+Taiwan+OR+Korea)+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-4,news,P1,Xinhua,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:xinhuanet.com+OR+Xinhua+when:1d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,49,,ok,57,
-5,news,P1,Nikkei Asia,Google News RSS,https://news.google.com/rss/search?q=site:asia.nikkei.com+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,74,,ok,98,
+4,news,P1,Xinhua,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:xinhuanet.com+OR+Xinhua+when:1d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,49,,ok,54,
+5,news,P1,Nikkei Asia,Google News RSS,https://news.google.com/rss/search?q=site:asia.nikkei.com+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,74,,ok,86,
 6,news,P1,The Hindu,NewsAPI/官方RSS,https://www.thehindu.com/news/national/feeder/default.rss,RssFetcher,LIVE_RSS,ok,60,,ok,60,
 7,news,P1,MIIT (China),Google News RSS,https://news.google.com/rss/search?q=site:miit.gov.cn+when:7d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans,RssFetcher,LIVE_RSS,ok,71,,ok,12,
 8,news,P1,MOFCOM (China),Google News RSS,https://news.google.com/rss/search?q=site:mofcom.gov.cn+when:7d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans,RssFetcher,LIVE_RSS,ok,100,,ok,100,
@@ -740,28 +742,28 @@ For more information check: https://developer.mozil"
 10,news,P1,CBC News (World),NewsAPI/官方RSS,https://www.cbc.ca/webfeed/rss/rss-world,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 11,news,P1,Le Monde [en],NewsAPI/官方RSS,https://www.lemonde.fr/en/rss/une.xml,RssFetcher,LIVE_RSS,ok,18,,ok,18,
 12,news,P1,DW News [en],官方RSS,https://rss.dw.com/xml/rss-en-all,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-13,news,P1,Der Spiegel,NewsAPI/官方RSS,https://www.spiegel.de/schlagzeilen/tops/index.rss,RssFetcher,LIVE_RSS,ok,17,,ok,19,
+13,news,P1,Der Spiegel,NewsAPI/官方RSS,https://www.spiegel.de/schlagzeilen/tops/index.rss,RssFetcher,LIVE_RSS,ok,17,,ok,22,
 14,news,P1,Die Zeit,NewsAPI/官方RSS,https://newsfeed.zeit.de/index,RssFetcher,LIVE_RSS,ok,15,,ok,15,
-15,news,P1,Reuters LatAm,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:reuters.com+(Brazil+OR+Mexico+OR+Argentina)+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,99,
+15,news,P1,Reuters LatAm,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:reuters.com+(Brazil+OR+Mexico+OR+Argentina)+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 16,news,P1,Al Jazeera [en],NewsAPI/官方RSS,https://www.aljazeera.com/xml/rss/all.xml,RssFetcher,LIVE_RSS,ok,25,,ok,25,
 17,news,P1,Al Jazeera [ar],官方RSS,https://www.aljazeera.net/aljazeerarss/a7c186be-1adb-4b11-a982-4783e765316e/4e17ecdc-8fb9-40de-a5d6-d00f72384a51,RssFetcher,LIVE_RSS,ok,25,,ok,25,
 18,news,P1,Jerusalem Post,NewsAPI/官方RSS,https://www.jpost.com/Rss/RssFeedsHeadlines.aspx,RssFetcher,LIVE_RSS,ok,30,,ok,30,
 19,news,P1,NPR News,官方RSS,https://feeds.npr.org/1001/rss.xml,RssFetcher,LIVE_RSS,ok,10,,ok,10,
 20,news,P1,Politico,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:politico.com+when:1d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,24,,ok,100,
-21,news,P1,Washington Post,NewsAPI/官方RSS,https://feeds.washingtonpost.com/rss/world,RssFetcher,LIVE_RSS,ok,6,,ok,5,
+21,news,P1,Washington Post,NewsAPI/官方RSS,https://feeds.washingtonpost.com/rss/world,RssFetcher,LIVE_RSS,ok,6,,ok,7,
 22,news,P1,CBS News,NewsAPI/官方RSS,https://www.cbsnews.com/latest/rss/main,RssFetcher,LIVE_RSS,ok,30,,ok,30,
 23,news,P1,NBC News (World),NewsAPI/官方RSS,https://feeds.nbcnews.com/nbcnews/public/world,RssFetcher,LIVE_RSS,ok,25,,ok,25,
 24,news,P1,ABC News (US),NewsAPI/官方RSS,https://abcnews.go.com/abcnews/internationalheadlines,RssFetcher,LIVE_RSS,ok,25,,ok,25,
-25,news,P1,BBC World,NewsAPI/官方RSS,https://feeds.bbci.co.uk/news/world/rss.xml,RssFetcher,LIVE_RSS,ok,47,,ok,45,
+25,news,P1,BBC World,NewsAPI/官方RSS,https://feeds.bbci.co.uk/news/world/rss.xml,RssFetcher,LIVE_RSS,ok,47,,ok,24,
 26,news,P1,Guardian World,官方RSS,https://www.theguardian.com/world/rss,RssFetcher,LIVE_RSS,ok,45,,ok,45,
 27,news,P1,AP News,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:apnews.com&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 28,news,P1,Reuters World,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:reuters.com+world&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 29,news,P1,CNN World,NewsAPI/官方RSS,http://rss.cnn.com/rss/cnn_world.rss,RssFetcher,LIVE_RSS,ok,29,,ok,29,
-30,news,P2,BBC Africa,NewsAPI/官方RSS,https://feeds.bbci.co.uk/news/world/africa/rss.xml,RssFetcher,LIVE_RSS,ok,26,,ok,28,
+30,news,P2,BBC Africa,NewsAPI/官方RSS,https://feeds.bbci.co.uk/news/world/africa/rss.xml,RssFetcher,LIVE_RSS,ok,26,,ok,25,
 31,news,P2,The Diplomat,官方RSS,https://thediplomat.com/feed/,RssFetcher,LIVE_RSS,ok,96,,ok,96,
 32,news,P2,The Globe and Mail (World),NewsAPI/官方RSS,https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/world/?outputType=xml,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-33,news,P2,France 24 [fr],官方RSS,https://www.france24.com/fr/rss,RssFetcher,LIVE_RSS,ok,24,,ok,24,
-34,news,P2,France 24 [es],官方RSS,https://www.france24.com/es/rss,RssFetcher,LIVE_RSS,ok,24,,ok,23,
+33,news,P2,France 24 [fr],官方RSS,https://www.france24.com/fr/rss,RssFetcher,LIVE_RSS,ok,24,,ok,23,
+34,news,P2,France 24 [es],官方RSS,https://www.france24.com/es/rss,RssFetcher,LIVE_RSS,ok,24,,ok,24,
 35,news,P2,France 24 [ar],官方RSS,https://www.france24.com/ar/rss,RssFetcher,LIVE_RSS,ok,24,,ok,24,
 36,news,P2,EuroNews [fr],官方RSS,https://fr.euronews.com/rss?format=xml,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 37,news,P2,EuroNews [de],官方RSS,https://de.euronews.com/rss?format=xml,RssFetcher,LIVE_RSS,ok,50,,ok,50,
@@ -769,8 +771,8 @@ For more information check: https://developer.mozil"
 39,news,P2,EuroNews [es],官方RSS,https://es.euronews.com/rss?format=xml,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 40,news,P2,EuroNews [pt],官方RSS,https://pt.euronews.com/rss?format=xml,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 41,news,P2,EuroNews [ru],官方RSS,https://ru.euronews.com/rss?format=xml,RssFetcher,LIVE_RSS,ok,50,,ok,50,
-42,news,P2,Le Monde [fr],NewsAPI/官方RSS,https://www.lemonde.fr/rss/une.xml,RssFetcher,LIVE_RSS,ok,16,,ok,16,
-43,news,P2,DW News [de],官方RSS,https://rss.dw.com/xml/rss-de-all,RssFetcher,LIVE_RSS,ok,79,,ok,94,
+42,news,P2,Le Monde [fr],NewsAPI/官方RSS,https://www.lemonde.fr/rss/une.xml,RssFetcher,LIVE_RSS,ok,16,,ok,17,
+43,news,P2,DW News [de],官方RSS,https://rss.dw.com/xml/rss-de-all,RssFetcher,LIVE_RSS,ok,79,,ok,91,
 44,news,P2,DW News [es],官方RSS,https://rss.dw.com/xml/rss-es-all,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,0,feed parsed but empty
 45,news,P2,RTÉ News,NewsAPI/官方RSS,https://www.rte.ie/feeds/rss/?index=/news/&type=2,RssFetcher,LIVE_RSS,ok,60,,ok,60,
 46,news,P2,RTL Nieuws,NewsAPI/官方RSS,https://www.rtlnieuws.nl/rss.xml,RssFetcher,LIVE_RSS,ok,10,,ok,10,
@@ -801,13 +803,13 @@ For more information check: https://developer.mozil"
 71,news,P3,Thai PBS,Google News RSS,https://news.google.com/rss/search?q=site:thaipbsworld.com+when:2d&hl=th&gl=TH&ceid=TH:th,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,0,feed parsed but empty
 72,news,P3,VnExpress,官方RSS,https://vnexpress.net/rss,RssFetcher,LIVE_RSS,error,0,http: The read operation timed out,ok,0,feed parsed but empty
 73,news,P3,Tuoi Tre News,Google News RSS,https://news.google.com/rss/search?q=site:tuoitrenews.vn+when:2d&hl=vi&gl=VN&ceid=VN:vi,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,0,feed parsed but empty
-74,news,P3,Guardian Australia,官方RSS,https://www.theguardian.com/australia-news/rss,RssFetcher,LIVE_RSS,ok,24,,ok,23,
+74,news,P3,Guardian Australia,官方RSS,https://www.theguardian.com/australia-news/rss,RssFetcher,LIVE_RSS,ok,24,,ok,21,
 75,news,P3,Island Times (Palau),官方RSS,https://islandtimes.org/feed/,RssFetcher,LIVE_RSS,ok,20,,ok,20,
-76,news,P3,France 24 [en],官方RSS,https://www.france24.com/en/rss,RssFetcher,LIVE_RSS,ok,24,,ok,0,feed parsed but empty
-77,news,P3,EuroNews [en],官方RSS,https://www.euronews.com/rss?format=xml,RssFetcher,LIVE_RSS,ok,50,,ok,0,feed parsed but empty
+76,news,P3,France 24 [en],官方RSS,https://www.france24.com/en/rss,RssFetcher,LIVE_RSS,ok,24,,ok,24,
+77,news,P3,EuroNews [en],官方RSS,https://www.euronews.com/rss?format=xml,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 78,news,P3,El País,官方RSS,https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-79,news,P3,El Mundo,NewsAPI/官方RSS,https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml,RssFetcher,LIVE_RSS,ok,26,,ok,27,
-80,news,P3,BBC Mundo,NewsAPI/官方RSS,https://www.bbc.com/mundo/index.xml,RssFetcher,LIVE_RSS,ok,35,,ok,34,
+79,news,P3,El Mundo,NewsAPI/官方RSS,https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml,RssFetcher,LIVE_RSS,ok,26,,ok,23,
+80,news,P3,BBC Mundo,NewsAPI/官方RSS,https://www.bbc.com/mundo/index.xml,RssFetcher,LIVE_RSS,ok,35,,ok,32,
 81,news,P3,Tagesschau,官方RSS,https://www.tagesschau.de/xml/rss2/,RssFetcher,LIVE_RSS,ok,40,,ok,40,
 82,news,P3,Bild,NewsAPI/官方RSS,https://www.bild.de/feed/alles.xml,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 83,news,P3,ANSA,NewsAPI/官方RSS,https://www.ansa.it/sito/notizie/topnews/topnews_rss.xml,RssFetcher,LIVE_RSS,ok,10,,ok,10,
@@ -823,9 +825,9 @@ For more information check: https://developer.mozilla.org"
 For more information check: https://dev",error,0,"http: Client error '404 Not Found' for url 'https://www.dn.se/rss/nyhetsdygnet/'
 For more information check: https://developer.mozilla.org/en-US/docs/"
 91,news,P3,Svenska Dagbladet,NewsAPI/官方RSS,https://www.svd.se/feed/articles.rss,RssFetcher,LIVE_RSS,ok,30,,ok,30,
-92,news,P3,BBC Turkce,NewsAPI/官方RSS,https://feeds.bbci.co.uk/turkce/rss.xml,RssFetcher,LIVE_RSS,ok,24,,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+92,news,P3,BBC Turkce,NewsAPI/官方RSS,https://feeds.bbci.co.uk/turkce/rss.xml,RssFetcher,LIVE_RSS,ok,24,,ok,25,
 93,news,P3,DW Turkish,官方RSS,https://rss.dw.com/xml/rss-tur-all,RssFetcher,LIVE_RSS,ok,15,,ok,15,
-94,news,P3,Hurriyet,官方RSS,https://www.hurriyet.com.tr/rss/anasayfa,RssFetcher,LIVE_RSS,ok,65,,ok,69,
+94,news,P3,Hurriyet,官方RSS,https://www.hurriyet.com.tr/rss/anasayfa,RssFetcher,LIVE_RSS,ok,65,,ok,71,
 95,news,P3,TVN24,官方RSS,https://tvn24.pl/najwazniejsze.xml,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,0,feed parsed but empty
 96,news,P3,Polsat News,官方RSS,https://www.polsatnews.pl/rss/wszystkie.xml,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 97,news,P3,Rzeczpospolita,官方RSS,https://www.rp.pl/rss_main,RssFetcher,LIVE_RSS,ok,20,,ok,20,
@@ -834,16 +836,16 @@ For more information check: https://developer.mozilla.org/en-US/docs/"
 100,news,P3,in.gr,官方RSS,https://www.in.gr/feed/,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 101,news,P3,iefimerida,官方RSS,https://www.iefimerida.gr/rss.xml,RssFetcher,LIVE_RSS,ok,75,,ok,75,
 102,news,P3,Proto Thema,Google News RSS,https://news.google.com/rss/search?q=site:protothema.gr+when:2d&hl=el&gl=GR&ceid=GR:el,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-103,news,P3,BBC Russian,NewsAPI/官方RSS,https://feeds.bbci.co.uk/russian/rss.xml,RssFetcher,LIVE_RSS,ok,36,,ok,33,
+103,news,P3,BBC Russian,NewsAPI/官方RSS,https://feeds.bbci.co.uk/russian/rss.xml,RssFetcher,LIVE_RSS,ok,36,,ok,37,
 104,news,P3,Meduza,官方RSS,https://meduza.io/rss/all,RssFetcher,LIVE_RSS,ok,30,,ok,30,
-105,news,P3,Novaya Gazeta Europe,官方RSS,https://novayagazeta.eu/feed/rss,RssFetcher,LIVE_RSS,ok,100,,ok,97,
-106,news,P3,TASS,Google News RSS,https://news.google.com/rss/search?q=site:tass.com+OR+TASS+Russia+when:1d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,52,,ok,100,
-107,news,P3,Kyiv Independent,Google News RSS,https://news.google.com/rss/search?q=site:kyivindependent.com+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,89,,ok,88,
+105,news,P3,Novaya Gazeta Europe,官方RSS,https://novayagazeta.eu/feed/rss,RssFetcher,LIVE_RSS,ok,100,,ok,91,
+106,news,P3,TASS,Google News RSS,https://news.google.com/rss/search?q=site:tass.com+OR+TASS+Russia+when:1d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,52,,ok,56,
+107,news,P3,Kyiv Independent,Google News RSS,https://news.google.com/rss/search?q=site:kyivindependent.com+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,89,,ok,83,
 108,news,P3,Moscow Times,官方RSS,https://www.themoscowtimes.com/rss/news,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 109,news,P3,The Irish Times,NewsAPI/官方RSS,https://www.irishtimes.com/cmlink/news-1.1319192,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 110,news,P3,RBC (俄罗斯),NewsAPI/官方RSS,https://rssexport.rbc.ru/rbcnews/news/30/full.rss,RssFetcher,LIVE_RSS,ok,30,,ok,30,
 111,news,P3,Latin America,Google News RSS,https://news.google.com/rss/search?q=(Brazil+OR+Mexico+OR+Argentina+OR+Venezuela+OR+Colombia)+when:2d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-112,news,P3,BBC Latin America,NewsAPI/官方RSS,https://feeds.bbci.co.uk/news/world/latin_america/rss.xml,RssFetcher,LIVE_RSS,ok,25,,ok,23,
+112,news,P3,BBC Latin America,NewsAPI/官方RSS,https://feeds.bbci.co.uk/news/world/latin_america/rss.xml,RssFetcher,LIVE_RSS,ok,25,,ok,24,
 113,news,P3,Guardian Americas,官方RSS,https://www.theguardian.com/world/americas/rss,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 114,news,P3,Clarín,官方RSS,https://www.clarin.com/rss/lo-ultimo/,RssFetcher,LIVE_RSS,ok,10,,ok,10,
 115,news,P3,O Globo,NewsAPI/官方RSS,https://oglobo.globo.com/rss/top_noticias/,RssFetcher,LIVE_RSS,error,0,"http: Client error '404 Not Found' for url 'https://oglobo.globo.com/rss/top_noticias/'
@@ -868,14 +870,14 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/"
 124,news,P3,Milenio,官方RSS,https://www.milenio.com/rss,RssFetcher,LIVE_RSS,error,0,"http: Client error '404 Not Found' for url 'https://www.milenio.com/rss'
 For more information check: https://developer.m",error,0,"http: Client error '404 Not Found' for url 'https://www.milenio.com/rss'
 For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP"
-125,news,P3,Mexico Security,Google News RSS,https://news.google.com/rss/search?q=(Mexico+cartel+OR+Mexico+violence+OR+Mexico+troops+OR+narco+Mexico)+when:2d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,36,,ok,50,
+125,news,P3,Mexico Security,Google News RSS,https://news.google.com/rss/search?q=(Mexico+cartel+OR+Mexico+violence+OR+Mexico+troops+OR+narco+Mexico)+when:2d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,36,,ok,57,
 126,news,P3,AP Mexico,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:apnews.com+Mexico+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 127,news,P3,InSight Crime,官方RSS,https://insightcrime.org/feed/,RssFetcher,LIVE_RSS,ok,11,,ok,11,
 128,news,P3,France 24 LatAm,官方RSS,https://www.france24.com/en/americas/rss,RssFetcher,LIVE_RSS,ok,30,,ok,30,
 129,news,P3,Al Arabiya,Google News RSS,https://news.google.com/rss/search?q=site:english.alarabiya.net+when:2d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,66,,ok,100,
 130,news,P3,Guardian ME,官方RSS,https://www.theguardian.com/world/middleeast/rss,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 131,news,P3,BBC Persian,NewsAPI/官方RSS,http://feeds.bbci.co.uk/persian/tv-and-radio-37434376/rss.xml,RssFetcher,LIVE_RSS,ok,34,,ok,33,
-132,news,P3,Iran International,Google News RSS,https://news.google.com/rss/search?q=site:iranintl.com+when:2d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,88,
+132,news,P3,Iran International,Google News RSS,https://news.google.com/rss/search?q=site:iranintl.com+when:2d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,89,
 133,news,P3,Fars News,Google News RSS,https://news.google.com/rss/search?q=site:farsnews.ir+when:2d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 134,news,P3,L\,官方RSS,https://www.lorientlejour.com/rss,RssFetcher,LIVE_RSS,error,0,"http: Client error '404 Not Found' for url 'https://www.lorientlejour.com/rss'
 For more information check: https://devel",error,0,"http: Client error '404 Not Found' for url 'https://www.lorientlejour.com/rss'
@@ -896,8 +898,8 @@ For more information check: https://developer.mozilla.org/en-US/docs/We"
 146,news,P1,中新网 社会新闻,官方RSS,http://www.chinanews.com.cn/rss/society.xml,RssFetcher,LIVE_RSS,ok,30,,ok,30,
 147,news,P1,Oil & Gas,Google News RSS,"https://news.google.com/rss/search?q=(oil+price+OR+OPEC+OR+""natural+gas""+OR+pipeline+OR+LNG)+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
 148,news,P1,MarketWatch,Google News RSS,https://news.google.com/rss/search?q=site:marketwatch.com+markets+when:1d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-149,news,P1,Yahoo Finance,官方RSS,https://finance.yahoo.com/news/rssindex,RssFetcher,LIVE_RSS,ok,50,,ok,42,
-150,news,P1,Financial Times,官方RSS,https://www.ft.com/rss/home,RssFetcher,LIVE_RSS,ok,9,,ok,9,
+149,news,P1,Yahoo Finance,官方RSS,https://finance.yahoo.com/news/rssindex,RssFetcher,LIVE_RSS,ok,50,,ok,50,
+150,news,P1,Financial Times,官方RSS,https://www.ft.com/rss/home,RssFetcher,LIVE_RSS,ok,9,,ok,10,
 151,news,P1,Reuters Business,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:reuters.com+business+markets&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 152,news,P1,Axios,NewsAPI/官方RSS,https://api.axios.com/feed/,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 153,news,P1,Hacker News,NewsAPI/官方RSS,https://hnrss.org/frontpage,RssFetcher,LIVE_RSS,ok,20,,ok,20,
@@ -905,9 +907,9 @@ For more information check: https://developer.mozilla.org/en-US/docs/We"
 155,news,P1,The Verge,NewsAPI/官方RSS,https://www.theverge.com/rss/index.xml,RssFetcher,LIVE_RSS,ok,10,,ok,10,
 156,news,P1,MIT Tech Review,官方RSS,https://www.technologyreview.com/feed/,RssFetcher,LIVE_RSS,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010),error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
 157,news,P1,CSIS,Google News RSS,https://news.google.com/rss/search?q=site:csis.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-158,news,P1,RAND,Google News RSS,https://news.google.com/rss/search?q=site:rand.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,50,,ok,29,
+158,news,P1,RAND,Google News RSS,https://news.google.com/rss/search?q=site:rand.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,50,,ok,22,
 159,news,P1,Brookings,Google News RSS,https://news.google.com/rss/search?q=site:brookings.edu+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-160,news,P1,Carnegie,Google News RSS,https://news.google.com/rss/search?q=site:carnegieendowment.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,39,,ok,29,
+160,news,P1,Carnegie,Google News RSS,https://news.google.com/rss/search?q=site:carnegieendowment.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,39,,ok,31,
 161,news,P2,VentureBeat AI,官方RSS,https://venturebeat.com/category/ai/feed/,RssFetcher,LIVE_RSS,ok,7,,ok,7,
 162,news,P2,The Verge AI,NewsAPI/官方RSS,https://www.theverge.com/rss/ai-artificial-intelligence/index.xml,RssFetcher,LIVE_RSS,ok,10,,ok,10,
 163,news,P2,ArXiv AI,官方RSS,https://export.arxiv.org/api/query?search_query=cat:cs.AI&sortBy=submittedDate&sortOrder=descending&max_results=30,RssFetcher,LIVE_RSS,ok,30,,ok,30,
@@ -933,7 +935,7 @@ For more information check: https://developer.mo",error,0,"http: Client error '4
 For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/"
 182,news,P2,Jamestown,官方RSS,https://jamestown.org/feed/,RssFetcher,LIVE_RSS,error,0,http: _ssl.c:993: The handshake operation timed out,error,0,http: _ssl.c:993: The handshake operation timed out
 183,news,P3,CNBC,NewsAPI/官方RSS,https://www.cnbc.com/id/100003114/device/rss/rss.html,RssFetcher,LIVE_RSS,ok,30,,ok,30,
-184,news,P3,RUSI,Google News RSS,https://news.google.com/rss/search?q=site:rusi.org+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,9,,ok,21,
+184,news,P3,RUSI,Google News RSS,https://news.google.com/rss/search?q=site:rusi.org+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,9,,ok,20,
 185,news,P1,AI News,Google News RSS,"https://news.google.com/rss/search?q=(OpenAI+OR+Anthropic+OR+Google+AI+OR+""large+language+model""+OR+ChatGPT+OR+Claude+OR+""AI+model"")+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
 186,news,P1,IT之家,官方RSS,https://www.ithome.com/rss/,RssFetcher,LIVE_RSS,ok,60,,ok,60,
 187,news,P1,36氪,官方RSS,https://www.36kr.com/feed,RssFetcher,LIVE_RSS,ok,30,,ok,30,
@@ -941,7 +943,7 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/"
 189,news,P1,虎嗅 文章,RSSHub,https://RSSHUB_HOST/huxiu/article,RsshubFetcher,LIVE_RSSHUB,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010),error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
 190,news,P1,钛媒体,RSSHub,https://RSSHUB_HOST/tmtpost/index,RsshubFetcher,LIVE_RSSHUB,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010),error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
 191,news,P1,36氪 24小时快讯,RSSHub,https://RSSHUB_HOST/36kr/newsflashes,RsshubFetcher,LIVE_RSSHUB,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010),error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-192,news,P1,Yahoo Finance,官方RSS,https://finance.yahoo.com/rss/topstories,RssFetcher,LIVE_RSS,ok,50,,ok,42,
+192,news,P1,Yahoo Finance,官方RSS,https://finance.yahoo.com/rss/topstories,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 193,news,P1,TechCrunch,NewsAPI/官方RSS,https://techcrunch.com/feed/,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 194,news,P1,TechMeme,官方RSS,https://www.techmeme.com/feed.xml,RssFetcher,LIVE_RSS,ok,15,,ok,15,
 195,news,P2,MIT Tech Review AI,官方RSS,https://www.technologyreview.com/topic/artificial-intelligence/feed,RssFetcher,LIVE_RSS,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010),error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
@@ -954,10 +956,10 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/"
 202,news,P2,Changelog,官方RSS,https://changelog.com/feed,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 203,news,P2,CNBC Tech,NewsAPI/官方RSS,https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=19854910,RssFetcher,LIVE_RSS,ok,30,,ok,30,
 204,news,P2,Seeking Alpha Tech,官方RSS,https://seekingalpha.com/market_currents.xml,RssFetcher,LIVE_RSS,ok,7,,ok,7,
-205,news,P2,EU Startups,Google News RSS,https://news.google.com/rss/search?q=site:eu-startups.com+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,80,,ok,71,
+205,news,P2,EU Startups,Google News RSS,https://news.google.com/rss/search?q=site:eu-startups.com+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,80,,ok,62,
 206,news,P2,TechCabal (Africa),官方RSS,https://techcabal.com/feed/,RssFetcher,LIVE_RSS,error,0,http: The read operation timed out,ok,10,
 207,news,P2,Tom's Hardware,官方RSS,https://www.tomshardware.com/feeds/all,RssFetcher,LIVE_RSS,ok,50,,ok,50,
-208,news,P2,SemiAnalysis,Google News RSS,https://news.google.com/rss/search?q=site:semianalysis.com+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,4,,ok,5,
+208,news,P2,SemiAnalysis,Google News RSS,https://news.google.com/rss/search?q=site:semianalysis.com+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,4,,ok,6,
 209,news,P2,Layoffs.fyi,Google News RSS,https://news.google.com/rss/search?q=tech+layoffs+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 210,news,P2,Krebs Security,官方RSS,https://krebsonsecurity.com/feed/,RssFetcher,LIVE_RSS,ok,10,,ok,10,
 211,news,P2,The Hacker News,NewsAPI/官方RSS,https://feeds.feedburner.com/TheHackersNews,RssFetcher,LIVE_RSS,ok,50,,ok,50,
@@ -968,62 +970,62 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/"
 216,news,P2,Crunchbase News,官方RSS,https://news.crunchbase.com/feed/,RssFetcher,LIVE_RSS,error,0,http: _ssl.c:993: The handshake operation timed out,error,0,http: _ssl.c:993: The handshake operation timed out
 217,news,P2,SaaStr,官方RSS,https://www.saastr.com/feed/,RssFetcher,LIVE_RSS,ok,10,,ok,10,
 218,news,P2,TechCrunch Venture,NewsAPI/官方RSS,https://techcrunch.com/category/venture/feed/,RssFetcher,LIVE_RSS,ok,17,,ok,19,
-219,news,P2,Fortune Term Sheet,NewsAPI/Google News RSS,"https://news.google.com/rss/search?q=""Term+Sheet""+venture+capital+OR+startup+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,41,,ok,37,
+219,news,P2,Fortune Term Sheet,NewsAPI/Google News RSS,"https://news.google.com/rss/search?q=""Term+Sheet""+venture+capital+OR+startup+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,41,,ok,35,
 220,news,P2,PitchBook News,Google News RSS,https://news.google.com/rss/search?q=site:pitchbook.com+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 221,news,P2,CB Insights,官方RSS,https://www.cbinsights.com/research/feed/,RssFetcher,LIVE_RSS,ok,25,,ok,25,
 222,news,P3,MIT Research,官方RSS,https://news.mit.edu/rss/research,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 223,news,P3,AI Weekly,Google News RSS,"https://news.google.com/rss/search?q=""artificial+intelligence""+OR+""machine+learning""+when:3d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
 224,news,P3,Anthropic News,Google News RSS,https://news.google.com/rss/search?q=Anthropic+Claude+AI+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 225,news,P2,OpenAI News,官方RSS,https://openai.com/news/rss.xml,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-226,news,P3,MarketWatch Tech,Google News RSS,https://news.google.com/rss/search?q=site:marketwatch.com+technology+markets+when:2d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
+226,news,P3,MarketWatch Tech,Google News RSS,https://news.google.com/rss/search?q=site:marketwatch.com+technology+markets+when:2d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,99,
 227,news,P3,Tech.eu,官方RSS,https://tech.eu/feed/,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 228,news,P3,Sifted (Europe),官方RSS,https://sifted.eu/feed,RssFetcher,LIVE_RSS,ok,24,,ok,24,
 229,news,P3,The Next Web,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:thenextweb.com+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 230,news,P3,Tech in Asia,Google News RSS,https://news.google.com/rss/search?q=site:techinasia.com+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-231,news,P3,KrASIA,Google News RSS,https://news.google.com/rss/search?q=site:kr-asia.com+OR+KrASIA+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,19,,ok,24,
-232,news,P3,SEA Startups,Google News RSS,https://news.google.com/rss/search?q=(Singapore+OR+Indonesia+OR+Vietnam+OR+Thailand+OR+Malaysia)+startup+funding+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,56,,ok,57,
+231,news,P3,KrASIA,Google News RSS,https://news.google.com/rss/search?q=site:kr-asia.com+OR+KrASIA+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,19,,ok,23,
+232,news,P3,SEA Startups,Google News RSS,https://news.google.com/rss/search?q=(Singapore+OR+Indonesia+OR+Vietnam+OR+Thailand+OR+Malaysia)+startup+funding+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,56,,ok,60,
 233,news,P3,Asia VC News,Google News RSS,"https://news.google.com/rss/search?q=(""Southeast+Asia""+OR+ASEAN)+venture+capital+OR+funding+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,46,,ok,39,
-234,news,P3,China Startups,Google News RSS,"https://news.google.com/rss/search?q=China+startup+funding+OR+""Chinese+startup""+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,58,,ok,63,
-235,news,P3,36Kr English,Google News RSS,"https://news.google.com/rss/search?q=site:36kr.com+OR+""36Kr""+startup+china+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,36,,ok,60,
+234,news,P3,China Startups,Google News RSS,"https://news.google.com/rss/search?q=China+startup+funding+OR+""Chinese+startup""+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,58,,ok,66,
+235,news,P3,36Kr English,Google News RSS,"https://news.google.com/rss/search?q=site:36kr.com+OR+""36Kr""+startup+china+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,36,,ok,58,
 236,news,P3,China Tech Giants,Google News RSS,https://news.google.com/rss/search?q=(Alibaba+OR+Tencent+OR+ByteDance+OR+Baidu+OR+JD.com+OR+Xiaomi+OR+Huawei)+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-237,news,P3,Japan Startups,Google News RSS,"https://news.google.com/rss/search?q=Japan+startup+funding+OR+""Japanese+startup""+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,48,,ok,53,
-238,news,P3,Japan Tech News,Google News RSS,https://news.google.com/rss/search?q=(Japan+startup+OR+Japan+tech+OR+SoftBank+OR+Rakuten+OR+Sony)+funding+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,54,,ok,58,
-239,news,P3,Nikkei Tech,Google News RSS,https://news.google.com/rss/search?q=site:asia.nikkei.com+technology+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,30,,ok,56,
-240,news,P3,Korea Tech News,Google News RSS,https://news.google.com/rss/search?q=(Korea+startup+OR+Korean+tech+OR+Samsung+OR+Kakao+OR+Naver+OR+Coupang)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,67,,ok,52,
-241,news,P3,Korea Startups,Google News RSS,"https://news.google.com/rss/search?q=Korea+startup+funding+OR+""Korean+unicorn""+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,44,,ok,56,
+237,news,P3,Japan Startups,Google News RSS,"https://news.google.com/rss/search?q=Japan+startup+funding+OR+""Japanese+startup""+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,48,,ok,54,
+238,news,P3,Japan Tech News,Google News RSS,https://news.google.com/rss/search?q=(Japan+startup+OR+Japan+tech+OR+SoftBank+OR+Rakuten+OR+Sony)+funding+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,54,,ok,54,
+239,news,P3,Nikkei Tech,Google News RSS,https://news.google.com/rss/search?q=site:asia.nikkei.com+technology+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,30,,ok,48,
+240,news,P3,Korea Tech News,Google News RSS,https://news.google.com/rss/search?q=(Korea+startup+OR+Korean+tech+OR+Samsung+OR+Kakao+OR+Naver+OR+Coupang)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,67,,ok,58,
+241,news,P3,Korea Startups,Google News RSS,"https://news.google.com/rss/search?q=Korea+startup+funding+OR+""Korean+unicorn""+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,44,,ok,59,
 242,news,P3,Inc42 (India),官方RSS,https://inc42.com/feed/,RssFetcher,LIVE_RSS,ok,24,,ok,24,
 243,news,P3,YourStory,官方RSS,https://yourstory.com/feed,RssFetcher,LIVE_RSS,error,0,http: _ssl.c:993: The handshake operation timed out,error,0,http: _ssl.c:993: The handshake operation timed out
 244,news,P3,India Startups,Google News RSS,"https://news.google.com/rss/search?q=India+startup+funding+OR+""Indian+startup""+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,68,,ok,100,
 245,news,P3,India Tech News,Google News RSS,https://news.google.com/rss/search?q=(Flipkart+OR+Razorpay+OR+Zerodha+OR+Zomato+OR+Paytm+OR+PhonePe)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-246,news,P3,SEA Tech News,Google News RSS,https://news.google.com/rss/search?q=(Grab+OR+GoTo+OR+Sea+Limited+OR+Shopee+OR+Tokopedia)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,45,,ok,40,
-247,news,P3,Vietnam Tech,Google News RSS,https://news.google.com/rss/search?q=Vietnam+startup+OR+Vietnam+tech+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,82,,ok,89,
-248,news,P3,Indonesia Tech,Google News RSS,https://news.google.com/rss/search?q=Indonesia+startup+OR+Indonesia+tech+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,42,,ok,98,
-249,news,P3,Taiwan Tech,Google News RSS,https://news.google.com/rss/search?q=(Taiwan+startup+OR+TSMC+OR+MediaTek+OR+Foxconn)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,62,
+246,news,P3,SEA Tech News,Google News RSS,https://news.google.com/rss/search?q=(Grab+OR+GoTo+OR+Sea+Limited+OR+Shopee+OR+Tokopedia)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,45,,ok,48,
+247,news,P3,Vietnam Tech,Google News RSS,https://news.google.com/rss/search?q=Vietnam+startup+OR+Vietnam+tech+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,82,,ok,78,
+248,news,P3,Indonesia Tech,Google News RSS,https://news.google.com/rss/search?q=Indonesia+startup+OR+Indonesia+tech+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,42,,ok,94,
+249,news,P3,Taiwan Tech,Google News RSS,https://news.google.com/rss/search?q=(Taiwan+startup+OR+TSMC+OR+MediaTek+OR+Foxconn)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,56,
 250,news,P3,LAVCA (LATAM),Google News RSS,https://news.google.com/rss/search?q=site:lavca.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,5,,ok,5,
-251,news,P3,LATAM Startups,Google News RSS,"https://news.google.com/rss/search?q=(""Latin+America""+startup+OR+LATAM+funding)+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,54,,ok,19,
-252,news,P3,Startups LATAM,Google News RSS,https://news.google.com/rss/search?q=(startup+Brazil+OR+startup+Mexico+OR+startup+Argentina+OR+startup+Colombia+OR+startup+Chile)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,50,,ok,54,
+251,news,P3,LATAM Startups,Google News RSS,"https://news.google.com/rss/search?q=(""Latin+America""+startup+OR+LATAM+funding)+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,54,,ok,25,
+252,news,P3,Startups LATAM,Google News RSS,https://news.google.com/rss/search?q=(startup+Brazil+OR+startup+Mexico+OR+startup+Argentina+OR+startup+Colombia+OR+startup+Chile)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,50,,ok,45,
 253,news,P3,Brazil Tech,Google News RSS,https://news.google.com/rss/search?q=(Nubank+OR+iFood+OR+Mercado+Libre+OR+Rappi+OR+VTEX)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,47,,ok,38,
-254,news,P3,FinTech LATAM,Google News RSS,"https://news.google.com/rss/search?q=fintech+(Brazil+OR+Mexico+OR+Argentina+OR+""Latin+America"")+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,63,,ok,61,
+254,news,P3,FinTech LATAM,Google News RSS,"https://news.google.com/rss/search?q=fintech+(Brazil+OR+Mexico+OR+Argentina+OR+""Latin+America"")+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,63,,ok,57,
 255,news,P3,Disrupt Africa,Google News RSS,https://news.google.com/rss/search?q=site:disrupt-africa.com+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,0,feed parsed but empty
-256,news,P3,Africa Startups,Google News RSS,"https://news.google.com/rss/search?q=Africa+startup+funding+OR+""African+startup""+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,51,,ok,49,
-257,news,P3,Africa Tech News,Google News RSS,"https://news.google.com/rss/search?q=(Flutterwave+OR+Paystack+OR+Jumia+OR+Andela+OR+""Africa+startup"")+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,47,
-258,news,P3,MENA Startups,Google News RSS,"https://news.google.com/rss/search?q=(MENA+startup+OR+""Middle+East""+funding+OR+Gulf+startup)+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,41,,ok,40,
-259,news,P3,MENA Tech News,Google News RSS,https://news.google.com/rss/search?q=(UAE+startup+OR+Saudi+tech+OR+Dubai+startup+OR+NEOM+tech)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,65,,ok,54,
+256,news,P3,Africa Startups,Google News RSS,"https://news.google.com/rss/search?q=Africa+startup+funding+OR+""African+startup""+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,51,,ok,46,
+257,news,P3,Africa Tech News,Google News RSS,"https://news.google.com/rss/search?q=(Flutterwave+OR+Paystack+OR+Jumia+OR+Andela+OR+""Africa+startup"")+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,42,
+258,news,P3,MENA Startups,Google News RSS,"https://news.google.com/rss/search?q=(MENA+startup+OR+""Middle+East""+funding+OR+Gulf+startup)+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,41,,ok,39,
+259,news,P3,MENA Tech News,Google News RSS,https://news.google.com/rss/search?q=(UAE+startup+OR+Saudi+tech+OR+Dubai+startup+OR+NEOM+tech)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,65,,ok,52,
 260,news,P3,Semiconductor News,Google News RSS,https://news.google.com/rss/search?q=semiconductor+OR+chip+OR+TSMC+OR+NVIDIA+OR+Intel+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-261,news,P3,AngelList News,Google News RSS,"https://news.google.com/rss/search?q=site:angellist.com+OR+""AngelList""+funding+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,1,,ok,3,
-262,news,P3,The Information,Google News RSS,https://news.google.com/rss/search?q=site:theinformation.com+startup+OR+funding+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,15,,ok,73,
+261,news,P3,AngelList News,Google News RSS,"https://news.google.com/rss/search?q=site:angellist.com+OR+""AngelList""+funding+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,1,,ok,1,
+262,news,P3,The Information,Google News RSS,https://news.google.com/rss/search?q=site:theinformation.com+startup+OR+funding+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,15,,ok,44,
 263,news,P3,ZDNet,官方RSS,https://www.zdnet.com/news/rss.xml,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 264,news,P3,Engadget,NewsAPI/官方RSS,https://www.engadget.com/rss.xml,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 265,news,P3,Fast Company,官方RSS,https://feeds.feedburner.com/fastcompany/headlines,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 266,news,P3,Politico Tech,NewsAPI/官方RSS,https://rss.politico.com/technology.xml,RssFetcher,LIVE_RSS,ok,30,,ok,30,
-267,news,P3,AI Regulation,Google News RSS,"https://news.google.com/rss/search?q=AI+regulation+OR+""artificial+intelligence""+law+OR+policy+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,69,,ok,69,
-268,news,P3,Tech Antitrust,Google News RSS,https://news.google.com/rss/search?q=tech+antitrust+OR+FTC+Google+OR+FTC+Apple+OR+FTC+Amazon+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,51,,ok,37,
+267,news,P3,AI Regulation,Google News RSS,"https://news.google.com/rss/search?q=AI+regulation+OR+""artificial+intelligence""+law+OR+policy+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,69,,ok,74,
+268,news,P3,Tech Antitrust,Google News RSS,https://news.google.com/rss/search?q=tech+antitrust+OR+FTC+Google+OR+FTC+Apple+OR+FTC+Amazon+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,51,,ok,38,
 269,news,P3,EFF News,Google News RSS,"https://news.google.com/rss/search?q=site:eff.org+OR+""Electronic+Frontier+Foundation""+when:14d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,31,,ok,21,
-270,news,P3,EU Digital Policy,Google News RSS,"https://news.google.com/rss/search?q=(""Digital+Services+Act""+OR+""Digital+Markets+Act""+OR+""EU+AI+Act""+OR+""GDPR"")+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,39,,ok,57,
+270,news,P3,EU Digital Policy,Google News RSS,"https://news.google.com/rss/search?q=(""Digital+Services+Act""+OR+""Digital+Markets+Act""+OR+""EU+AI+Act""+OR+""GDPR"")+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,39,,ok,63,
 271,news,P3,Euractiv Digital,Google News RSS,https://news.google.com/rss/search?q=site:euractiv.com+digital+OR+tech+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 272,news,P3,EU Commission Digital,Google News RSS,https://news.google.com/rss/search?q=site:ec.europa.eu+digital+OR+technology+when:14d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-273,news,P3,China Tech Policy,Google News RSS,https://news.google.com/rss/search?q=(China+tech+regulation+OR+China+AI+policy+OR+MIIT+technology)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,70,,ok,61,
-274,news,P3,UK Tech Policy,Google News RSS,"https://news.google.com/rss/search?q=(UK+AI+safety+OR+""Online+Safety+Bill""+OR+UK+tech+regulation)+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,55,,ok,66,
+273,news,P3,China Tech Policy,Google News RSS,https://news.google.com/rss/search?q=(China+tech+regulation+OR+China+AI+policy+OR+MIIT+technology)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,70,,ok,58,
+274,news,P3,UK Tech Policy,Google News RSS,"https://news.google.com/rss/search?q=(UK+AI+safety+OR+""Online+Safety+Bill""+OR+UK+tech+regulation)+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,55,,ok,64,
 275,news,P3,India Tech Policy,Google News RSS,https://news.google.com/rss/search?q=(India+tech+regulation+OR+India+data+protection+OR+India+AI+policy)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,65,,ok,65,
 276,news,P3,Brookings Tech,Google News RSS,https://news.google.com/rss/search?q=site:brookings.edu+technology+OR+AI+when:14d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 277,news,P3,CSIS Tech,Google News RSS,https://news.google.com/rss/search?q=site:csis.org+technology+OR+AI+when:14d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
@@ -1031,13 +1033,13 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/"
 279,news,P3,Stanford HAI,Google News RSS,https://news.google.com/rss/search?q=site:hai.stanford.edu+when:14d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,8,,ok,1,
 280,news,P3,AI Now Institute,Google News RSS,https://news.google.com/rss/search?q=site:ainowinstitute.org+when:14d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,4,,ok,0,feed parsed but empty
 281,news,P3,OECD Digital,Google News RSS,https://news.google.com/rss/search?q=site:oecd.org+digital+OR+AI+when:14d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-282,news,P3,EU Tech Policy,Google News RSS,"https://news.google.com/rss/search?q=(""EU+tech+policy""+OR+""European+digital""+OR+Bruegel+tech)+when:14d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,24,,ok,32,
-283,news,P3,Chatham House Tech,Google News RSS,https://news.google.com/rss/search?q=site:chathamhouse.org+technology+OR+AI+when:14d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,92,,ok,30,
-284,news,P3,ISEAS (Singapore),Google News RSS,https://news.google.com/rss/search?q=site:iseas.edu.sg+technology+when:14d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,8,,ok,8,
-285,news,P3,ORF Tech (India),Google News RSS,"https://news.google.com/rss/search?q=(India+tech+policy+OR+ORF+technology+OR+""Observer+Research+Foundation""+tech)+when:14d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,62,,ok,60,
+282,news,P3,EU Tech Policy,Google News RSS,"https://news.google.com/rss/search?q=(""EU+tech+policy""+OR+""European+digital""+OR+Bruegel+tech)+when:14d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,24,,ok,31,
+283,news,P3,Chatham House Tech,Google News RSS,https://news.google.com/rss/search?q=site:chathamhouse.org+technology+OR+AI+when:14d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,92,,ok,32,
+284,news,P3,ISEAS (Singapore),Google News RSS,https://news.google.com/rss/search?q=site:iseas.edu.sg+technology+when:14d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,8,,ok,7,
+285,news,P3,ORF Tech (India),Google News RSS,"https://news.google.com/rss/search?q=(India+tech+policy+OR+ORF+technology+OR+""Observer+Research+Foundation""+tech)+when:14d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,62,,ok,58,
 286,news,P3,RIETI (Japan),Google News RSS,https://news.google.com/rss/search?q=site:rieti.go.jp+technology+when:30d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,10,,ok,8,
-287,news,P3,Asia Pacific Tech,Google News RSS,"https://news.google.com/rss/search?q=(""Asia+Pacific""+tech+policy+OR+""Lowy+Institute""+technology)+when:14d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,52,,ok,66,
-288,news,P3,China Tech Analysis,Google News RSS,"https://news.google.com/rss/search?q=(""China+tech+strategy""+OR+""Chinese+AI""+OR+""China+semiconductor"")+analysis+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,41,,ok,25,
+287,news,P3,Asia Pacific Tech,Google News RSS,"https://news.google.com/rss/search?q=(""Asia+Pacific""+tech+policy+OR+""Lowy+Institute""+technology)+when:14d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,52,,ok,64,
+288,news,P3,China Tech Analysis,Google News RSS,"https://news.google.com/rss/search?q=(""China+tech+strategy""+OR+""Chinese+AI""+OR+""China+semiconductor"")+analysis+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,41,,ok,26,
 289,news,P3,DigiChina,Google News RSS,https://news.google.com/rss/search?q=site:digichina.stanford.edu+when:14d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,0,feed parsed but empty
 290,news,P1,FT中文网 首页,RSSHub,https://RSSHUB_HOST/ft/chinese,RsshubFetcher,LIVE_RSSHUB,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010),error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
 291,news,P1,财联社 电报,RSSHub,https://RSSHUB_HOST/cls/depth/1000,RsshubFetcher,LIVE_RSSHUB,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010),error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
@@ -1048,38 +1050,38 @@ For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/"
 296,news,P1,Oil & Gas,Google News RSS,"https://news.google.com/rss/search?q=(oil+price+OR+OPEC+OR+""natural+gas""+OR+""crude+oil""+OR+WTI+OR+Brent)+when:1d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
 297,news,P1,Bloomberg Markets,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:bloomberg.com+markets+when:1d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 298,news,P2,Gold & Metals,Google News RSS,"https://news.google.com/rss/search?q=(gold+price+OR+silver+price+OR+copper+OR+platinum+OR+""precious+metals"")+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
-299,news,P2,Agriculture,Google News RSS,https://news.google.com/rss/search?q=(wheat+OR+corn+OR+soybeans+OR+coffee+OR+sugar)+price+OR+commodity+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,40,,ok,60,
-300,news,P2,Commodity Trading,Google News RSS,"https://news.google.com/rss/search?q=(""commodity+trading""+OR+""futures+market""+OR+CME+OR+NYMEX+OR+COMEX)+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,61,,ok,97,
+299,news,P2,Agriculture,Google News RSS,https://news.google.com/rss/search?q=(wheat+OR+corn+OR+soybeans+OR+coffee+OR+sugar)+price+OR+commodity+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,40,,ok,53,
+300,news,P2,Commodity Trading,Google News RSS,"https://news.google.com/rss/search?q=(""commodity+trading""+OR+""futures+market""+OR+CME+OR+NYMEX+OR+COMEX)+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,61,,ok,69,
 301,news,P2,CoinDesk,官方RSS,https://www.coindesk.com/arc/outboundfeeds/rss/,RssFetcher,LIVE_RSS,ok,25,,ok,25,
 302,news,P2,Cointelegraph,官方RSS,https://cointelegraph.com/rss,RssFetcher,LIVE_RSS,error,0,http: The read operation timed out,ok,30,
-303,news,P2,The Block,Google News RSS,https://news.google.com/rss/search?q=site:theblock.co+when:1d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,14,,ok,22,
+303,news,P2,The Block,Google News RSS,https://news.google.com/rss/search?q=site:theblock.co+when:1d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,14,,ok,4,
 304,news,P2,Seeking Alpha,官方RSS,https://seekingalpha.com/market_currents.xml,RssFetcher,LIVE_RSS,ok,7,,ok,7,
 305,news,P2,Reuters Markets,NewsAPI/Google News RSS,https://news.google.com/rss/search?q=site:reuters.com+markets+stocks+when:1d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 306,news,P2,Investing.com News,Google News RSS,https://news.google.com/rss/search?q=site:investing.com+markets+when:1d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 307,news,P2,Handelsblatt,NewsAPI/官方RSS,https://www.handelsblatt.com/contentexport/feed/schlagzeilen,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 308,news,P2,Australian Financial Review,NewsAPI/官方RSS,https://www.afr.com/rss/feed.xml,RssFetcher,LIVE_RSS,ok,20,,ok,20,
-309,news,P3,Bond Market,Google News RSS,"https://news.google.com/rss/search?q=(""bond+market""+OR+""treasury+yields""+OR+""bond+yields""+OR+""fixed+income"")+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,57,,ok,100,
-310,news,P3,Treasury Watch,Google News RSS,"https://news.google.com/rss/search?q=(""US+Treasury""+OR+""Treasury+auction""+OR+""10-year+yield""+OR+""2-year+yield"")+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,46,,ok,100,
+309,news,P3,Bond Market,Google News RSS,"https://news.google.com/rss/search?q=(""bond+market""+OR+""treasury+yields""+OR+""bond+yields""+OR+""fixed+income"")+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,57,,ok,73,
+310,news,P3,Treasury Watch,Google News RSS,"https://news.google.com/rss/search?q=(""US+Treasury""+OR+""Treasury+auction""+OR+""10-year+yield""+OR+""2-year+yield"")+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,46,,ok,50,
 311,news,P3,Corporate Bonds,Google News RSS,"https://news.google.com/rss/search?q=(""corporate+bond""+OR+""high+yield""+OR+""investment+grade""+OR+""credit+spread"")+when:3d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
 312,news,P3,Crypto News,Google News RSS,"https://news.google.com/rss/search?q=(bitcoin+OR+ethereum+OR+crypto+OR+""digital+assets"")+when:1d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
 313,news,P3,DeFi News,Google News RSS,"https://news.google.com/rss/search?q=(DeFi+OR+""decentralized+finance""+OR+DEX+OR+""yield+farming"")+when:3d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
-314,news,P3,Options Market,Google News RSS,"https://news.google.com/rss/search?q=(""options+market""+OR+""options+trading""+OR+""put+call+ratio""+OR+VIX)+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,29,,ok,78,
-315,news,P3,Futures Trading,Google News RSS,"https://news.google.com/rss/search?q=(""futures+trading""+OR+""S%26P+500+futures""+OR+""Nasdaq+futures"")+when:1d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,67,,ok,60,
+314,news,P3,Options Market,Google News RSS,"https://news.google.com/rss/search?q=(""options+market""+OR+""options+trading""+OR+""put+call+ratio""+OR+VIX)+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,29,,ok,53,
+315,news,P3,Futures Trading,Google News RSS,"https://news.google.com/rss/search?q=(""futures+trading""+OR+""S%26P+500+futures""+OR+""Nasdaq+futures"")+when:1d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,67,,ok,71,
 316,news,P3,Fintech News,Google News RSS,"https://news.google.com/rss/search?q=(fintech+OR+""payment+technology""+OR+""neobank""+OR+""digital+banking"")+when:3d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
-317,news,P3,Trading Tech,Google News RSS,"https://news.google.com/rss/search?q=(""algorithmic+trading""+OR+""trading+platform""+OR+""quantitative+finance"")+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,73,,ok,63,
+317,news,P3,Trading Tech,Google News RSS,"https://news.google.com/rss/search?q=(""algorithmic+trading""+OR+""trading+platform""+OR+""quantitative+finance"")+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,73,,ok,57,
 318,news,P3,Blockchain Finance,Google News RSS,"https://news.google.com/rss/search?q=(""blockchain+finance""+OR+""tokenization""+OR+""digital+securities""+OR+CBDC)+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
-319,news,P3,Forex News,Google News RSS,"https://news.google.com/rss/search?q=(""forex""+OR+""currency""+OR+""FX+market"")+trading+when:1d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,37,,ok,65,
+319,news,P3,Forex News,Google News RSS,"https://news.google.com/rss/search?q=(""forex""+OR+""currency""+OR+""FX+market"")+trading+when:1d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,37,,ok,46,
 320,news,P3,Dollar Watch,Google News RSS,"https://news.google.com/rss/search?q=(""dollar+index""+OR+DXY+OR+""US+dollar""+OR+""euro+dollar"")+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,79,,ok,100,
 321,news,P3,Central Bank Rates,Google News RSS,"https://news.google.com/rss/search?q=(""central+bank""+OR+""interest+rate""+OR+""rate+decision""+OR+""monetary+policy"")+when:2d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
-322,news,P3,Arabian Business,Google News RSS,https://news.google.com/rss/search?q=site:arabianbusiness.com+(Saudi+Arabia+OR+UAE+OR+GCC)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,14,,ok,22,
+322,news,P3,Arabian Business,Google News RSS,https://news.google.com/rss/search?q=site:arabianbusiness.com+(Saudi+Arabia+OR+UAE+OR+GCC)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,14,,ok,17,
 323,news,P3,The National,Google News RSS,https://news.google.com/rss/search?q=site:thenationalnews.com+(Abu+Dhabi+OR+UAE+OR+Saudi)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
 324,news,P3,Arab News,Google News RSS,https://news.google.com/rss/search?q=site:arabnews.com+(Saudi+Arabia+OR+investment+OR+infrastructure)+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-325,news,P3,Gulf FDI,Google News RSS,"https://news.google.com/rss/search?q=(PIF+OR+""DP+World""+OR+Mubadala+OR+ADNOC+OR+Masdar+OR+""ACWA+Power"")+infrastructure+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,56,,ok,48,
-326,news,P3,Gulf Investments,Google News RSS,"https://news.google.com/rss/search?q=(""Saudi+Arabia""+OR+""UAE""+OR+""Abu+Dhabi"")+investment+infrastructure+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,57,,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-327,news,P3,Vision 2030,Google News RSS,"https://news.google.com/rss/search?q=""Vision+2030""+(project+OR+investment+OR+announced)+when:14d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,68,,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-328,news,P3,Market Outlook,Google News RSS,"https://news.google.com/rss/search?q=(""market+outlook""+OR+""stock+market+forecast""+OR+""bull+market""+OR+""bear+market"")+when:3d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,error,0,http: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+325,news,P3,Gulf FDI,Google News RSS,"https://news.google.com/rss/search?q=(PIF+OR+""DP+World""+OR+Mubadala+OR+ADNOC+OR+Masdar+OR+""ACWA+Power"")+infrastructure+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,56,,ok,51,
+326,news,P3,Gulf Investments,Google News RSS,"https://news.google.com/rss/search?q=(""Saudi+Arabia""+OR+""UAE""+OR+""Abu+Dhabi"")+investment+infrastructure+when:7d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,57,,ok,49,
+327,news,P3,Vision 2030,Google News RSS,"https://news.google.com/rss/search?q=""Vision+2030""+(project+OR+investment+OR+announced)+when:14d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,68,,ok,68,
+328,news,P3,Market Outlook,Google News RSS,"https://news.google.com/rss/search?q=(""market+outlook""+OR+""stock+market+forecast""+OR+""bull+market""+OR+""bear+market"")+when:3d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,100,,ok,100,
 329,news,P3,Risk & Volatility,Google News RSS,"https://news.google.com/rss/search?q=(VIX+OR+""market+volatility""+OR+""risk+off""+OR+""market+correction"")+when:3d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,80,,ok,100,
-330,news,P3,Bank Research,Google News RSS,"https://news.google.com/rss/search?q=(""Goldman+Sachs""+OR+""JPMorgan""+OR+""Morgan+Stanley"")+forecast+OR+outlook+when:3d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,43,,ok,49,
+330,news,P3,Bank Research,Google News RSS,"https://news.google.com/rss/search?q=(""Goldman+Sachs""+OR+""JPMorgan""+OR+""Morgan+Stanley"")+forecast+OR+outlook+when:3d&hl=en-US&gl=US&ceid=US:en",RssFetcher,LIVE_RSS,ok,43,,ok,45,
 331,news,P2,GNN Health,官方RSS,https://www.goodnewsnetwork.org/category/news/health/feed/,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 332,news,P2,Medical News Today,NewsAPI/官方RSS,https://www.medicalnewstoday.com/newsfeeds-rss,RssFetcher,LIVE_RSS,error,0,"http: Client error '404 Not Found' for url 'https://www.medicalnewstoday.com/newsfeeds-rss'
 For more information check: ",error,0,"http: Client error '404 Not Found' for url 'https://www.medicalnewstoday.com/newsfeeds-rss'
@@ -1106,14 +1108,14 @@ For more information check: https://developer.mozilla.org/"
 352,news,P2,Greater Good (Berkeley),官方RSS,https://greatergood.berkeley.edu/rss,RssFetcher,LIVE_RSS,ok,50,,ok,50,
 353,news,P1,Defense One,官方RSS,https://www.defenseone.com/rss/all/,RssFetcher,LIVE_RSS,ok,24,,ok,25,
 354,news,P1,Defense News,官方RSS,https://www.defensenews.com/arc/outboundfeeds/rss/?outputType=xml,RssFetcher,LIVE_RSS,ok,25,,ok,25,
-355,news,P1,Janes,Google News RSS,https://news.google.com/rss/search?q=site:janes.com+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,18,,ok,33,
+355,news,P1,Janes,Google News RSS,https://news.google.com/rss/search?q=site:janes.com+when:3d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,18,,ok,18,
 356,news,P1,Military Times,官方RSS,https://www.militarytimes.com/arc/outboundfeeds/rss/?outputType=xml,RssFetcher,LIVE_RSS,ok,25,,ok,25,
 357,news,P1,CSIS,官方RSS,https://www.csis.org/rss.xml,RssFetcher,LIVE_RSS,ok,10,,ok,10,
 358,news,P1,Chatham House,Google News RSS,https://news.google.com/rss/search?q=site:chathamhouse.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,57,,ok,19,
 359,news,P1,RAND,官方RSS,https://www.rand.org/pubs/new.xml,RssFetcher,LIVE_RSS,ok,20,,ok,20,
 360,news,P1,Bellingcat,官方RSS,https://www.bellingcat.com/feed/,RssFetcher,LIVE_RSS,ok,10,,ok,10,
 361,news,P2,Breaking Defense,官方RSS,https://breakingdefense.com/feed/,RssFetcher,LIVE_RSS,ok,15,,ok,15,
-362,news,P2,The War Zone,官方RSS,https://www.twz.com/feed,RssFetcher,LIVE_RSS,ok,32,,ok,38,
+362,news,P2,The War Zone,官方RSS,https://www.twz.com/feed,RssFetcher,LIVE_RSS,ok,32,,ok,37,
 363,news,P2,Task & Purpose,官方RSS,https://taskandpurpose.com/feed/,RssFetcher,LIVE_RSS,ok,30,,ok,30,
 364,news,P2,USNI News,官方RSS,https://news.usni.org/feed,RssFetcher,LIVE_RSS,ok,30,,ok,30,
 365,news,P2,gCaptain,官方RSS,https://gcaptain.com/feed/,RssFetcher,LIVE_RSS,ok,12,,ok,12,
@@ -1125,19 +1127,19 @@ For more information check: https://developer.mozilla.org/"
 For more information check: https://developer",error,0,"http: Client error '403 Forbidden' for url 'https://www.stimson.org/feed/'
 For more information check: https://developer.mozilla.org/en-US/docs/Web/HT"
 371,news,P2,Ransomware.live,官方RSS,https://www.ransomware.live/rss.xml,RssFetcher,LIVE_RSS,ok,100,,ok,100,
-372,news,P3,ECFR,Google News RSS,https://news.google.com/rss/search?q=site:ecfr.eu+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,16,,ok,5,
-373,news,P3,Middle East Institute,Google News RSS,https://news.google.com/rss/search?q=site:mei.edu+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,20,,ok,12,
+372,news,P3,ECFR,Google News RSS,https://news.google.com/rss/search?q=site:ecfr.eu+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,16,,ok,10,
+373,news,P3,Middle East Institute,Google News RSS,https://news.google.com/rss/search?q=site:mei.edu+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,20,,ok,15,
 374,news,P3,Brookings,官方RSS,https://www.brookings.edu/feed/,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,0,feed parsed but empty
 375,news,P3,Carnegie,官方RSS,https://carnegieendowment.org/rss/,RssFetcher,LIVE_RSS,ok,0,feed parsed but empty,ok,0,feed parsed but empty
-376,news,P3,RUSI,Google News RSS,https://news.google.com/rss/search?q=site:rusi.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,31,,ok,31,
-377,news,P3,Wilson Center,Google News RSS,https://news.google.com/rss/search?q=site:wilsoncenter.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,3,,ok,6,
-378,news,P3,GMF,Google News RSS,https://news.google.com/rss/search?q=site:gmfus.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,12,,ok,7,
-379,news,P3,CNAS,Google News RSS,https://news.google.com/rss/search?q=site:cnas.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,20,,ok,14,
-380,news,P3,Lowy Institute,Google News RSS,https://news.google.com/rss/search?q=site:lowyinstitute.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,42,
-381,news,P3,Arms Control Assn,Google News RSS,https://news.google.com/rss/search?q=site:armscontrol.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,13,,ok,4,
-382,news,P3,Bulletin of Atomic Scientists,Google News RSS,https://news.google.com/rss/search?q=site:thebulletin.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,5,,ok,21,
-383,news,P3,FAO News,官方RSS,https://www.fao.org/feeds/fao-newsroom-rss,RssFetcher,LIVE_RSS,ok,17,,ok,21,
-384,news,P3,FAO GIEWS,Google News RSS,https://news.google.com/rss/search?q=site:fao.org+GIEWS+food+security+when:30d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,17,,ok,28,
+376,news,P3,RUSI,Google News RSS,https://news.google.com/rss/search?q=site:rusi.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,31,,ok,39,
+377,news,P3,Wilson Center,Google News RSS,https://news.google.com/rss/search?q=site:wilsoncenter.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,3,,ok,4,
+378,news,P3,GMF,Google News RSS,https://news.google.com/rss/search?q=site:gmfus.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,12,,ok,5,
+379,news,P3,CNAS,Google News RSS,https://news.google.com/rss/search?q=site:cnas.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,20,,ok,2,
+380,news,P3,Lowy Institute,Google News RSS,https://news.google.com/rss/search?q=site:lowyinstitute.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,100,,ok,36,
+381,news,P3,Arms Control Assn,Google News RSS,https://news.google.com/rss/search?q=site:armscontrol.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,13,,ok,2,
+382,news,P3,Bulletin of Atomic Scientists,Google News RSS,https://news.google.com/rss/search?q=site:thebulletin.org+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,5,,ok,24,
+383,news,P3,FAO News,官方RSS,https://www.fao.org/feeds/fao-newsroom-rss,RssFetcher,LIVE_RSS,ok,17,,ok,20,
+384,news,P3,FAO GIEWS,Google News RSS,https://news.google.com/rss/search?q=site:fao.org+GIEWS+food+security+when:30d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,17,,ok,27,
 385,news,P3,EU ISS,Google News RSS,https://news.google.com/rss/search?q=site:iss.europa.eu+when:7d&hl=en-US&gl=US&ceid=US:en,RssFetcher,LIVE_RSS,ok,1,,ok,2,
 589,opinion,P1,微博财经话题榜,RSSHub·微博,https://s.weibo.com/top/summary?cate=socialevent,RsshubFetcher,LIVE_RSSHUB,error,0,"http: Client error '432 ' for url 'https://s.weibo.com/top/summary?cate=socialevent'
 For more information check: https:/",error,0,"http: Client error '432 ' for url 'https://s.weibo.com/top/summary?cate=socialevent'
@@ -1162,13 +1164,13 @@ For more information check: https://developer.mozilla.org/e"
 599,opinion,P1,r/wallstreetbets hot,官方RSS,https://www.reddit.com/r/wallstreetbets/hot/.rss,RssFetcher,LIVE_RSS,ok,25,,error,0,"http: Client error '429 Too Many Requests' for url 'https://www.reddit.com/r/wallstreetbets/hot/.rss'
 For more information check: https://developer.mo"
 600,opinion,P1,r/investing hot,官方RSS,https://www.reddit.com/r/investing/hot/.rss,RssFetcher,LIVE_RSS,error,0,"http: Client error '429 Too Many Requests' for url 'https://www.reddit.com/r/investing/hot/.rss'
-For more information ch",ok,25,
+For more information ch",error,0,"http: Client error '429 Too Many Requests' for url 'https://www.reddit.com/r/investing/hot/.rss'
+For more information check: https://developer.mozilla"
 601,opinion,P1,r/stocks hot,官方RSS,https://www.reddit.com/r/stocks/hot/.rss,RssFetcher,LIVE_RSS,error,0,"http: Client error '429 Too Many Requests' for url 'https://www.reddit.com/r/stocks/hot/.rss'
 For more information check",error,0,"http: Client error '429 Too Many Requests' for url 'https://www.reddit.com/r/stocks/hot/.rss'
 For more information check: https://developer.mozilla.or"
 602,opinion,P1,r/technology hot,官方RSS,https://www.reddit.com/r/technology/hot/.rss,RssFetcher,LIVE_RSS,error,0,"http: Client error '429 Too Many Requests' for url 'https://www.reddit.com/r/technology/hot/.rss'
-For more information c",error,0,"http: Client error '429 Too Many Requests' for url 'https://www.reddit.com/r/technology/hot/.rss'
-For more information check: https://developer.mozill"
+For more information c",ok,25,
 603,opinion,P1,r/MachineLearning hot,官方RSS,https://www.reddit.com/r/MachineLearning/hot/.rss,RssFetcher,LIVE_RSS,error,0,"http: Client error '429 Too Many Requests' for url 'https://www.reddit.com/r/MachineLearning/hot/.rss'
 For more informat",error,0,"http: Client error '429 Too Many Requests' for url 'https://www.reddit.com/r/MachineLearning/hot/.rss'
 For more information check: https://developer.m"
