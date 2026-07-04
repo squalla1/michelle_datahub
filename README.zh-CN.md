@@ -16,7 +16,7 @@
 |---|---|
 | [docs/API_REFERENCE.zh-CN.md](docs/API_REFERENCE.zh-CN.md) | REST API 完整参考([English](docs/API_REFERENCE.md)) |
 | [docs/DEPLOY.zh-CN.md](docs/DEPLOY.zh-CN.md) | PostgreSQL 打包部署指南([English](docs/DEPLOY.md)) |
-| [docs/SOURCES_CONNECTIVITY.zh-CN.md](docs/SOURCES_CONNECTIVITY.zh-CN.md) | 信息源连通性报告(直连 vs 代理、解锁路线) |
+| [docs/SOURCES_CONNECTIVITY.zh-CN.md](docs/SOURCES_CONNECTIVITY.zh-CN.md) | 信息源连通性报告(联通实测 + 付费验证标注) |
 | [deploy/schema.sql](deploy/schema.sql) | PostgreSQL 权威建表 DDL |
 | `/docs`(服务运行后) | 自动生成的 Swagger 交互文档 |
 
@@ -83,7 +83,7 @@ Excel 注册表 ──> catalog(解析 + 模块标准)
 | RSSHub·微博 / 雪球 / B站 / RSSHub | `RsshubFetcher` | 可用(建议自建并配置 `DATAHUB_RSSHUB_BASE_URL`) |
 | GDELT / ArXiv | `ApiFetcher` provider | 可用,免密钥 |
 | FMP / FRED / twitterapi.io / ACLED | `ApiFetcher` provider | 需 API 密钥 |
-| 其他 `* API` 方式(AKShare、EIA 等) | `ApiFetcher` | 待补 provider 插件,当前跳过 |
+| 其他 `* API` 方式(AKShare、EIA 等) | `ApiFetcher` | 尚未接入,当前跳过 |
 | 爬虫 / 官方(爬取) | `ScraperFetcher` | 可用(通用链接抽取) |
 | 邮件订阅 | `EmailSubscriptionFetcher` | 桩实现(需邮箱网关) |
 

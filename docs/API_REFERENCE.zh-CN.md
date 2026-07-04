@@ -36,19 +36,21 @@
 
 ## 数据源现状(接口能取到什么)
 
-内容来自注册表的 **1232 个数据源**,其中 **767 个(62%)当前代码可直接抓取,实测约 70% 真实返回数据**;其余在等 API 密钥(297)、provider 插件(99)、邮箱网关(21)等。这直接决定各模块接口的数据丰度:
+内容来自注册表的 **1232 个数据源**,已全部做过联通验证(实抓 + 接口可达性探测):
+**931 个(76%)联通正常**,其中 **491 个当前即可取数、310 个取数需付费(已验证)、
+64 个为免费官方 API**;240 个不可联通,61 个无链接可验证。这直接决定各模块接口的数据丰度:
 
-| 模块 | 源数 | 实测可抓 | 数据现状与说明 |
+| 模块 | 源数 | ✅可取数 | 数据现状与说明 |
 |---|---|---|---|
-| `news` | 385 | 345 | ✅ 最丰富,日增数千条 |
-| `channel` | 316 | 129 | ✅ 播客/博客/YouTube;39 个源 URL 待清洗 |
-| `person` | 286 | 21 | ⚠️ **大头(262 源)是 twitterapi.io,配密钥前接口基本无数据** |
-| `market` | 59 | 4 | ⚠️ 多数需 FMP 等付费密钥 |
-| `macro` | 50 | 5 | ⚠️ 多数需央行/统计局 API 插件 |
-| `opinion` | 42 | 10 | ⚠️ 微博/知乎/Reddit 反爬,需自建 RSSHub |
-| `calendar` | 39 | 12 | 部分可用 |
-| `company` | 33 | 13 | 部分可用 |
-| `events` | 22 | 3 | ⚠️ GDELT 公共 API 限流严重 |
+| `news` | 385 | 335 | ✅ 最丰富,日增数千条 |
+| `channel` | 316 | 112 | ✅ 播客/博客/YouTube;126 个链接失效/不可达,61 个无链接 |
+| `person` | 286 | 0 | 🟡 **256 个源联通正常但需付费(twitterapi.io,$0.15/千条),开通后即有数据** |
+| `market` | 59 | 3 | 🟡 29 个需付费(FMP 等);🟢 18 个免费官方 API 联通正常 |
+| `macro` | 50 | 3 | 🟢 24 个免费官方统计 API(世行/央行等)联通正常;19 个不可联通 |
+| `opinion` | 42 | 5 | ❌ 30 个不可联通(微博/知乎/Reddit 反爬) |
+| `calendar` | 39 | 8 | 🟢 11 个免费联通;🟡 7 个需付费 |
+| `company` | 33 | 12 | 🟡 另有 12 个需付费 |
+| `events` | 22 | 13 | ✅ GDELT 可用(偶发限流);🟡 4 个需付费 |
 
 完整分析(失败原因、解锁路线):[SOURCES_CONNECTIVITY.zh-CN.md](SOURCES_CONNECTIVITY.zh-CN.md);
 逐源明细:[reports/connectivity_report.csv](reports/connectivity_report.csv)。
@@ -62,7 +64,7 @@ curl "https://mai.polarisagi.com/api/v1/sources?module=opinion&limit=1"
 #   "url":"https://s.weibo.com/top/summary?cate=socialevent","method":"RSSHub·微博",
 #   "frequency":"每15分钟","priority":"P1","enabled":true}]
 
-# 找出所有等密钥的 twitterapi.io 源(person 模块的缺口)
+# 找出所有需付费的 twitterapi.io 源(person 模块)
 curl "https://mai.polarisagi.com/api/v1/sources?method=twitterapi&limit=1"
 # [{"id":947,"module":"person","name":"Fei-Fei Li","url":"https://x.com/drfeifei",
 #   "method":"twitterapi.io","paid":"$0.15/千条,按量无月费","frequency":"实时","priority":"P1"}]

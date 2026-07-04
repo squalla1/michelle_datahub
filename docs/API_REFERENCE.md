@@ -40,22 +40,23 @@ Content is organized into **9 module types**. Every `{module}` path parameter an
 
 ## Data-source landscape (what the API can serve)
 
-Content comes from **1232 registered sources**, of which **767 (62%) are fetchable
-by the current code and ~70% of those actually return data**; the rest await API
-keys (297), provider plugins (99), or a mailbox bridge (21). This directly shapes
-how much data each module endpoint serves:
+Content comes from **1232 registered sources**, all connectivity-verified (live
+fetch + endpoint reachability probe): **931 (76%) are reachable** — 491 serve data
+right now, 310 are reachable but **pay-gated (verified)**, 64 are free official
+APIs; 240 are unreachable and 61 have no URL to test. This directly shapes how
+much data each module endpoint serves:
 
-| module | sources | fetchable (probed) | availability notes |
+| module | sources | ✅ serving data | availability notes |
 |---|---|---|---|
-| `news` | 385 | 345 | ✅ richest; thousands of new items/day |
-| `channel` | 316 | 129 | ✅ podcasts/blogs/YouTube; 39 source URLs need cleanup |
-| `person` | 286 | 21 | ⚠️ **262 sources are twitterapi.io — nearly empty until the key is set** |
-| `market` | 59 | 4 | ⚠️ mostly behind paid keys (FMP …) |
-| `macro` | 50 | 5 | ⚠️ mostly awaits central-bank/stats API plugins |
-| `opinion` | 42 | 10 | ⚠️ Weibo/Zhihu/Reddit anti-bot; needs self-hosted RSSHub |
-| `calendar` | 39 | 12 | partial |
-| `company` | 33 | 13 | partial |
-| `events` | 22 | 3 | ⚠️ public GDELT API heavily rate-limited |
+| `news` | 385 | 335 | ✅ richest; thousands of new items/day |
+| `channel` | 316 | 112 | ✅ podcasts/blogs/YouTube; 126 dead/unreachable links, 61 without URLs |
+| `person` | 286 | 0 | 🟡 **256 sources reachable but paid (twitterapi.io, $0.15/1k) — data flows once subscribed** |
+| `market` | 59 | 3 | 🟡 29 pay-gated (FMP …); 🟢 18 free official APIs reachable |
+| `macro` | 50 | 3 | 🟢 24 free official statistics APIs reachable; 19 unreachable |
+| `opinion` | 42 | 5 | ❌ 30 unreachable (Weibo/Zhihu/Reddit anti-bot) |
+| `calendar` | 39 | 8 | 🟢 11 free reachable; 🟡 7 pay-gated |
+| `company` | 33 | 12 | 🟡 plus 12 pay-gated |
+| `events` | 22 | 13 | ✅ GDELT works (occasional rate limits); 🟡 4 pay-gated |
 
 Full analysis (failure taxonomy, unlock roadmap):
 [SOURCES_CONNECTIVITY.zh-CN.md](SOURCES_CONNECTIVITY.zh-CN.md); per-source detail:
@@ -70,7 +71,7 @@ curl "https://mai.polarisagi.com/api/v1/sources?module=opinion&limit=1"
 #   "url":"https://s.weibo.com/top/summary?cate=socialevent","method":"RSSHub·微博",
 #   "frequency":"每15分钟","priority":"P1","enabled":true}]
 
-# all twitterapi.io sources awaiting the key (the person-module gap)
+# all pay-gated twitterapi.io sources (the person module)
 curl "https://mai.polarisagi.com/api/v1/sources?method=twitterapi&limit=1"
 # [{"id":947,"module":"person","name":"Fei-Fei Li","url":"https://x.com/drfeifei",
 #   "method":"twitterapi.io","paid":"$0.15/千条,按量无月费","frequency":"实时","priority":"P1"}]

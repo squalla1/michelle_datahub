@@ -19,7 +19,7 @@ per-module content standard, and serves everything via HTTP.
 |---|---|
 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | full REST API reference ([中文](docs/API_REFERENCE.zh-CN.md)) |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | packaging & deployment on PostgreSQL ([中文](docs/DEPLOY.zh-CN.md)) |
-| [docs/SOURCES_CONNECTIVITY.zh-CN.md](docs/SOURCES_CONNECTIVITY.zh-CN.md) | per-source fetchability report (direct vs proxy, unlock roadmap) |
+| [docs/SOURCES_CONNECTIVITY.zh-CN.md](docs/SOURCES_CONNECTIVITY.zh-CN.md) | per-source connectivity report (reachability + verified paid gating) |
 | [deploy/schema.sql](deploy/schema.sql) | canonical PostgreSQL DDL |
 | `/docs` (running server) | auto-generated Swagger UI |
 
@@ -88,7 +88,7 @@ payload model per module on top of a shared `BaseContentItem`.
 | RSSHub·微博 / 雪球 / B站 / RSSHub | `RsshubFetcher` | live (set `DATAHUB_RSSHUB_BASE_URL`) |
 | GDELT / ArXiv | `ApiFetcher` providers | live, key-free |
 | FMP / FRED / twitterapi.io / ACLED | `ApiFetcher` providers | needs API key |
-| Other `* API` methods (AKShare, EIA, …) | `ApiFetcher` | skipped until a provider plugin is added |
+| Other `* API` methods (AKShare, EIA, …) | `ApiFetcher` | not yet integrated; skipped |
 | 爬虫 / 官方(爬取) | `ScraperFetcher` | live (generic link extraction) |
 | 邮件订阅 | `EmailSubscriptionFetcher` | stub (needs mailbox bridge) |
 

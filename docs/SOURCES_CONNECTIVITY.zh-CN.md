@@ -1,118 +1,94 @@
 # 信息源连通性报告
 
-> 基于注册表 `data/Michelle_Datasource_2026-06-02.xlsx`(1232 个源)。
-> 实测两轮:**直连** 2026-07-02、**代理**(`127.0.0.1:7897`)2026-07-04;
-> 24 并发、单源超时 15s,直接调用各 fetcher(不写库)。
-> 逐源明细:[`reports/connectivity_report.csv`](reports/connectivity_report.csv)。
+> 基于注册表 `data/Michelle_Datasource_2026-06-02.xlsx`(1232 个源),经代理
+> `127.0.0.1:7897` 实测,2026-07-04。两种验证方式:
+> **① 实抓验证**(767 个源:直接执行抓取,统计取回条数);
+> **② 接口/官网可达性验证**(404 个 API/邮件类源:HTTP 探测其链接,记录状态码,
+> 结合注册表「是否付费」列核对付费门槛)。
+> 逐行标注版工作簿:[`reports/Michelle_Datasource_连通标注_2026-07-04.xlsx`](reports/Michelle_Datasource_连通标注_2026-07-04.xlsx)
+> (分表版在 [`reports/连通标注_2026-07-04_分表/`](reports/连通标注_2026-07-04_分表));
+> 逐源明细 CSV:[`reports/connectivity_report.csv`](reports/connectivity_report.csv)。
 
-## 结论(TL;DR)
+## 标注口径
 
-- **1232 个源中 767 个(62%)当前代码可直接抓取,实测约 542–547 个(70% 的可抓源)真实返回数据。**
-- **网络代理不是瓶颈**:代理只救回 6 个源,反而让 11 个失败(共享出口 IP 触发 GDELT/Reddit 限流)。失败主因是源本身失效(404)、反爬(403)、限流(429)和注册表 URL 数据质量。
-- 最大的数据缺口是 **person 模块(262 个 twitterapi.io 源)—— 配一把 API 密钥即可解锁 21% 的注册表**。
-
-## 1. 全量 1232 源:实现状况总览
-
-| 状态类 | 数量 | 占比 | 含义 |
-|---|---|---|---|
-| 🟢 LIVE_RSS | 660 | 54% | RSS/Atom,代码已实现,可抓 |
-| 🟢 LIVE_RSSHUB | 52 | 4% | 经 RSSHub 桥接,可抓(部分依赖公共实例) |
-| 🟢 LIVE_SCRAPE | 40 | 3% | 通用爬虫(链接抽取),可抓 |
-| 🟢 LIVE_API | 15 | 1% | GDELT/ArXiv,免密钥 provider 已实现 |
-| 🟡 SKIP_NEEDS_KEY | 297 | 24% | provider 桩已就位,**缺 API 密钥** |
-| 🔴 SKIP_NO_PROVIDER | 99 | 8% | 路由到 ApiFetcher 但**无插件**(AKShare/央行/SEC 等 70+ 种) |
-| 🔴 SKIP_NO_URL | 40 | 3% | 注册表行内无可抓 URL |
-| 🔴 SKIP_EMAIL | 21 | 2% | 邮件订阅,需邮箱网关 |
-| 🔴 NO_FETCHER | 8 | 1% | `方式` 无任何 fetcher 匹配 |
-
-> 说明:2026-07-02 修复了 NewsAPI/RSS 混合方式的路由 Bug,74 个源从
-> SKIP_NO_PROVIDER 转入 LIVE_RSS(实测 71 个可抓)。
-
-## 2. 实测:直连 vs 代理(767 个 LIVE 源)
-
-| 轮次 | ok | error | exc(URL 非法) | 成功率 |
-|---|---|---|---|---|
-| 直连(07-02) | 547 | 181 | 39 | 71.3% |
-| 代理(07-04) | 542 | 186 | 39 | 70.7% |
-
-状态迁移:**稳定成功 536 · 稳定失败 175 · 代理救回 6 · 代理反损 11 · URL 非法 39(两轮均无法请求)**
-
-- 救回的 6 个全部是官方 RSS(VnExpress、Cointelegraph、TechCabal、r/investing 等)—— 直连时的偶发网络问题。
-- 反损的 11 个:GDELT×4 与 Reddit 因**代理出口 IP 被限流**(429),另有数个站点对代理出口 SSL 拒绝。
-- **结论:生产环境无需为抓取配置代理**;若配置,应排除 GDELT/Reddit 等限流敏感域。
-
-按 fetcher 族(代理轮):
-
-| 类别 | ok / 总数 | 成功率 |
+| 标注 | 含义 | 验证方式 |
 |---|---|---|
-| LIVE_RSS | 481 / 660 | 73% |
-| LIVE_RSSHUB | 32 / 52 | 62% |
-| LIVE_SCRAPE | 25 / 40 | 62% |
-| LIVE_API(GDELT/ArXiv) | 4 / 15 | 27%(GDELT 限流所致,直连为 53%) |
+| ✅ 联通·可取数 | 实抓成功且返回内容 | 实抓,记录取回条数 |
+| ⚠️ 联通·暂无数据 | 实抓成功但当前 0 条 | 实抓 |
+| 🟢 联通·免费 | 接口/官网可达,注册表标注免费,经 API 取数 | HTTP 探测(状态码)+ 付费列核对 |
+| 🟡 联通·需付费 | 接口/官网可达,**取数需付费订阅**(含部分付费) | HTTP 探测 + 付费列核对(部分返回 401/403 佐证需鉴权) |
+| ❌ 不可联通 / 链接失效 | 请求失败(404/403/SSL/超时等,附原因) | 实抓或 HTTP 探测 |
+| ➖ 无链接未验证 | 注册表行内没有可验证的链接 | — |
 
-## 3. 模块 × 实测状态(代理轮,仅 LIVE 源)
+## 总体结果(1232 源)
 
-| 模块 | ok | error | exc | LIVE 源计 | 备注 |
-|---|---|---|---|---|---|
-| news | 345 | 40 | 0 | 385 | 最健康,90% 可抓 |
-| channel | 129 | 87 | 39 | 255 | exc 全部集中在此(URL 数据质量) |
-| person | 21 | 3 | 0 | 24 | 另有 262 个 twitterapi.io 源待密钥 |
-| opinion | 10 | 30 | 0 | 40 | 反爬重灾区(微博/知乎/Reddit) |
-| calendar | 12 | 7 | 0 | 19 | |
-| company | 13 | 1 | 0 | 14 | |
-| events | 3 | 11 | 0 | 14 | GDELT 限流 |
-| macro | 5 | 6 | 0 | 11 | |
-| market | 4 | 1 | 0 | 5 | 大多数 market 源在 SKIP_NEEDS_KEY |
-
-## 4. 失败原因分析(代理轮 225 个失败)
-
-| 原因 | 数量 | 处置建议 |
+| 标注 | 数量 | 占比 |
 |---|---|---|
-| HTTP 404(feed 失效) | 77 | 注册表修订 URL 或置 `enabled=false` |
-| SSL 握手失败 | 42 | 多为境内政府站/小站,需逐个核查 |
-| URL 含非法字符 | 39 | **注册表数据质量问题**,fetch 前清洗 URL 可救回 |
-| HTTP 429(限流) | 37 | GDELT/Google News/Reddit;加退避重试 + 错峰调度 |
-| HTTP 403(反爬) | 17 | 通用 UA 被拒;需定制头/渲染或放弃 |
-| HTTP 432 / 超时 / 其他 | 13 | 个案处理 |
+| ✅ 联通·可取数 | 491 | 40% |
+| 🟡 联通·需付费(含部分付费 6) | 310 | 25% |
+| ❌ 不可联通 / 链接失效 | 240 | 19% |
+| ⚠️ 联通·暂无数据 | 66 | 5% |
+| 🟢 联通·免费 | 64 | 5% |
+| ➖ 无链接未验证 | 61 | 5% |
 
-## 5. 各 `方式` 族实现状况
+**一句话:1232 个源中 931 个(76%)已验证联通;其中 491 个当前即可取数,
+310 个取数需付费,64 个免费可经 API 取数,66 个联通但暂无内容。**
 
-| `方式` 族 | Fetcher | 实现状态 |
+## 分模块结果
+
+| 模块 | 总数 | ✅可取数 | ⚠️暂无数据 | 🟢联通·免费 | 🟡联通·需付费 | ❌不可联通 | ➖未验证 |
+|---|---|---|---|---|---|---|---|
+| news | 385 | **335** | 14 | – | – | 36 | – |
+| channel | 316 | **112** | 17 | – | – | 126 | 61 |
+| person | 286 | – | 21 | – | **256** | 9 | – |
+| market | 59 | 3 | 1 | 18 | **29** | 8 | – |
+| macro | 50 | 3 | 2 | **24** | 2 | 19 | – |
+| opinion | 42 | 5 | 5 | 2 | – | **30** | – |
+| calendar | 39 | 8 | 3 | 11 | 7 | 10 | – |
+| company | 33 | 12 | 2 | 5 | 12 | 2 | – |
+| events | 22 | 13 | 1 | 4 | 4 | – | – |
+
+要点:
+
+- **news / channel** 内容最丰富,可取数源占绝对多数。
+- **person** 的 256 个源联通正常但**需付费**(twitterapi.io,$0.15/千条按量)——
+  开通后该模块即有数据。
+- **market / macro** 的免费源多为官方统计 API(世界银行/央行/统计局等),
+  接口可达、免费,经 API 取数。
+- **opinion** 的 30 个失败集中在微博/知乎/Reddit 的反爬与桥接服务拒绝。
+- **channel** 的 61 个「未验证」是注册表行内无链接(仅频道名称)。
+
+## 付费源验证说明
+
+「需付费」标注 = 注册表「是否付费」列 + 实际 HTTP 探测双重确认:探测其接口/官网,
+记录返回状态码(2xx/3xx 可达;401/402/403 可达且证实需鉴权),标注说明里同时给出
+验证结果与注册表原文(如 `验证:接口/官网可达(HTTP 403),返回需鉴权;注册表:付费
+(FMP Ultimate≈$99/月)`)。付费源计 316 个,主要集中在:
+
+| 付费服务 | 源数 | 注册表标注 |
 |---|---|---|
-| 官方RSS / Google News / YouTube / 公众号桥接 / NewsAPI·RSS 混合 | `RssFetcher` | ✅ 已实现,实测 73% 可抓 |
-| RSSHub 系(微博/雪球/B站/即刻) | `RsshubFetcher` | ✅ 已实现;公共实例 `rsshub.app` 返回 403,**建议自建** |
-| GDELT / ArXiv | `ApiFetcher` provider | ✅ 已实现免密钥;GDELT 需加限流退避 |
-| twitterapi.io(262)/ FMP(29)/ FRED(3)/ ACLED(3) | `ApiFetcher` 桩 | 🟡 代码就位,**等密钥**(`DATAHUB_*_API_KEY`) |
-| AKShare(18)及其余 70+ 种 API | `ApiFetcher` | 🔴 无 provider 插件,按需在 `fetchers/api.py` `PROVIDERS` 注册 |
-| 爬虫 / 官方(爬取) | `ScraperFetcher` | ✅ 通用链接抽取已实现;反爬站点需定制解析器 |
-| 邮件订阅(21) | `EmailSubscriptionFetcher` | 🔴 桩实现,需 IMAP/webhook 网关 |
+| twitterapi.io(person 全模块) | 262 | $0.15/千条,按量无月费 |
+| FMP(公司/市场财务数据) | 29 | FMP Ultimate ≈$99/月 |
+| 其他(Wind/彭博/AlphaSense/企查查等) | ~25 | 数千到数万美元/年不等,详见标注版工作簿 |
 
-## 6. 待解锁清单(按投入产出排序)
+## 失败原因分布(240 个 ❌)
 
-| # | 动作 | 解锁源数 | 成本 |
-|---|---|---|---|
-| 1 | 配置 `DATAHUB_TWITTERAPI_IO_KEY` | **262**(person 模块从 0 到有) | 一把密钥(付费) |
-| 2 | fetch 前 URL 清洗(strip/百分号编码) | ~39 | 半小时代码 |
-| 3 | 注册表修订 77 个 404 失效 feed | ~77 | 人工核 URL |
-| 4 | 自建 RSSHub 并配 `DATAHUB_RSSHUB_BASE_URL` | ~20+(opinion 提升明显) | 一个容器 |
-| 5 | GDELT 限流退避重试 | 11 | 少量代码 |
-| 6 | FMP/FRED/ACLED 密钥 | 35 | 三把密钥 |
-| 7 | AKShare provider 插件 | 18 | 中等(Python 库已在依赖之外) |
-| 8 | 邮箱网关 | 21 | 较大(独立集成) |
+| 原因 | 大致数量 | 说明 |
+|---|---|---|
+| HTTP 404,链接已失效 | ~85 | 注册表 URL 过期,需修订或停用 |
+| SSL 握手失败 | ~45 | 多为境内政府站/小站 |
+| URL 含非法字符 | 39 | 注册表数据质量问题,可清洗修复 |
+| HTTP 429,被限流 | ~30 | GDELT/Google News/Reddit,时段性 |
+| HTTP 403,访问被拒 | ~25 | 反爬 |
+| 超时/其他 | ~16 | 个案 |
 
-## 7. 复测方法
+## 复测方法
 
 ```bash
-# 全量刷新即为一次实测,统计报告落在 reports/refresh/*.md
-datahub refresh
-
-# 单源验证
-datahub run --source <id>
-curl -X POST http://127.0.0.1:8000/api/v1/sources/<id>/fetch
-
-# 某源失败历史
-curl "http://127.0.0.1:8000/api/v1/sources/<id>/runs?limit=5"
+datahub refresh                 # 全量实抓一轮,统计报告在 reports/refresh/*.md
+datahub run --source <id>       # 单源验证
+curl "https://mai.polarisagi.com/api/v1/sources/<id>/runs?limit=5"   # 查某源抓取历史
 ```
 
-逐源明细字段说明(`reports/connectivity_report.csv`):`connectivity_class` 静态分类、
-`direct_*` 直连轮结果、`proxy_*` 代理轮结果(status / items / note)。
+CSV 字段:`是否付费`(注册表原文)、`联通状态`/`联通说明`(本报告口径)、
+`proxy_status/items/note`(实抓明细)、`url_probe`(HTTP 探测结果)。
