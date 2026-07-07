@@ -16,6 +16,73 @@ from ..storage import session_scope
 
 logger = logging.getLogger("datahub.runner")
 
+_NUM_PREFIX = None  # compiled lazily
+
+
+def _strip_num(text: str | None) -> str | None:
+    """'1. 微博' -> '微博' (registry L1 categories carry a numeric prefix)."""
+    global _NUM_PREFIX
+    if not text:
+        return None
+    if _NUM_PREFIX is None:
+        import re
+
+        _NUM_PREFIX = re.compile(r"^\s*\d+[\.、]\s*")
+    return _NUM_PREFIX.sub("", text).strip() or None
+
+
+def registry_payload(source: DataSource) -> dict:
+    """Source-intrinsic payload fields derived from the registry row itself
+    (its L1/L2 categories, name, url). Fetcher-provided values always win —
+    callers must merge with `{**registry_payload(src), **item.payload}`."""
+    l1, l2 = _strip_num(source.l1_category), (source.l2_category or "").strip() or None
+    m = source.module
+    out: dict[str, str] = {}
+    if m == "news":
+        if l2:
+            out["topic"] = l2
+        if l1 and "regional" in l1.lower() and l2:
+            out["region"] = l2
+    elif m == "events":
+        if l2:
+            out["event_type"] = l2
+    elif m == "calendar":
+        if l2:
+            out["calendar_type"] = l2
+    elif m == "company":
+        if l2:
+            out["data_type"] = l2
+    elif m == "market":
+        if l1:
+            out["asset_class"] = l1
+        if l2:
+            out["instrument"] = l2
+    elif m == "macro":
+        if l2:
+            out["indicator"] = l2
+    elif m == "opinion":
+        if l1:
+            out["platform"] = l1
+        if l2:
+            out["topic"] = l2
+    elif m == "channel":
+        if l1:
+            out["medium"] = l1
+        if l2:
+            out["topic"] = l2
+    elif m == "person":
+        out["person"] = source.name
+        url = source.url or ""
+        for dom, plat in (("x.com", "X"), ("twitter.com", "X"), ("weibo", "微博"),
+                          ("xueqiu", "雪球"), ("substack", "Substack"), ("youtube", "YouTube")):
+            if dom in url:
+                out["platform"] = plat
+                break
+        else:
+            if l1:
+                out["platform"] = l1
+    return out
+
 
 def run_source(source_id: int) -> dict:
     """Fetch a single source, dedup-store its items, and record a FetchRun.
@@ -41,6 +108,7 @@ def run_source(source_id: int) -> dict:
                     )
                 )
             )
+            base_payload = registry_payload(source)
             for item in result.items:
                 if item.external_id in existing_ids:
                     continue
@@ -53,7 +121,8 @@ def run_source(source_id: int) -> dict:
                         url=item.url,
                         summary=item.summary,
                         published_at=item.published_at,
-                        payload=item.payload,
+                        # source-intrinsic fields from the registry; fetcher wins
+                        payload={**base_payload, **(item.payload or {})},
                     )
                 )
                 existing_ids.add(item.external_id)

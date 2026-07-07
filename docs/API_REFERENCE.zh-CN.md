@@ -50,7 +50,7 @@
 | `opinion` | 42 | 5 | ❌ 30 个不可联通(微博/知乎/Reddit 反爬) |
 | `calendar` | 39 | 8 | 🟢 11 个免费联通;🟡 7 个需付费 |
 | `company` | 33 | 12 | 🟡 另有 12 个需付费 |
-| `events` | 22 | 13 | ✅ GDELT 可用(偶发限流);🟡 4 个需付费 |
+| `events` | 22 | 13 | ✅ GDELT 可用(偶发限流);🟡 4 个需付费。注:注册表在此页还登记了 GitHub/Show HN 技术事件源(条目量大),按 `source_id` 可区分 |
 
 完整分析(失败原因、解锁路线):[SOURCES_CONNECTIVITY.zh-CN.md](SOURCES_CONNECTIVITY.zh-CN.md);
 逐源明细:[reports/connectivity_report.csv](reports/connectivity_report.csv)。
@@ -310,6 +310,12 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 | `channel` | `medium`, `topic`, `lang` |
 | `person` | `person`, `platform`, `bio` |
 
+> **填充现状**:`region/topic/platform/medium/asset_class` 等**源侧字段**由注册表
+> 分类在入库时自动回填(含存量,2026-07-07 起);`symbol/exchange/indicator` 等
+> **数值型字段**依赖结构化数据源接入,当前普遍为空。NLP 派生字段(实体/ticker/
+> 情绪)按分工由下游引擎生成,API 不做。Google News 条目解码出的原文链接存于
+> `payload.canonical_url`。
+
 ---
 
 ## Sources(目录源)
@@ -449,5 +455,10 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 - 无时间戳的源其 `published_at` 为空;想看"今天到了什么"而非"今天发布了什么",
   用 `by=fetched`。
 - `fulltext` 由富化任务异步填充(入库后约 15 分钟内);刚入库的条目可能还是
-  `null`,`""` 表示抽取失败(付费墙/反爬/跳转 —— Google News 链接较常见)。
+  `null`,`""` 表示抽取失败(付费墙/反爬)。**Google News 加密链接会先自动解码出
+  原文地址再抽取**,原文链接存于 `payload.canonical_url`(供去重/溯源);正文页
+  若带发布时间,会顺带回填缺失的 `published_at`。
+- **低频模块的查询口径**:`macro`/`calendar` 等模块条目常无发布时间或非每日更新,
+  默认查询(当天 + `by=published`)会显示为空 —— 请用 `by=fetched`(按入库时间)
+  或显式指定 `date`。
 - **保留期:** 只保留最近 7 天的内容(`DATAHUB_RETENTION_DAYS`),更早的每日清理。

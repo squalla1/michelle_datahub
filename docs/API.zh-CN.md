@@ -249,7 +249,7 @@ curl -X POST http://127.0.0.1:8000/api/v1/jobs/catalog/reload
 | `title` | string \| null | 标题 |
 | `url` | string \| null | 原文链接 |
 | `summary` | string \| null | 摘要 |
-| `fulltext` | string \| null | 正文全文;`null`=尚未抽取,`""`=抽取失败 |
+| `fulltext` | string \| null | 正文全文;`null`=尚未抽取,`""`=抽取失败。Google News 链接自动解码原文后抽取,原文链接在 `payload.canonical_url` |
 | `published_at` | datetime \| null | 发布时间(UTC) |
 | `fetched_at` | datetime | 入库时间(UTC) |
 | `payload` | object | 类型专属字段(见 `/api/v1/modules` 的 `payload_fields`) |

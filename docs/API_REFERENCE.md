@@ -56,7 +56,7 @@ much data each module endpoint serves:
 | `opinion` | 42 | 5 | ❌ 30 unreachable (Weibo/Zhihu/Reddit anti-bot) |
 | `calendar` | 39 | 8 | 🟢 11 free reachable; 🟡 7 pay-gated |
 | `company` | 33 | 12 | 🟡 plus 12 pay-gated |
-| `events` | 22 | 13 | ✅ GDELT works (occasional rate limits); 🟡 4 pay-gated |
+| `events` | 22 | 13 | ✅ GDELT works (occasional rate limits); 🟡 4 pay-gated. Note: the registry also lists a high-volume GitHub/Show HN tech-events source on this tab — filter by `source_id` to separate |
 
 Full analysis (failure taxonomy, unlock roadmap):
 [SOURCES_CONNECTIVITY.zh-CN.md](SOURCES_CONNECTIVITY.zh-CN.md); per-source detail:
@@ -320,6 +320,14 @@ Every module allows extra keys (`extra="allow"`), but these are the declared fie
 | `channel` | `medium`, `topic`, `lang` |
 | `person` | `person`, `platform`, `bio` |
 
+> **Population status:** source-intrinsic fields (`region/topic/platform/medium/
+> asset_class` …) are auto-filled at ingest from the registry's categories
+> (including backfilled history, since 2026-07-07); numeric fields
+> (`symbol/exchange/indicator`) depend on structured sources and are mostly empty
+> for now. NLP-derived fields (entities/tickers/sentiment) are the downstream
+> engine's job, not the API's. For Google News items the decoded origin link is
+> stored in `payload.canonical_url`.
+
 ---
 
 ## Sources (catalog)
@@ -466,6 +474,11 @@ Standard FastAPI error envelope:
   when you need "what arrived today" rather than "what was published today".
 - `fulltext` is filled asynchronously by the enrichment job (every ~15 min after
   ingestion); expect `null` on very fresh items and `""` where extraction failed
-  (paywall/anti-bot/redirects — common for Google News links).
+  (paywall/anti-bot). **Google News links are decoded to the real article URL
+  first**; the canonical link lands in `payload.canonical_url` (for dedup/tracing)
+  and the article page's date backfills a missing `published_at`.
+- **Low-frequency modules:** `macro`/`calendar` items often lack a publish date or
+  don't update daily, so the default query (today + `by=published`) looks empty —
+  use `by=fetched` or pass an explicit `date`.
 - **Retention:** only the last 7 days of content are kept
   (`DATAHUB_RETENTION_DAYS`); older rows are purged daily.
