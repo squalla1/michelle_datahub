@@ -1,3 +1,3 @@
-from . import content, jobs, modules, sources
+from . import content, jobs, modules, monitor, sources
 
-__all__ = ["content", "jobs", "modules", "sources"]
+__all__ = ["content", "jobs", "modules", "monitor", "sources"]

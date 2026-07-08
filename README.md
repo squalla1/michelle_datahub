@@ -136,6 +136,8 @@ Full reference: [docs/API_REFERENCE.md](docs/API_REFERENCE.md).
 | GET | `/api/v1/sources/{id}` | source detail |
 | POST | `/api/v1/sources/{id}/fetch` | fetch one source now |
 | GET | `/api/v1/sources/{id}/runs` | recent fetch-run audit |
+| GET | `/api/v1/stats` | monitoring aggregates |
+| GET | `/monitor` | **monitoring dashboard** (HTML) |
 | GET | `/api/v1/jobs` | scheduler state (incl. `refresh-all`) |
 | POST | `/api/v1/jobs/reload` | rebuild jobs from catalog |
 | POST | `/api/v1/jobs/catalog/reload` | re-parse Excel, then rebuild jobs |

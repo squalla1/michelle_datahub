@@ -22,6 +22,8 @@
 | 9 | [调度状态](#9-调度状态) | GET | `/api/v1/jobs` | 调度器运行状态与任务表 |
 | 10 | [重建任务](#10-重建任务) | POST | `/api/v1/jobs/reload` | 依当前目录重建调度任务 |
 | 11 | [重载注册表](#11-重载注册表) | POST | `/api/v1/jobs/catalog/reload` | 重新解析 Excel 并重建任务 |
+| 12 | [监控统计](#12-监控统计) | GET | `/api/v1/stats` | 全局数据统计(驱动监控页) |
+| 13 | [监控页面](#13-监控页面) | GET | `/monitor` | 数据监控仪表盘(HTML) |
 
 ---
 
@@ -231,6 +233,32 @@ curl -X POST http://127.0.0.1:8000/api/v1/jobs/catalog/reload
 {"catalog": {"created": 0, "updated": 1232, "skipped": 1, "total": 1233},
  "total_jobs": 1189}
 ```
+
+### 12. 监控统计
+
+`GET /api/v1/stats` — 一次返回全部监控聚合:总量、今日新增、正文覆盖、近 24
+小时抓取执行(ok/error/skipped + 成功率)、分模块库存/今日/最新入库时间、最近
+10 条失败记录。无参数。
+
+```bash
+curl https://mai.polarisagi.com/api/v1/stats
+```
+```json
+{"generated_at": "2026-07-08T00:11:26+00:00",
+ "totals": {"content": 79486, "today_new": 5713, "sources": 1232, "sources_enabled": 1232},
+ "fulltext": {"extracted": 42009, "failed": 10324, "pending": 27153},
+ "runs_24h": {"ok": 5660, "error": 2294, "skipped": 5580, "success_rate": 0.712},
+ "last_fetch_at": "…", "modules": [{"module": "news", "total": 65214, "today": 5113, …}],
+ "recent_errors": [{"source_id": …, "name": "…", "error": "…"}]}
+```
+
+### 13. 监控页面
+
+`GET /monitor` — 自包含 HTML 仪表盘(内联样式脚本,无外部依赖,自适应深浅色,
+每 60 秒自动刷新),内容:指标卡片(总量/今日/成功率/源数/正文覆盖率)、正文
+覆盖与 24h 执行状态条、分模块今日入库条形表、近期失败列表。
+
+**访问路径:`https://mai.polarisagi.com/monitor`**(本地 `http://127.0.0.1:8000/monitor`)。
 
 ---
 

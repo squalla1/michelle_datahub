@@ -130,6 +130,8 @@ datahub schedule
 | GET | `/api/v1/sources/{id}` | 源详情 |
 | POST | `/api/v1/sources/{id}/fetch` | 立即抓取一个源 |
 | GET | `/api/v1/sources/{id}/runs` | 近期抓取审计记录 |
+| GET | `/api/v1/stats` | 监控统计聚合 |
+| GET | `/monitor` | **数据监控页**(仪表盘) |
 | GET | `/api/v1/jobs` | 调度器状态(含 `refresh-all`) |
 | POST | `/api/v1/jobs/reload` | 依目录重建调度任务 |
 | POST | `/api/v1/jobs/catalog/reload` | 重新解析 Excel 并重建任务 |

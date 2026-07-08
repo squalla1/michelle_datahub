@@ -10,7 +10,7 @@ from fastapi import FastAPI
 
 from ..config import get_settings
 from ..storage import init_db
-from .routes import content, jobs, modules, sources
+from .routes import content, jobs, modules, monitor, sources
 
 logging.basicConfig(level=logging.INFO)
 
@@ -54,6 +54,7 @@ def create_app() -> FastAPI:
     app.include_router(sources.router)
     app.include_router(content.router)
     app.include_router(jobs.router)
+    app.include_router(monitor.router)
     return app
 
 
