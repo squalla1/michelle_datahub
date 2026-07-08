@@ -23,6 +23,10 @@ DATAHUB_DATABASE_URL=postgresql+psycopg://USER:PASS@<rds-host>:5432/<dbname>
 - The scheme must be `postgresql+psycopg://` (psycopg 3, from
   `pip install ".[postgres]"`); plain `postgresql://` fails.
 - The server's outbound IP must be in the RDS whitelist.
+- **The database timezone must be UTC**: `ALTER DATABASE <name> SET timezone TO
+  'UTC';` (managed PG often defaults to a local zone — Alibaba Japan uses
+  Asia/Tokyo — which silently stores local time into TIMESTAMP columns). The
+  app also forces UTC at the connection level; this is belt-and-suspenders.
 
 Optional:
 

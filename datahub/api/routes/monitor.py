@@ -22,7 +22,7 @@ router = APIRouter(tags=["monitor"])
 
 @router.get("/api/v1/stats")
 def stats(session: Session = Depends(get_session)) -> dict:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)  # columns are naive-UTC
     day_start = datetime.combine(now.date(), time.min)
     h24 = now - timedelta(hours=24)
 

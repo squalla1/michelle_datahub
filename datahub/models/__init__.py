@@ -22,8 +22,22 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 JSONType = JSON().with_variant(JSONB, "postgresql")
 
 
-def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+def utcnow() -> datetime:
+    """Naive UTC now. Columns are TIMESTAMP WITHOUT TIME ZONE; passing an
+    *aware* datetime makes PostgreSQL cast it through the session timezone
+    (e.g. Asia/Tokyo on RDS), silently storing local time. All writes must
+    therefore be naive-UTC."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def to_naive_utc(value: datetime | None) -> datetime | None:
+    """Normalize any datetime (aware or naive) to naive UTC for storage."""
+    if value is None or value.tzinfo is None:
+        return value
+    return value.astimezone(timezone.utc).replace(tzinfo=None)
+
+
+_utcnow = utcnow  # backward-compat alias for existing column defaults
 
 
 class Base(DeclarativeBase):

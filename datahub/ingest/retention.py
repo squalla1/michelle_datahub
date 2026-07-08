@@ -9,12 +9,12 @@ week-old entries, so with the default 7 days this is negligible.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 from sqlalchemy import delete
 
 from ..config import get_settings
-from ..models import ContentItem, FetchRun
+from ..models import ContentItem, FetchRun, utcnow
 from ..storage import session_scope
 
 logger = logging.getLogger("datahub.retention")
@@ -28,7 +28,7 @@ def purge_old_content(days: int | None = None) -> dict:
     if not days or days <= 0:
         return {"enabled": False, "content_deleted": 0, "runs_deleted": 0}
 
-    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    cutoff = utcnow() - timedelta(days=days)
     with session_scope() as session:
         content_deleted = session.execute(
             delete(ContentItem).where(ContentItem.fetched_at < cutoff)

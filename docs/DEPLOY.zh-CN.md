@@ -22,6 +22,9 @@ DATAHUB_DATABASE_URL=postgresql+psycopg://USER:PASS@<RDS地址>:5432/<库名>
 - 前缀必须是 `postgresql+psycopg://`(psycopg 3,装 `pip install ".[postgres]"`);
   写 `postgresql://` 会报错。
 - 服务器出口 IP 必须加入 RDS 白名单。
+- **数据库时区必须为 UTC**:`ALTER DATABASE <库名> SET timezone TO 'UTC';`
+  (托管 PG 的默认时区常是本地时区,如阿里云日本区为 Asia/Tokyo,会导致
+  时间戳按本地时区落库)。应用连接层已强制 UTC,此步为双保险。
 
 其他按需:
 

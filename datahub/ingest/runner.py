@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 from sqlalchemy import func, select
@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 
 from ..config import get_settings
 from ..fetchers import fetch_source
-from ..models import ContentItem, DataSource, FetchRun
+from ..models import ContentItem, DataSource, FetchRun, to_naive_utc, utcnow
 from ..storage import session_scope
 
 logger = logging.getLogger("datahub.runner")
@@ -120,7 +120,7 @@ def run_source(source_id: int) -> dict:
                         title=item.title,
                         url=item.url,
                         summary=item.summary,
-                        published_at=item.published_at,
+                        published_at=to_naive_utc(item.published_at),
                         # source-intrinsic fields from the registry; fetcher wins
                         payload={**base_payload, **(item.payload or {})},
                     )
@@ -132,7 +132,7 @@ def run_source(source_id: int) -> dict:
         run.item_count = len(result.items)
         run.new_count = new_count
         run.error = result.note if result.status in {"error", "skipped"} else None
-        run.finished_at = datetime.now(timezone.utc)
+        run.finished_at = utcnow()
 
         try:
             session.flush()
@@ -159,7 +159,7 @@ def run_all_sources(module: str | None = None, only_enabled: bool = True) -> dic
     repeated refreshes only persist genuinely new items. Returns an aggregate
     summary and writes a per-run stats report to `settings.report_dir`.
     Individual source failures are logged and never abort the sweep."""
-    started_at = datetime.now(timezone.utc)
+    started_at = utcnow()
     with session_scope() as session:
         stmt = select(DataSource.id)
         if only_enabled:
@@ -190,7 +190,7 @@ def run_all_sources(module: str | None = None, only_enabled: bool = True) -> dic
             m[status] += 1
         m["new_items"] += summary.get("new", 0) or 0
 
-    finished_at = datetime.now(timezone.utc)
+    finished_at = utcnow()
     report = _write_refresh_report(totals, per_module, started_at, finished_at)
     if report:
         totals["report"] = str(report)

@@ -57,9 +57,11 @@ def _page_date(html: str) -> datetime | None:
     try:
         import trafilatura
 
+        from ..models import to_naive_utc
+
         meta = trafilatura.extract_metadata(html)
         if meta and meta.date:
-            return datetime.fromisoformat(meta.date)
+            return to_naive_utc(datetime.fromisoformat(meta.date))
     except Exception:
         pass
     return None

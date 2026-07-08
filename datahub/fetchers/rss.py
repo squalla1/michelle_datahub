@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime, timezone
+from datetime import datetime
 
 import feedparser
 import httpx
@@ -23,10 +23,12 @@ def _entry_id(entry, source_name: str) -> str:
 
 
 def _entry_time(entry) -> datetime | None:
+    # feedparser's *_parsed structs are already UTC; store naive-UTC (aware
+    # values get shifted through the DB session timezone on TIMESTAMP columns).
     for key in ("published_parsed", "updated_parsed"):
         t = entry.get(key)
         if t:
-            return datetime(*t[:6], tzinfo=timezone.utc)
+            return datetime(*t[:6])
     return None
 
 

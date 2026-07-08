@@ -8,7 +8,7 @@ add new providers by registering a callable in PROVIDERS."""
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Callable
 
 import httpx
@@ -62,7 +62,8 @@ def _gdelt_time(value: str | None) -> datetime | None:
     if not value:
         return None
     try:
-        return datetime.strptime(value, "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+        # GDELT times are UTC; keep naive (see models.utcnow rationale).
+        return datetime.strptime(value, "%Y%m%dT%H%M%SZ")
     except ValueError:
         return None
 

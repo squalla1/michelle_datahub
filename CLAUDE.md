@@ -117,6 +117,12 @@ Package responsibilities (`datahub/`):
   only, never auto-scheduled).
 - SQLAlchemy 2.0 typed-`Mapped` style throughout; use `session_scope()` for
   transactional writes and the `get_session` FastAPI dependency for reads.
+- **Datetimes are naive UTC everywhere.** Columns are `TIMESTAMP WITHOUT TIME
+  ZONE`; an *aware* datetime gets cast through the PG session timezone on write
+  (RDS defaulted to Asia/Tokyo — this shifted the whole DB by +9h once, migrated
+  2026-07-08). Use `models.utcnow()` / `models.to_naive_utc()`; never
+  `datetime.now(timezone.utc)` directly in write paths. The engine also forces
+  `-c timezone=utc` and the database default is `UTC` as belt-and-suspenders.
 - **Database** is SQLite by default, PostgreSQL in production (`DATAHUB_DATABASE_URL`
   must use the `postgresql+psycopg://` driver, from the `[postgres]` extra). JSON
   columns are `JSON().with_variant(JSONB, "postgresql")` — keep `deploy/schema.sql`
