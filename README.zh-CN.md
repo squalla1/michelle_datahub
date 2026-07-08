@@ -7,7 +7,7 @@
 
 该 Excel 工作簿被视为*数据源注册表*:9 个标签页各对应一个**模块**,每一行是一个
 **数据源**,声明其抓取方式(`方式`列)与抓取频率(`频率`列)。DataHub 解析注册表、
-按频率为每个源调度抓取任务(另有每 2 小时一次的全量刷新,自动排重)、把结果规范化为
+按频率为每个源调度抓取任务(另有每 4 小时一次的全量刷新,自动排重)、把结果规范化为
 各模块的内容标准,并通过 HTTP 提供查询。
 
 **文档导航**
@@ -35,7 +35,7 @@ Excel 注册表 ──> catalog(解析 + 模块标准)
                       ▼
                  data_source 表
                       │
-      scheduler(频率 → interval/cron;全局 2 小时刷新) ── 手动即时抓取 ──┐
+      scheduler(频率 → interval/cron;全局 4 小时刷新) ── 手动即时抓取 ──┐
                       │                                                  │
                       ▼                                                  │
       fetchers(方式 → RSS / RSSHub / API / 爬虫 / 邮件)                 │
@@ -53,7 +53,7 @@ Excel 注册表 ──> catalog(解析 + 模块标准)
 | Models | `datahub.models` | ORM:`DataSource`、`FetchRun`、`ContentItem` |
 | Schemas | `datahub.schemas` | 通用 + 各模块内容标准;API DTO |
 | Fetchers | `datahub.fetchers` | 每个`方式`族一个 fetcher;`registry.py` 按方式路由 |
-| Scheduler | `datahub.scheduler` | `频率` → 触发器(`frequency.py`);APScheduler 服务 + 全局 2h 刷新 |
+| Scheduler | `datahub.scheduler` | `频率` → 触发器(`frequency.py`);APScheduler 服务 + 全局 4h 刷新 |
 | Ingest | `datahub.ingest` | 注册表入库;抓取+排重落库(`run_source` / `run_all_sources`) |
 | API | `datahub.api` | FastAPI 应用 + 路由 |
 | CLI | `datahub.cli` | `init-db / ingest / list / run / refresh / serve / schedule` |
@@ -92,7 +92,7 @@ Excel 注册表 ──> catalog(解析 + 模块标准)
 
 `实时/高频` → 间隔轮询 · `N分钟` → 间隔 · `每日/每周/每月/每季/每年` → cron ·
 `不定期/偶尔/按provider/(空)` → 手动(仅按需触发)。
-在各源自身节奏之外,全局 `refresh-all` 任务每 2 小时重抓一次全部启用源
+在各源自身节奏之外,全局 `refresh-all` 任务每 4 小时重抓一次全部启用源
 (`DATAHUB_REFRESH_ALL_HOURS`);排重保证幂等。
 
 ## 快速开始

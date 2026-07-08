@@ -265,7 +265,7 @@ curl https://mai.polarisagi.com/api/v1/stats
 
 ### 14. 报告列表
 
-`GET /api/v1/reports` — 每次全量刷新(手动 `refresh` 或 2 小时定时任务)生成的
+`GET /api/v1/reports` — 每次全量刷新(手动 `refresh` 或 4 小时定时任务)生成的
 统计报告清单,最新在前。无参数。
 
 ```bash

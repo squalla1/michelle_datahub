@@ -28,7 +28,7 @@ datahub ingest [--path FILE]          # parse the Excel registry into data_sourc
 datahub list --module news --limit 5  # inspect the catalog
 datahub run --source 2                # fetch ONE source now (synchronous)
 datahub run --module news --priority P1 --limit 5   # fetch a batch now
-datahub refresh [--module news]       # fetch ALL enabled sources once (dedup); manual twin of the 2h job
+datahub refresh [--module news]       # fetch ALL enabled sources once (dedup); manual twin of the 4h job
 datahub enrich [--limit N]            # extract article fulltext into content_item.fulltext
 datahub purge [--days N]              # delete content older than the retention window (default 7d)
 datahub serve                         # REST API + in-process scheduler -> :8000/docs
@@ -68,7 +68,7 @@ Package responsibilities (`datahub/`):
   source's method string to a fetcher by substring keyword match.
 - `scheduler/` — `frequency.py` maps the Chinese `频率` to a `TriggerSpec`;
   `service.py` builds an APScheduler job per schedulable source, plus one global
-  `refresh-all` cron job (every `refresh_all_hours`, default 2h) that re-fetches
+  `refresh-all` cron job (every `refresh_all_hours`, default 4h) that re-fetches
   every enabled source via `ingest.runner.run_all_sources` (dedup makes it idempotent).
   Every `run_all_sources` sweep writes a per-run stats report (markdown) to
   `reports/refresh/` (`DATAHUB_REPORT_DIR`; empty disables; gitignored).

@@ -77,14 +77,14 @@ MONITOR_HTML = r"""<!doctype html>
 <section class="card">
   <h2>各模块 · 今日入库与库存</h2>
   <table id="mods"><thead><tr>
-    <th>模块</th><th style="width:45%">今日入库</th><th class="num">库存</th><th>最新入库(UTC)</th>
+    <th>模块</th><th style="width:45%">今日入库</th><th class="num">库存</th><th>最新入库(本地时间)</th>
   </tr></thead><tbody></tbody></table>
 </section>
 
 <section class="card">
   <h2>近 24 小时抓取失败(最近 10 条)</h2>
   <table id="errs"><thead><tr>
-    <th>时间(UTC)</th><th>数据源</th><th>错误</th>
+    <th>时间(本地)</th><th>数据源</th><th>错误</th>
   </tr></thead><tbody></tbody></table>
 </section>
 
@@ -92,7 +92,11 @@ MONITOR_HTML = r"""<!doctype html>
 <script>
 const $=s=>document.querySelector(s);
 const fmt=n=>n==null?"–":n.toLocaleString("en-US");
-const t16=s=>s?s.replace("T"," ").slice(5,16):"–";
+// 后端时间均为 UTC(无时区后缀);补 Z 解析后按浏览器本地时区显示
+const t16=s=>{if(!s)return "–";const d=new Date(s.endsWith("Z")||s.includes("+")?s:s+"Z");
+  const p=n=>String(n).padStart(2,"0");
+  return `${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`};
+const TZ=Intl.DateTimeFormat().resolvedOptions().timeZone||"本地";
 const tip=$("#tip");
 function hover(el,text){
   el.addEventListener("mousemove",e=>{tip.textContent=text;tip.style.display="block";
@@ -118,7 +122,7 @@ function tile(k,v,hint){return `<div class="card tile"><div class="k">${k}</div>
 async function load(){
   const r=await fetch("api/v1/stats");const d=await r.json();
   const T=d.totals,F=d.fulltext,R=d.runs_24h;
-  $("#meta").textContent=`生成于 ${t16(d.generated_at)} UTC · 每 60 秒自动刷新 · 最近一次抓取 ${t16(d.last_fetch_at)}`;
+  $("#meta").textContent=`生成于 ${t16(d.generated_at)} · 最近一次抓取 ${t16(d.last_fetch_at)} · 时区 ${TZ} · 每 60 秒自动刷新`;
   const cov=T.content?(100*F.extracted/T.content).toFixed(1)+"%":"–";
   const rate=R.success_rate==null?"–":(100*R.success_rate).toFixed(1)+"%";
   $("#tiles").innerHTML=
@@ -195,7 +199,7 @@ REPORTS_HTML = r"""<!doctype html>
 </head>
 <body>
 <h1>刷新报告 <a href="monitor" style="font-size:12px;font-weight:500;text-decoration:none;margin-left:10px">← 返回监控</a></h1>
-<div class="sub" id="meta">每次全量刷新(手动 refresh 或 2 小时定时任务)生成一份统计报告</div>
+<div class="sub" id="meta">每次全量刷新(手动 refresh 或 4 小时定时任务)生成一份统计报告</div>
 <div class="layout">
   <div class="card" id="list"><div class="muted" style="padding:8px">加载中…</div></div>
   <div class="card">
@@ -244,8 +248,10 @@ async function open(name,el){
   $("#meta").textContent=`共 ${d.count} 份 · 最新在前 · 点击查看,或直接下载`;
   if(!d.count){$("#list").innerHTML='<div class="muted" style="padding:8px">暂无报告(首轮刷新后生成)</div>';return;}
   $("#list").innerHTML=d.reports.map(r=>{
-    const t=r.name.replace("refresh_","").replace(".md","")
-      .replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})\d{2}Z/,"$1-$2-$3 $4:$5 UTC");
+    const m=r.name.match(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/);
+    const dt=m?new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6])):null;
+    const p=n=>String(n).padStart(2,"0");
+    const t=dt?`${dt.getFullYear()}-${p(dt.getMonth()+1)}-${p(dt.getDate())} ${p(dt.getHours())}:${p(dt.getMinutes())}`:r.name;
     return `<div class="item" data-n="${r.name}"><span class="t">${t}</span>`+
            `<span class="s">${kb(r.size)}</span>`+
            `<a class="dl" href="api/v1/reports/${r.name}?download=1" onclick="event.stopPropagation()">⬇</a></div>`;

@@ -8,7 +8,7 @@ nothing self-hosted. Two long-running processes plus a one-shot init:
 | Process | Command | Notes |
 |---|---|---|
 | API | `datahub serve` | REST on `:8000` (set `DATAHUB_API_SCHEDULER=0`) |
-| Scheduler | `datahub schedule` | per-source jobs + global 2-hour refresh |
+| Scheduler | `datahub schedule` | per-source jobs + global 4-hour refresh |
 | Init (once) | `datahub init-db && datahub ingest` | create tables + load registry (both idempotent) |
 
 ## 1. Configuration

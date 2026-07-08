@@ -2,7 +2,7 @@
 
 > **语言:** [English](API_REFERENCE.md) | 中文
 
-目录驱动数据引擎的 REST API。所有内容从数据源注册表抓取、存入数据库、每 2 小时
+目录驱动数据引擎的 REST API。所有内容从数据源注册表抓取、存入数据库、每 4 小时
 全量刷新一次(自动排重),并通过以下只读接口提供。
 
 - **Base URL:** 生产 `https://mai.polarisagi.com`;本地 `http://<host>:8000`
@@ -406,7 +406,7 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 
 ### `GET /api/v1/jobs`
 
-调度器状态与当前任务表(各源`频率`任务 + 每 2 小时的全局 `refresh-all` 任务)。
+调度器状态与当前任务表(各源`频率`任务 + 每 4 小时的全局 `refresh-all` 任务)。
 
 ```json
 {
@@ -452,7 +452,7 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 
 ## 使用注意
 
-- 数据由调度器(2 小时全量刷新 + 各源自身节奏)及 `POST /api/v1/sources/{id}/fetch`
+- 数据由调度器(4 小时全量刷新 + 各源自身节奏)及 `POST /api/v1/sources/{id}/fetch`
   填充。刚初始化的库在首次抓取/刷新前是空的。
 - 排重键为 `(source_id, external_id)`,重复刷新只新增真正的新条目 —— 轮询和重抓
   都是安全的。

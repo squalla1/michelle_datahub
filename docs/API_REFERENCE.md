@@ -3,7 +3,7 @@
 > **Language:** English | [中文](API_REFERENCE.zh-CN.md)
 
 REST API for the catalog-driven ingestion engine. All content is fetched from the
-data-source registry, stored in the database, refreshed every 2 hours (dedup), and
+data-source registry, stored in the database, refreshed every 4 hours (dedup), and
 served read-only through the endpoints below.
 
 - **Base URL:** production `https://mai.polarisagi.com`; local `http://<host>:8000`
@@ -421,7 +421,7 @@ Recent fetch-run audit records, newest first.
 ### `GET /api/v1/jobs`
 
 Scheduler status and the current job table (per-source `频率` jobs + the global
-`refresh-all` job that runs every 2 hours).
+`refresh-all` job that runs every 4 hours).
 
 ```json
 {
@@ -469,7 +469,7 @@ Standard FastAPI error envelope:
 
 ## Notes
 
-- Data is populated by the scheduler (every 2h global refresh + per-source cadence)
+- Data is populated by the scheduler (every 4h global refresh + per-source cadence)
   and by `POST /api/v1/sources/{id}/fetch`. A freshly initialized DB is empty until
   the first fetch/refresh runs.
 - Dedup key is `(source_id, external_id)`, so repeated refreshes only add genuinely

@@ -10,7 +10,7 @@ The Excel workbook is treated as a *source registry*: each of its 9 tabs is a
 **module**, and each row is a **data source** that declares how it is fetched
 (`方式`) and how often (`频率`). DataHub parses that registry, schedules a fetch
 job per source according to its frequency (plus a global refresh of every
-enabled source every 2 hours, deduplicated), normalizes results into a
+enabled source every 4 hours, deduplicated), normalizes results into a
 per-module content standard, and serves everything via HTTP.
 
 **Documentation**
@@ -39,7 +39,7 @@ Excel registry ──> catalog (parse + module standards)
                         ▼
                    data_source table
                         │
-        scheduler (频率 → interval/cron; global 2h refresh)  ── on-demand fetch ──┐
+        scheduler (频率 → interval/cron; global 4h refresh)  ── on-demand fetch ──┐
                         │                                                         │
                         ▼                                                         │
         fetchers (方式 → RSS / RSSHub / API / Scraper / Email)                    │
@@ -57,7 +57,7 @@ Excel registry ──> catalog (parse + module standards)
 | Models | `datahub.models` | ORM: `DataSource`, `FetchRun`, `ContentItem` |
 | Schemas | `datahub.schemas` | Common + per-module content standards; API DTOs |
 | Fetchers | `datahub.fetchers` | One fetcher per `方式` family; `registry.py` routes by method |
-| Scheduler | `datahub.scheduler` | `频率` → trigger (`frequency.py`); APScheduler service + global 2h refresh |
+| Scheduler | `datahub.scheduler` | `频率` → trigger (`frequency.py`); APScheduler service + global 4h refresh |
 | Ingest | `datahub.ingest` | Catalog upsert; fetch+dedup-store runner (`run_source` / `run_all_sources`) |
 | API | `datahub.api` | FastAPI app + routers |
 | CLI | `datahub.cli` | `init-db / ingest / list / run / refresh / serve / schedule` |
@@ -98,7 +98,7 @@ payload model per module on top of a shared `BaseContentItem`.
 `实时/高频` → interval poll · `N分钟` → interval · `每日/每周/每月/每季/每年`
 → cron · `不定期/偶尔/按provider/(blank)` → manual (on-demand only).
 Independent of per-source cadence, a global `refresh-all` job re-fetches every
-enabled source every 2 hours (`DATAHUB_REFRESH_ALL_HOURS`); dedup keeps it
+enabled source every 4 hours (`DATAHUB_REFRESH_ALL_HOURS`); dedup keeps it
 idempotent.
 
 ## Quickstart

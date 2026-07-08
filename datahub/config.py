@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     # Global refresh: re-fetch every enabled source on this cadence (hours),
     # independent of each source's 频率. Dedup keeps repeated fetches idempotent.
     # Set to 0 to disable the global refresh job.
-    refresh_all_hours: int = 2
+    refresh_all_hours: int = 4
     # Directory where each refresh writes its stats report (markdown, one file
     # per run). Empty string disables report writing.
     report_dir: str = "reports"

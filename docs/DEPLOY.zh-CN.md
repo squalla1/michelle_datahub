@@ -8,7 +8,7 @@
 | 进程 | 命令 | 说明 |
 |---|---|---|
 | API | `datahub serve` | REST 接口 `:8000`(需设 `DATAHUB_API_SCHEDULER=0`) |
-| 调度器 | `datahub schedule` | 各源定时任务 + 每 2 小时全量刷新 |
+| 调度器 | `datahub schedule` | 各源定时任务 + 每 4 小时全量刷新 |
 | 初始化(一次) | `datahub init-db && datahub ingest` | 建表 + 载入注册表(均幂等) |
 
 ## 1. 配置
