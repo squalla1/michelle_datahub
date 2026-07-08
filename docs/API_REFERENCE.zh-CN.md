@@ -94,6 +94,8 @@ curl "https://mai.polarisagi.com/api/v1/sources/386/runs?limit=1"
 | POST | `/api/v1/jobs/catalog/reload` | 重新解析 Excel 注册表并重建任务 |
 | GET | `/api/v1/stats` | 全局监控统计(总量/正文覆盖/24h 执行/分模块) |
 | GET | `/monitor` | 数据监控仪表盘页面(HTML,60s 自动刷新) |
+| GET | `/api/v1/reports` | 刷新统计报告清单 |
+| GET | `/api/v1/reports/{name}` | 查看/下载单份报告(`?download=1`);页面版 `/reports` |
 
 ---
 

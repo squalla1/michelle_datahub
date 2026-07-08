@@ -24,6 +24,8 @@
 | 11 | [重载注册表](#11-重载注册表) | POST | `/api/v1/jobs/catalog/reload` | 重新解析 Excel 并重建任务 |
 | 12 | [监控统计](#12-监控统计) | GET | `/api/v1/stats` | 全局数据统计(驱动监控页) |
 | 13 | [监控页面](#13-监控页面) | GET | `/monitor` | 数据监控仪表盘(HTML) |
+| 14 | [报告列表](#14-报告列表) | GET | `/api/v1/reports` | 全量刷新统计报告清单 |
+| 15 | [报告查看/下载](#15-报告查看下载) | GET | `/api/v1/reports/{name}` | 查看或下载单份报告;页面版 `/reports` |
 
 ---
 
@@ -259,6 +261,36 @@ curl https://mai.polarisagi.com/api/v1/stats
 覆盖与 24h 执行状态条、分模块今日入库条形表、近期失败列表。
 
 **访问路径:`https://mai.polarisagi.com/monitor`**(本地 `http://127.0.0.1:8000/monitor`)。
+页面右上角可跳转[刷新报告](#15-报告查看下载)。
+
+### 14. 报告列表
+
+`GET /api/v1/reports` — 每次全量刷新(手动 `refresh` 或 2 小时定时任务)生成的
+统计报告清单,最新在前。无参数。
+
+```bash
+curl https://mai.polarisagi.com/api/v1/reports
+```
+```json
+{"count": 12, "reports": [
+  {"name": "refresh_20260708T020000Z.md", "size": 1024, "modified_at": "2026-07-08T02:35:11"}]}
+```
+
+### 15. 报告查看/下载
+
+`GET /api/v1/reports/{name}` — 返回单份报告的 Markdown 原文;
+加 `?download=1` 则作为附件下载(`Content-Disposition: attachment`)。
+文件名不合法或不存在 → `404`。
+
+```bash
+# 在线查看
+curl https://mai.polarisagi.com/api/v1/reports/refresh_20260708T020000Z.md
+# 下载保存
+curl -O -J "https://mai.polarisagi.com/api/v1/reports/refresh_20260708T020000Z.md?download=1"
+```
+
+**页面版:`https://mai.polarisagi.com/reports`** —— 左侧报告列表(含下载按钮),
+右侧渲染查看,与监控页互链。
 
 ---
 

@@ -26,12 +26,16 @@ services:
     restart: "no"
 
   # REST API only — the dedicated scheduler worker owns all fetching.
+  # Mounts ../reports read-only so /reports can serve the scheduler's output.
   api:
     <<: *app
     environment:
       <<: *app-env
       DATAHUB_API_SCHEDULER: "0"
     command: ["datahub", "serve"]
+    volumes:
+      - ../data:/data:ro
+      - ../reports:/app/reports:ro
     ports:
       - "127.0.0.1:8000:8000"   # loopback only — expose via the nginx reverse proxy
     restart: unless-stopped

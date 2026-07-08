@@ -1,23 +1,36 @@
-"""Data-monitoring endpoints: aggregate stats JSON + a self-contained HTML page.
+"""Data-monitoring endpoints: aggregate stats JSON + self-contained HTML pages.
 
-GET /monitor        — dashboard page (inline CSS/JS, fetches /api/v1/stats)
-GET /api/v1/stats   — the aggregates powering it
+GET /monitor                 — dashboard page (inline CSS/JS, fetches /api/v1/stats)
+GET /api/v1/stats            — the aggregates powering it
+GET /reports                 — refresh-report browser page
+GET /api/v1/reports          — list per-refresh stats reports
+GET /api/v1/reports/{name}   — view (?download=1 to download) one report
 """
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, time, timedelta, timezone
+from pathlib import Path
 
-from fastapi import APIRouter, Depends
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from ...config import get_settings
 from ...models import ContentItem, DataSource, FetchRun
 from ..deps import get_session
-from ..monitor_page import MONITOR_HTML
+from ..monitor_page import MONITOR_HTML, REPORTS_HTML
 
 router = APIRouter(tags=["monitor"])
+
+# strict allow-list of report filenames — no path separators can ever match
+_REPORT_NAME = re.compile(r"^refresh_\d{8}T\d{6}Z\.md$")
+
+
+def _report_dir() -> Path:
+    return Path(get_settings().report_dir) / "refresh"
 
 
 @router.get("/api/v1/stats")
@@ -123,6 +136,49 @@ def _module_rows(session: Session, day_start: datetime) -> list[dict]:
     ]
 
 
+@router.get("/api/v1/reports")
+def list_reports() -> dict:
+    """List per-refresh stats reports, newest first."""
+    d = _report_dir()
+    reports = []
+    if d.is_dir():
+        for p in sorted(d.glob("refresh_*.md"), reverse=True):
+            if not _REPORT_NAME.match(p.name):
+                continue
+            st = p.stat()
+            reports.append(
+                {
+                    "name": p.name,
+                    "size": st.st_size,
+                    "modified_at": datetime.fromtimestamp(st.st_mtime, tz=timezone.utc)
+                    .replace(tzinfo=None)
+                    .isoformat(),
+                }
+            )
+    return {"count": len(reports), "reports": reports}
+
+
+@router.get("/api/v1/reports/{name}")
+def get_report(name: str, download: bool = False) -> PlainTextResponse:
+    """Return one report as markdown text; `?download=1` forces a download."""
+    if not _REPORT_NAME.match(name):
+        raise HTTPException(404, "report not found")
+    path = _report_dir() / name
+    if not path.is_file():
+        raise HTTPException(404, "report not found")
+    headers = {"Content-Disposition": f'attachment; filename="{name}"'} if download else {}
+    return PlainTextResponse(
+        path.read_text(encoding="utf-8"),
+        media_type="text/markdown; charset=utf-8",
+        headers=headers,
+    )
+
+
 @router.get("/monitor", response_class=HTMLResponse, include_in_schema=False)
 def monitor_page() -> str:
     return MONITOR_HTML
+
+
+@router.get("/reports", response_class=HTMLResponse, include_in_schema=False)
+def reports_page() -> str:
+    return REPORTS_HTML

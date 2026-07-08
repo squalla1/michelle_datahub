@@ -55,7 +55,7 @@ MONITOR_HTML = r"""<!doctype html>
 </style>
 </head>
 <body>
-<h1>Michelle DataHub · 数据监控</h1>
+<h1>Michelle DataHub · 数据监控 <a href="reports" style="font-size:12px;font-weight:500;color:var(--series);text-decoration:none;margin-left:10px">刷新报告 →</a></h1>
 <div class="sub" id="meta">加载中…</div>
 
 <div class="tiles" id="tiles"></div>
@@ -148,6 +148,111 @@ async function load(){
     :`<tr><td colspan="3" class="muted">近 24 小时无失败记录 🎉</td></tr>`;
 }
 load();setInterval(load,60000);
+</script>
+</body>
+</html>
+"""
+
+REPORTS_HTML = r"""<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Michelle DataHub · 刷新报告</title>
+<style>
+  :root{--surface:#fcfcfb;--page:#f9f9f7;--ink:#0b0b0b;--ink-2:#52514e;--muted:#898781;
+        --grid:#e1e0d9;--ring:rgba(11,11,11,.10);--series:#2a78d6}
+  @media (prefers-color-scheme: dark){
+    :root{--surface:#1a1a19;--page:#0d0d0d;--ink:#fff;--ink-2:#c3c2b7;--muted:#898781;
+          --grid:#2c2c2a;--ring:rgba(255,255,255,.10);--series:#3987e5}}
+  *{box-sizing:border-box;margin:0}
+  body{background:var(--page);color:var(--ink);
+       font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:24px}
+  h1{font-size:18px;font-weight:650}
+  .sub{color:var(--muted);font-size:12px;margin:4px 0 20px}
+  a{color:var(--series)}
+  .layout{display:grid;grid-template-columns:300px 1fr;gap:12px}
+  @media (max-width:820px){.layout{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--ring);border-radius:10px;padding:12px}
+  .item{display:flex;justify-content:space-between;align-items:center;gap:8px;
+        padding:8px 10px;border-radius:7px;cursor:pointer;font-size:13px}
+  .item:hover{background:var(--page)}
+  .item.on{background:var(--page);outline:1px solid var(--ring)}
+  .item .t{font-variant-numeric:tabular-nums}
+  .item .s{color:var(--muted);font-size:11px;white-space:nowrap}
+  .dl{font-size:12px;text-decoration:none;padding:2px 8px;border:1px solid var(--ring);
+      border-radius:6px;color:var(--ink-2);white-space:nowrap}
+  .dl:hover{background:var(--page)}
+  #view h2{font-size:15px;margin:0 0 10px}
+  #view ul{margin:0 0 12px 18px;color:var(--ink-2)}
+  #view table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+  #view th{color:var(--muted);font-weight:500;text-align:left;padding:6px 10px;border-bottom:1px solid var(--grid)}
+  #view td{padding:6px 10px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+  #view tr:last-child td{border-bottom:none}
+  .muted{color:var(--muted)}
+  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+</style>
+</head>
+<body>
+<h1>刷新报告 <a href="monitor" style="font-size:12px;font-weight:500;text-decoration:none;margin-left:10px">← 返回监控</a></h1>
+<div class="sub" id="meta">每次全量刷新(手动 refresh 或 2 小时定时任务)生成一份统计报告</div>
+<div class="layout">
+  <div class="card" id="list"><div class="muted" style="padding:8px">加载中…</div></div>
+  <div class="card">
+    <div class="toolbar" id="toolbar" style="display:none">
+      <b id="cur" style="font-size:13px"></b>
+      <a class="dl" id="dlink" href="#">⬇ 下载 Markdown</a>
+    </div>
+    <div id="view" class="muted">← 选择左侧一份报告查看</div>
+  </div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const kb=n=>n<1024?n+" B":(n/1024).toFixed(1)+" KB";
+function mdRender(md){ // 渲染报告用到的 markdown 子集:标题/列表/表格
+  const out=[];let tbl=null;
+  for(const raw of md.split("\n")){
+    const line=raw.trimEnd();
+    if(line.startsWith("|")){
+      const cells=line.slice(1,-1).split("|").map(c=>c.trim());
+      if(cells.every(c=>/^-+$/.test(c)))continue;
+      if(!tbl){tbl=[];tbl.header=cells;}else tbl.push(cells);
+      continue;
+    }
+    if(tbl){out.push(tblHtml(tbl));tbl=null;}
+    if(line.startsWith("# "))out.push(`<h2>${esc(line.slice(2))}</h2>`);
+    else if(line.startsWith("- "))out.push(`<ul><li>${esc(line.slice(2))}</li></ul>`);
+    else if(line)out.push(`<p class="muted" style="margin:4px 0">${esc(line)}</p>`);
+  }
+  if(tbl)out.push(tblHtml(tbl));
+  return out.join("").replace(/<\/ul><ul>/g,"");
+}
+function tblHtml(t){return `<table><thead><tr>${t.header.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${
+  t.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`}
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+async function open(name,el){
+  document.querySelectorAll(".item").forEach(i=>i.classList.remove("on"));
+  if(el)el.classList.add("on");
+  const md=await (await fetch("api/v1/reports/"+name)).text();
+  $("#toolbar").style.display="flex";
+  $("#cur").textContent=name;
+  $("#dlink").href="api/v1/reports/"+name+"?download=1";
+  $("#view").className="";$("#view").innerHTML=mdRender(md);
+}
+(async()=>{
+  const d=await (await fetch("api/v1/reports")).json();
+  $("#meta").textContent=`共 ${d.count} 份 · 最新在前 · 点击查看,或直接下载`;
+  if(!d.count){$("#list").innerHTML='<div class="muted" style="padding:8px">暂无报告(首轮刷新后生成)</div>';return;}
+  $("#list").innerHTML=d.reports.map(r=>{
+    const t=r.name.replace("refresh_","").replace(".md","")
+      .replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})\d{2}Z/,"$1-$2-$3 $4:$5 UTC");
+    return `<div class="item" data-n="${r.name}"><span class="t">${t}</span>`+
+           `<span class="s">${kb(r.size)}</span>`+
+           `<a class="dl" href="api/v1/reports/${r.name}?download=1" onclick="event.stopPropagation()">⬇</a></div>`;
+  }).join("");
+  document.querySelectorAll(".item").forEach(el=>el.addEventListener("click",()=>open(el.dataset.n,el)));
+  open(d.reports[0].name, document.querySelector(".item"));
+})();
 </script>
 </body>
 </html>

@@ -101,6 +101,8 @@ curl "https://mai.polarisagi.com/api/v1/sources/386/runs?limit=1"
 | POST | `/api/v1/jobs/catalog/reload` | re-parse the Excel registry, then rebuild jobs |
 | GET | `/api/v1/stats` | global monitoring aggregates (totals/fulltext/24h runs/per-module) |
 | GET | `/monitor` | monitoring dashboard page (HTML, auto-refreshes every 60s) |
+| GET | `/api/v1/reports` | list per-refresh stats reports |
+| GET | `/api/v1/reports/{name}` | view/download one report (`?download=1`); page at `/reports` |
 
 ---
 
