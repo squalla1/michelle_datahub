@@ -73,6 +73,8 @@ N 条([ContentItemOut](#contentitemout) 数组),默认**当天(UTC)**、最新 5
 
 错误:未知类型 → `404`;`by` 非法/日期格式错 → `422`。
 注意:`by=published` 会排除无发布时间的条目,想要"当天入库的一切"用 `by=fetched`。
+低频回退:不传 `date` 且当天无数据时(calendar/macro/market 常见),自动返回
+全库最新 N 条而非空数组;显式传 `date=` 不回退。
 
 ```bash
 # 今天最新 20 条新闻(按入库时间)
@@ -85,6 +87,7 @@ curl "https://mai.polarisagi.com/api/v1/content/market?date=2026-07-01"
   "external_id": "https://www.scmp.com/…",
   "title": "Hong Kong assets hit record US$5.38 trillion …",
   "url": "https://www.scmp.com/…", "summary": "…",
+  "image_url": "https://cdn.scmp.com/…/hero.jpg",
   "fulltext": "文章正文全文……", "published_at": "2026-07-04T08:15:00",
   "fetched_at": "2026-07-04T08:20:11", "payload": {"author": "…"}}]
 ```
@@ -309,10 +312,11 @@ curl -O -J "https://mai.polarisagi.com/api/v1/reports/refresh_20260708T020000Z.m
 | `title` | string \| null | 标题 |
 | `url` | string \| null | 原文链接 |
 | `summary` | string \| null | 摘要 |
+| `image_url` | string \| null | 配图;抓取时取 feed 媒体标签,富化时用页面 `og:image` 补齐 |
 | `fulltext` | string \| null | 正文全文;`null`=尚未抽取,`""`=抽取失败。Google News 链接自动解码原文后抽取,原文链接在 `payload.canonical_url` |
 | `published_at` | datetime \| null | 发布时间(UTC) |
 | `fetched_at` | datetime | 入库时间(UTC) |
-| `payload` | object | 类型专属字段(见 `/api/v1/modules` 的 `payload_fields`) |
+| `payload` | object | 类型专属字段(见 `/api/v1/modules` 的 `payload_fields`);播客/视频条目带 `audio_url`(+`audio_mime`/`audio_duration`)/`video_url`(+`video_id`),company 条目有 `symbol` 时带 `logo_url` |
 
 #### DataSourceOut
 
@@ -329,6 +333,8 @@ curl -O -J "https://mai.polarisagi.com/api/v1/reports/refresh_20260708T020000Z.m
 | `priority` | string \| null | 优先级 |
 | `health` | string \| null | 健康度标记 |
 | `enabled` | bool | 是否启用 |
+| `icon_url` | string \| null | 源域名 64px favicon |
+| `avatar_url` | string \| null | 源头像(当前同 `icon_url`) |
 
 #### FetchRunOut
 

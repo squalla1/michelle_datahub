@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 from datetime import datetime
+from urllib.parse import urlparse
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
+
+from ..config import get_settings
 
 
 class DataSourceOut(BaseModel):
@@ -22,6 +25,22 @@ class DataSourceOut(BaseModel):
     priority: str | None
     health: str | None
     enabled: bool
+    # Derived 64px favicon of the source's domain (see favicon_service_url).
+    # avatar_url currently mirrors icon_url; it upgrades to a real channel/person
+    # avatar once a per-platform source becomes available.
+    icon_url: str | None = None
+    avatar_url: str | None = None
+
+    @model_validator(mode="after")
+    def _derive_icons(self):
+        if self.icon_url is None and self.url and self.url.startswith("http"):
+            domain = urlparse(self.url).netloc
+            template = get_settings().favicon_service_url
+            if domain and template:
+                self.icon_url = template.format(domain=domain)
+        if self.avatar_url is None:
+            self.avatar_url = self.icon_url
+        return self
 
 
 class FetchRunOut(BaseModel):

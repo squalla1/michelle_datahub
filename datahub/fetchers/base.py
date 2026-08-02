@@ -14,6 +14,7 @@ class RawItem:
     title: str | None = None
     url: str | None = None
     summary: str | None = None
+    image_url: str | None = None
     published_at: datetime | None = None
     payload: dict = field(default_factory=dict)
 

@@ -32,6 +32,58 @@ def _entry_time(entry) -> datetime | None:
     return None
 
 
+_IMG_EXTS = (".jpg", ".jpeg", ".png", ".gif", ".webp")
+
+
+def _entry_media(entry) -> tuple[str | None, dict]:
+    """Pull media attachments out of a feed entry.
+
+    Returns (image_url, payload_extras) where payload_extras may carry
+    audio_url/audio_mime/audio_duration (podcast enclosures) and
+    video_url/video_id (video enclosures, YouTube feeds)."""
+    image = audio = video = audio_mime = None
+
+    for thumb in entry.get("media_thumbnail") or []:
+        image = image or thumb.get("url")
+    for media in entry.get("media_content") or []:
+        url = media.get("url")
+        if not url:
+            continue
+        kind = (media.get("medium") or media.get("type") or "").lower()
+        if kind.startswith("image") and not image:
+            image = url
+        elif kind.startswith("audio") and not audio:
+            audio, audio_mime = url, media.get("type")
+        elif kind.startswith("video") and not video:
+            video = url
+    for enc in entry.get("enclosures") or []:
+        url = enc.get("href") or enc.get("url")
+        if not url:
+            continue
+        mime = (enc.get("type") or "").lower()
+        if not image and (mime.startswith("image") or url.lower().endswith(_IMG_EXTS)):
+            image = url
+        elif mime.startswith("audio") and not audio:
+            audio, audio_mime = url, enc.get("type")
+        elif mime.startswith("video") and not video:
+            video = url
+    if not video and entry.get("yt_videoid"):
+        video = entry.get("link")
+
+    extras: dict = {}
+    if audio:
+        extras["audio_url"] = audio
+        if audio_mime:
+            extras["audio_mime"] = audio_mime
+        if entry.get("itunes_duration"):
+            extras["audio_duration"] = str(entry["itunes_duration"])
+    if video:
+        extras["video_url"] = video
+        if entry.get("yt_videoid"):
+            extras["video_id"] = entry["yt_videoid"]
+    return image, extras
+
+
 class RssFetcher(Fetcher):
     method_keywords = ("rss", "google news", "newsapi", "youtube", "公众号", "feed", "atom")
 
@@ -59,14 +111,18 @@ class RssFetcher(Fetcher):
         feed = feedparser.parse(resp.content)
         items: list[RawItem] = []
         for entry in feed.entries[: self._settings.max_items_per_fetch]:
+            image_url, media = _entry_media(entry)
+            payload = {k: v for k, v in (("author", entry.get("author")),) if v}
+            payload.update(media)
             items.append(
                 RawItem(
                     external_id=_entry_id(entry, source.name),
                     title=entry.get("title"),
                     url=entry.get("link"),
                     summary=entry.get("summary"),
+                    image_url=image_url,
                     published_at=_entry_time(entry),
-                    payload={k: v for k, v in (("author", entry.get("author")),) if v},
+                    payload=payload,
                 )
             )
         note = None if items else "feed parsed but empty"

@@ -120,6 +120,7 @@ def run_source(source_id: int) -> dict:
                         title=item.title,
                         url=item.url,
                         summary=item.summary,
+                        image_url=item.image_url,
                         published_at=to_naive_utc(item.published_at),
                         # source-intrinsic fields from the registry; fetcher wins
                         payload={**base_payload, **(item.payload or {})},

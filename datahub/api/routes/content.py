@@ -87,17 +87,29 @@ def list_module_content(
     """Latest N items of one module type for a given day (default: today, UTC).
 
     Pass `date=` to page back through history, or `limit=` to cap the response
-    for efficiency. Ordering is newest-first on the chosen `by` field."""
+    for efficiency. Ordering is newest-first on the chosen `by` field.
+
+    When `date` is omitted and today's window is empty (low-frequency modules —
+    calendar/macro/market — can go days without new items, and dedup never
+    updates `fetched_at`), the endpoint falls back to the latest N items overall
+    instead of returning `[]`. An explicit `date=` never falls back."""
     if module not in _MODULE_KEYS:
         raise HTTPException(404, detail=f"unknown module '{module}'; one of {sorted(_MODULE_KEYS)}")
     col = _date_column(by)
     day = date or datetime.now(timezone.utc).date()
     start, end = _day_bounds(day)
 
-    stmt = select(ContentItem).where(
-        ContentItem.module == module, col >= start, col < end
-    )
-    if q:
-        stmt = stmt.where(ContentItem.title.ilike(f"%{q}%"))
-    stmt = stmt.order_by(col.desc(), ContentItem.id.desc()).offset(offset).limit(limit)
-    return list(session.scalars(stmt))
+    def _query(day_bounded: bool):
+        stmt = select(ContentItem).where(ContentItem.module == module)
+        if day_bounded:
+            stmt = stmt.where(col >= start, col < end)
+        if q:
+            stmt = stmt.where(ContentItem.title.ilike(f"%{q}%"))
+        order = col.desc() if day_bounded else col.desc().nullslast()
+        stmt = stmt.order_by(order, ContentItem.id.desc()).offset(offset).limit(limit)
+        return list(session.scalars(stmt))
+
+    items = _query(day_bounded=True)
+    if not items and date is None:
+        items = _query(day_bounded=False)
+    return items

@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS content_item (
     title         TEXT,
     url           TEXT,
     summary       TEXT,
+    image_url     TEXT,          -- lead image (RSS media/enclosure or og:image)
     fulltext      TEXT,          -- extracted body: NULL = not attempted, '' = failed
     published_at  TIMESTAMP,
     payload       JSONB         NOT NULL DEFAULT '{}'::jsonb,

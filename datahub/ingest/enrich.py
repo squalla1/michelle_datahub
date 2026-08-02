@@ -38,6 +38,7 @@ class _Extract:
     text: str | None          # None = transient failure (retry later), "" = permanent
     canonical: str | None = None
     published: datetime | None = None
+    image: str | None = None  # page og:image, for items whose feed had no media
 
 
 def _decode_gnews(url: str) -> str | None:
@@ -53,18 +54,22 @@ def _decode_gnews(url: str) -> str | None:
     return None
 
 
-def _page_date(html: str) -> datetime | None:
+def _page_meta(html: str) -> tuple[datetime | None, str | None]:
+    """(publication date, og:image) from the article page's metadata."""
+    date = image = None
     try:
         import trafilatura
 
         from ..models import to_naive_utc
 
         meta = trafilatura.extract_metadata(html)
-        if meta and meta.date:
-            return to_naive_utc(datetime.fromisoformat(meta.date))
+        if meta:
+            image = getattr(meta, "image", None) or None
+            if meta.date:
+                date = to_naive_utc(datetime.fromisoformat(meta.date))
     except Exception:
         pass
-    return None
+    return date, image
 
 
 def _extract(url: str, client: httpx.Client, max_chars: int) -> _Extract:
@@ -86,10 +91,12 @@ def _extract(url: str, client: httpx.Client, max_chars: int) -> _Extract:
         text = trafilatura.extract(html, include_comments=False, favor_precision=True)
     except Exception:
         return _Extract(text="", canonical=canonical)
+    published, image = _page_meta(html)
     return _Extract(
         text=(text or "")[:max_chars],
         canonical=canonical,
-        published=_page_date(html),
+        published=published,
+        image=image,
     )
 
 
@@ -130,7 +137,7 @@ def enrich_fulltext(limit: int | None = None, module: str | None = None) -> dict
     finally:
         client.close()
 
-    extracted = failed = deferred = resolved = dated = 0
+    extracted = failed = deferred = resolved = dated = imaged = 0
     with session_scope() as session:
         for (item_id, _), out in zip(targets, outs):
             if out.text is None:
@@ -150,10 +157,14 @@ def enrich_fulltext(limit: int | None = None, module: str | None = None) -> dict
             if out.published is not None and item.published_at is None:
                 item.published_at = out.published
                 dated += 1
+            if out.image and item.image_url is None:
+                item.image_url = out.image
+                imaged += 1
 
     summary = {
         "attempted": len(targets), "extracted": extracted, "failed": failed,
         "deferred": deferred, "canonical_resolved": resolved, "dates_backfilled": dated,
+        "images_backfilled": imaged,
     }
     logger.info("fulltext enrich: %s", summary)
     return summary

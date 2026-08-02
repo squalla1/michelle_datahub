@@ -74,14 +74,17 @@ Package responsibilities (`datahub/`):
   `reports/refresh/` (`DATAHUB_REPORT_DIR`; empty disables; gitignored).
   Two more built-in jobs: `fulltext-enrich` (every `fulltext_interval_minutes`,
   extracts article bodies via trafilatura into `content_item.fulltext` — null=not
-  tried, ""=failed, never retried) and `retention-purge` (daily 04:30 UTC, deletes
-  content/runs older than `retention_days`, default 7).
+  tried, ""=failed, never retried — and backfills `image_url` from the page's
+  og:image when the feed carried none) and `retention-purge` (daily 04:30 UTC,
+  deletes content/runs older than `retention_days`, default 7).
 - `ingest/` — `catalog_ingest.py` (idempotent upsert of the registry),
   `runner.py` (`run_source` = fetch + dedup-store + record a FetchRun).
 - `api/` — `app.py` factory + `routes/`. `routes/content.py` serves both a generic
   cross-module query (`GET /api/v1/content`) and a per-type feed
   (`GET /api/v1/content/{module}`) that defaults to *today's* items (UTC) and returns
-  the latest N; `?by=published|fetched` chooses the date field. `storage/` — engine,
+  the latest N; `?by=published|fetched` chooses the date field; when `date` is
+  omitted and today is empty it falls back to the latest N overall (low-frequency
+  modules). `storage/` — engine,
   session, `init_db`. Full endpoint reference is `docs/API_REFERENCE.md` (or the live
   `/docs`); Chinese versions are the `docs/*.zh-CN.md` twins — update both when
   endpoints change.

@@ -49,6 +49,14 @@ class Settings(BaseSettings):
     # (by fetched_at / started_at). 0 disables purging.
     retention_days: int = 7
 
+    # Media URL templates (empty string disables the field).
+    # Source favicon, exposed as DataSourceOut.icon_url / avatar_url; swap for a
+    # domestic or self-hosted service if consumers can't reach Google.
+    favicon_service_url: str = "https://www.google.com/s2/favicons?domain={domain}&sz=64"
+    # Company logo by ticker, injected as payload.logo_url on company items that
+    # carry a symbol (FMP's image CDN is public — no API key required).
+    stock_logo_service_url: str = "https://images.financialmodelingprep.com/symbol/{symbol}.png"
+
     # REST API
     api_host: str = "0.0.0.0"
     api_port: int = 8000

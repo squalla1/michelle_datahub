@@ -236,6 +236,7 @@ fields live inside `payload`.
 | `title` | string \| null | headline / item title |
 | `url` | string \| null | link to the item |
 | `summary` | string \| null | short text/summary |
+| `image_url` | string \| null | lead image — feed `media:*`/enclosure at fetch time, page `og:image` backfilled by the enrichment job |
 | `fulltext` | string \| null | extracted article body (`null` = not attempted yet, `""` = extraction failed) |
 | `published_at` | datetime \| null | when the source published it (UTC) |
 | `fetched_at` | datetime | when we ingested it (UTC) |
@@ -257,6 +258,10 @@ Latest **N** items of one module type for a given day. Defaults to **today (UTC)
 Ordering is newest-first on the chosen `by` field. Note: with `by=published`, items
 without a publish timestamp (e.g. scraped links) are excluded — use `by=fetched` to
 include everything ingested that day.
+
+**Low-frequency fallback:** when `date` is omitted and today's window is empty
+(calendar/macro/market can go days without new items), the endpoint returns the
+latest N items overall instead of `[]`. An explicit `date=` never falls back.
 
 **Examples**
 ```bash
@@ -281,6 +286,7 @@ curl "localhost:8000/api/v1/content/events?q=oil"
     "title": "Example headline",
     "url": "https://example.com/a1",
     "summary": "…",
+    "image_url": "https://example.com/hero.jpg",
     "published_at": "2026-07-02T08:15:00",
     "fetched_at": "2026-07-02T08:20:11",
     "payload": { "author": "…" }
@@ -317,12 +323,17 @@ Every module allows extra keys (`extra="allow"`), but these are the declared fie
 | `news` | `region`, `topic`, `lang` |
 | `events` | `event_type`, `actors` (string[]), `location`, `cameo_code` |
 | `calendar` | `event_date`, `calendar_type`, `symbol` |
-| `company` | `symbol`, `exchange`, `data_type` |
+| `company` | `symbol`, `exchange`, `data_type`, `logo_url` |
 | `market` | `instrument`, `asset_class`, `venue` |
 | `macro` | `country`, `indicator`, `period` |
 | `opinion` | `platform`, `topic`, `rank` (int) |
-| `channel` | `medium`, `topic`, `lang` |
+| `channel` | `medium`, `topic`, `lang`, `audio_url` (+`audio_mime`/`audio_duration`), `video_url` (+`video_id`) |
 | `person` | `person`, `platform`, `bio` |
+
+> **Media fields:** `audio_url`/`video_url` come from podcast/video feed
+> enclosures (YouTube feeds also set `video_id`). `company.logo_url` is derived
+> from `symbol` at read time via a public logo CDN
+> (`DATAHUB_STOCK_LOGO_SERVICE_URL`) — present whenever `symbol` is populated.
 
 > **Population status:** source-intrinsic fields (`region/topic/platform/medium/
 > asset_class` …) are auto-filled at ingest from the registry's categories
@@ -354,6 +365,8 @@ The registry rows — the data sources themselves, not their content.
 | `priority` | string \| null | e.g. `P1` |
 | `health` | string \| null | health marker |
 | `enabled` | bool | whether it is scheduled/fetched |
+| `icon_url` | string \| null | 64px favicon of the source's domain (service template: `DATAHUB_FAVICON_SERVICE_URL`) |
+| `avatar_url` | string \| null | source avatar; currently mirrors `icon_url`, upgrades to real channel/person avatars when a per-platform source lands |
 
 ### `GET /api/v1/sources`
 

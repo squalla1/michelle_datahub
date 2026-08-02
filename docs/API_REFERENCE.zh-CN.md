@@ -227,6 +227,7 @@ curl localhost:8000/api/v1/modules
 | `title` | string \| null | 标题 |
 | `url` | string \| null | 条目链接 |
 | `summary` | string \| null | 摘要 |
+| `image_url` | string \| null | 配图 —— 抓取时取 feed 的 `media:*`/enclosure,正文富化时用页面 `og:image` 补齐 |
 | `fulltext` | string \| null | 抽取的正文全文(`null`=尚未尝试,`""`=抽取失败) |
 | `published_at` | datetime \| null | 源发布时间(UTC) |
 | `fetched_at` | datetime | 入库时间(UTC) |
@@ -247,6 +248,10 @@ curl localhost:8000/api/v1/modules
 
 按所选 `by` 字段倒序(最新在前)。注意:`by=published` 时,没有发布时间的条目
 (如爬虫抽取的链接)会被排除 —— 想拿到"当天入库的一切",用 `by=fetched`。
+
+**低频回退**:不传 `date` 且当天窗口为空时(calendar/macro/market 等低频模块
+可能连续数日无新条目),接口回退返回**全库最新 N 条**而不是 `[]`;显式传
+`date=` 则不回退。
 
 **示例**
 ```bash
@@ -271,6 +276,7 @@ curl "localhost:8000/api/v1/content/events?q=oil"
     "title": "Example headline",
     "url": "https://example.com/a1",
     "summary": "…",
+    "image_url": "https://example.com/hero.jpg",
     "published_at": "2026-07-02T08:15:00",
     "fetched_at": "2026-07-02T08:20:11",
     "payload": { "author": "…" }
@@ -307,12 +313,17 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 | `news` | `region`, `topic`, `lang` |
 | `events` | `event_type`, `actors`(string[]), `location`, `cameo_code` |
 | `calendar` | `event_date`, `calendar_type`, `symbol` |
-| `company` | `symbol`, `exchange`, `data_type` |
+| `company` | `symbol`, `exchange`, `data_type`, `logo_url` |
 | `market` | `instrument`, `asset_class`, `venue` |
 | `macro` | `country`, `indicator`, `period` |
 | `opinion` | `platform`, `topic`, `rank`(int) |
-| `channel` | `medium`, `topic`, `lang` |
+| `channel` | `medium`, `topic`, `lang`, `audio_url`(+`audio_mime`/`audio_duration`), `video_url`(+`video_id`) |
 | `person` | `person`, `platform`, `bio` |
+
+> **媒体字段**:`audio_url`/`video_url` 取自播客/视频 feed 的 enclosure
+> (YouTube 源另带 `video_id`)。`company.logo_url` 在读取时由 `symbol` 派生
+> (公开 logo CDN,模板 `DATAHUB_STOCK_LOGO_SERVICE_URL`)—— 只要 `symbol`
+> 有值即返回。
 
 > **填充现状**:`region/topic/platform/medium/asset_class` 等**源侧字段**由注册表
 > 分类在入库时自动回填(含存量,2026-07-07 起);`symbol/exchange/indicator` 等
@@ -342,6 +353,8 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 | `priority` | string \| null | 如 `P1` |
 | `health` | string \| null | 健康度标记 |
 | `enabled` | bool | 是否参与调度/抓取 |
+| `icon_url` | string \| null | 源域名的 64px favicon(服务模板 `DATAHUB_FAVICON_SERVICE_URL`,可换国内可达服务) |
+| `avatar_url` | string \| null | 源头像;当前与 `icon_url` 相同,接入各平台头像源后升级为真实头像 |
 
 ### `GET /api/v1/sources`
 

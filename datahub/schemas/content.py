@@ -10,9 +10,10 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..catalog.module_spec import ModuleKey
+from ..config import get_settings
 
 
 class BaseContentItem(BaseModel):
@@ -55,6 +56,7 @@ class CompanyPayload(BaseModel):
     symbol: str | None = None
     exchange: str | None = None
     data_type: str | None = None
+    logo_url: str | None = None   # injected from symbol at read time
 
 
 class MarketPayload(BaseModel):
@@ -83,6 +85,8 @@ class ChannelPayload(BaseModel):
     medium: str | None = None
     topic: str | None = None
     lang: str | None = None
+    audio_url: str | None = None  # podcast enclosure (+ audio_mime/audio_duration)
+    video_url: str | None = None  # video enclosure / YouTube watch URL (+ video_id)
 
 
 class PersonPayload(BaseModel):
@@ -119,5 +123,18 @@ class ContentItemOut(BaseContentItem):
     id: int
     source_id: int
     module: str
+    image_url: str | None = None  # lead image (feed media/enclosure or og:image)
     fulltext: str | None = None  # extracted article body (null=not tried, ""=failed)
     fetched_at: datetime
+
+    @model_validator(mode="after")
+    def _inject_company_logo(self):
+        """company items with a ticker get a logo_url derived from it (public
+        logo CDN, see stock_logo_service_url) — computed at read time so it
+        also covers historical rows."""
+        if self.module == "company" and isinstance(self.payload, dict):
+            symbol = self.payload.get("symbol")
+            template = get_settings().stock_logo_service_url
+            if symbol and template and not self.payload.get("logo_url"):
+                self.payload = {**self.payload, "logo_url": template.format(symbol=symbol)}
+        return self

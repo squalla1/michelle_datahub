@@ -104,6 +104,8 @@ class ContentItem(Base):
     title: Mapped[str | None] = mapped_column(Text)
     url: Mapped[str | None] = mapped_column(Text)
     summary: Mapped[str | None] = mapped_column(Text)
+    # Lead image (RSS media:*/enclosure at fetch time, og:image at enrich time).
+    image_url: Mapped[str | None] = mapped_column(Text)
     # Extracted article body: null = not attempted yet, "" = attempted but failed.
     fulltext: Mapped[str | None] = mapped_column(Text)
     published_at: Mapped[datetime | None] = mapped_column(DateTime, index=True)
