@@ -14,6 +14,7 @@ from typing import Callable
 import httpx
 
 from ..config import get_settings
+from ..models import utcnow
 from .base import Fetcher, FetchResult, RawItem
 
 ProviderFn = Callable[[object, "ApiFetcher"], FetchResult]
@@ -102,12 +103,240 @@ def _needs_key(provider: str, key_attr: str) -> ProviderFn:
     return _fn
 
 
+def _parse_dt(value: str | None) -> datetime | None:
+    """Parse the provider date formats into naive UTC."""
+    if not value:
+        return None
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(value[: len("2026-01-01 00:00:00")], fmt)
+        except ValueError:
+            continue
+    return None
+
+
+# ---- FMP (financialmodelingprep.com /stable API, paid key) ------------------
+
+_FMP_BASE = "https://financialmodelingprep.com/stable"
+
+# l2_category substring -> FMP exchange code (verified live 2026-08-02;
+# Euronext maps to its Paris leg, KRX to FMP's KSC code).
+_FMP_EXCHANGES = (
+    ("NYSE", "NYSE"), ("Nasdaq", "NASDAQ"), ("LSE", "LSE"), ("TSX", "TSX"),
+    ("NSE", "NSE"), ("JPX", "JPX"), ("HKEX", "HKSE"), ("KRX", "KSC"),
+    ("Euronext", "PAR"),
+)
+
+
+def _fmp_route(source) -> list[tuple[str, dict, str]]:
+    """Map a registry row to FMP /stable calls: [(endpoint, params, kind)]."""
+    l1 = (source.l1_category or "")
+    l2 = (source.l2_category or "")
+    name = (source.name or "")
+    if source.module == "calendar":
+        if "分红" in l1 or "拆股" in l1:
+            return [("dividends-calendar", {}, "dividend"), ("splits-calendar", {}, "split")]
+        if "IPO" in l1:
+            return [("ipos-calendar", {}, "ipo")]
+        if "经济" in l1:
+            return [("economic-calendar", {}, "economic")]
+        return [("earnings-calendar", {}, "earnings")]  # 财报日历 / 公司IR事件
+    if source.module == "events":
+        plan = [("mergers-acquisitions-latest", {}, "ma")]
+        if "资本" in l1 or "IPO" in name:
+            plan.append(("ipos-calendar", {}, "ipo"))
+        return plan
+    if source.module == "market":
+        if "债" in l1:
+            return [("treasury-rates", {}, "treasury")]
+        if "Forex" in l1:
+            return [("batch-forex-quotes", {}, "quotes")]
+        if "Crypto" in l1:
+            return [("batch-crypto-quotes", {}, "quotes")]
+        if "Commodities" in l1:
+            return [("batch-commodity-quotes", {}, "quotes")]
+        if "指数" in name or "ETF" in name:
+            return [("batch-index-quotes", {}, "quotes")]
+        for key, code in _FMP_EXCHANGES:
+            if key in l2:
+                return [("batch-exchange-quote", {"exchange": code}, "quotes")]
+        return [("most-actives", {}, "quotes")]  # 全球综合
+    if source.module == "company":
+        # Needs a watchlist: comma-separated tickers in the registry 账号 column.
+        symbols = [s.strip() for s in (source.account or "").split(",") if s.strip()]
+        return [("quote", {"symbol": s}, "quotes") for s in symbols]
+    return []
+
+
+def _fmp_items(kind: str, data, cap: int) -> list[RawItem]:
+    now = utcnow().replace(microsecond=0)
+    today = now.strftime("%Y-%m-%d")
+    items: list[RawItem] = []
+    rows = data if isinstance(data, list) else []
+    if kind == "quotes":
+        # Full exchange lists are alphabetical — keep the most-traded names.
+        rows = sorted(rows, key=lambda r: r.get("volume") or 0, reverse=True)[:cap]
+        for r in rows:
+            sym = r.get("symbol")
+            if not sym:
+                continue
+            payload = {k: r[k] for k in
+                       ("symbol", "price", "change", "changePercentage", "volume",
+                        "marketCap", "name", "exchange") if r.get(k) is not None}
+            change = r.get("change")
+            title = f"{r.get('name') or sym} {r.get('price')}"
+            if change is not None:
+                title += f" ({'+' if change >= 0 else ''}{change})"
+            items.append(RawItem(
+                external_id=f"q:{sym}:{today}", title=title,
+                published_at=now, payload=payload))
+    elif kind in ("earnings", "dividend", "split", "ipo"):
+        label = {"earnings": "财报", "dividend": "分红", "split": "拆股", "ipo": "IPO"}[kind]
+        for r in rows[:cap]:
+            sym, date = r.get("symbol"), r.get("date")
+            if not sym:
+                continue
+            payload = {k: v for k, v in r.items() if v is not None}
+            payload.setdefault("event_date", date)
+            items.append(RawItem(
+                external_id=f"{kind}:{sym}:{date}",
+                title=f"{r.get('company') or sym} {label} {date}",
+                published_at=_parse_dt(date), payload=payload))
+    elif kind == "economic":
+        for r in rows[:cap]:
+            date, event = r.get("date"), r.get("event")
+            if not event:
+                continue
+            items.append(RawItem(
+                external_id=f"eco:{r.get('country')}:{event}:{date}",
+                title=f"[{r.get('country')}] {event}",
+                published_at=_parse_dt(date),
+                payload={k: v for k, v in r.items() if v is not None}))
+    elif kind == "ma":
+        for r in rows[:cap]:
+            target = r.get("targetedCompanyName")
+            items.append(RawItem(
+                external_id=f"ma:{r.get('cik')}:{r.get('targetedCik') or target}",
+                title=f"{r.get('companyName')} 并购 {target}",
+                url=r.get("link"),
+                published_at=_parse_dt(r.get("transactionDate") or r.get("acceptedDate")),
+                payload={k: v for k, v in r.items() if v is not None and k != "link"}))
+    elif kind == "treasury":
+        for r in rows[:5]:  # daily curve snapshots
+            date = r.get("date")
+            items.append(RawItem(
+                external_id=f"ust:{date}",
+                title=f"US Treasury yield curve {date}",
+                published_at=_parse_dt(date),
+                payload={k: v for k, v in r.items() if v is not None}))
+    return items
+
+
+def _fmp(source, fetcher: "ApiFetcher") -> FetchResult:
+    key = fetcher.settings.fmp_api_key
+    if not key:
+        return FetchResult(status="skipped", note="FMP requires DATAHUB_FMP_API_KEY")
+    plan = _fmp_route(source)
+    if not plan:
+        return FetchResult(status="skipped",
+                           note="FMP: no endpoint mapping (company rows need "
+                                "comma-separated tickers in the 账号 column)")
+    cap = fetcher.settings.max_items_per_fetch
+    items: list[RawItem] = []
+    for endpoint, params, kind in plan:
+        try:
+            resp = fetcher.client.get(f"{_FMP_BASE}/{endpoint}", params={**params, "apikey": key})
+            resp.raise_for_status()
+            data = resp.json()
+        except (httpx.HTTPError, ValueError) as exc:
+            return FetchResult(status="error", note=f"fmp {endpoint}: {exc}")
+        if isinstance(data, dict) and data.get("Error Message"):
+            return FetchResult(status="error", note=f"fmp {endpoint}: {data['Error Message'][:120]}")
+        items.extend(_fmp_items(kind, data, cap))
+    return FetchResult(items=items[:cap], status="ok",
+                       note=None if items else "fmp: empty response")
+
+
+# ---- FRED (St. Louis Fed, free key) ----------------------------------------
+
+_FRED_DEFAULT_SERIES = ("DFF", "DGS2", "DGS10", "T10Y2Y")
+_FRED_TREASURY_SERIES = ("DGS1MO", "DGS3MO", "DGS2", "DGS10", "DGS30")
+
+
+def _fred_series(source) -> list[str]:
+    url = source.url or ""
+    if "/series/" in url:
+        sid = url.split("/series/")[1].split("/")[0].split("?")[0].strip()
+        if sid:
+            return [sid]
+    if source.account:
+        return [s.strip() for s in source.account.split(",") if s.strip()]
+    text = f"{source.l1_category or ''}{source.l2_category or ''}{source.name or ''}"
+    if "国债" in text or "Treasury" in text:
+        return list(_FRED_TREASURY_SERIES)
+    return list(_FRED_DEFAULT_SERIES)
+
+
+def _fred(source, fetcher: "ApiFetcher") -> FetchResult:
+    key = fetcher.settings.fred_api_key
+    if not key:
+        return FetchResult(status="skipped", note="FRED requires DATAHUB_FRED_API_KEY")
+    items: list[RawItem] = []
+    for sid in _fred_series(source):
+        try:
+            resp = fetcher.client.get(
+                "https://api.stlouisfed.org/fred/series/observations",
+                params={"series_id": sid, "api_key": key, "file_type": "json",
+                        "sort_order": "desc", "limit": "24"})
+            resp.raise_for_status()
+            obs = resp.json().get("observations", [])
+        except (httpx.HTTPError, ValueError) as exc:
+            return FetchResult(status="error", note=f"fred {sid}: {exc}")
+        for o in obs:
+            if o.get("value") in (None, "."):
+                continue
+            items.append(RawItem(
+                external_id=f"{sid}:{o['date']}",
+                title=f"{sid} = {o['value']} ({o['date']})",
+                url=f"https://fred.stlouisfed.org/series/{sid}",
+                published_at=_parse_dt(o.get("date")),
+                payload={"indicator": sid, "value": float(o["value"]), "period": o["date"]}))
+    return FetchResult(items=items, status="ok", note=None if items else "fred: no observations")
+
+
+# ---- Finnhub (free key; economic calendar needs a paid plan) ----------------
+
+def _finnhub(source, fetcher: "ApiFetcher") -> FetchResult:
+    key = fetcher.settings.finnhub_api_key
+    if not key:
+        return FetchResult(status="skipped", note="Finnhub requires DATAHUB_FINNHUB_API_KEY")
+    try:
+        resp = fetcher.client.get("https://finnhub.io/api/v1/calendar/economic",
+                                  params={"token": key})
+        if resp.status_code == 403:
+            return FetchResult(status="error",
+                               note="finnhub: economic calendar requires a paid plan "
+                                    "(free tier verified 2026-08-02)")
+        resp.raise_for_status()
+        rows = resp.json().get("economicCalendar", [])
+    except (httpx.HTTPError, ValueError) as exc:
+        return FetchResult(status="error", note=f"finnhub: {exc}")
+    items = [RawItem(
+        external_id=f"eco:{r.get('country')}:{r.get('event')}:{r.get('time')}",
+        title=f"[{r.get('country')}] {r.get('event')}",
+        published_at=_parse_dt(r.get("time")),
+        payload={k: v for k, v in r.items() if v is not None},
+    ) for r in rows[: fetcher.settings.max_items_per_fetch]]
+    return FetchResult(items=items, status="ok")
+
+
 # method keyword (lowercase substring) -> provider function
 PROVIDERS: dict[str, ProviderFn] = {
     "gdelt": _gdelt,
     "arxiv": _arxiv,
-    "fmp": _needs_key("FMP", "fmp_api_key"),
-    "fred": _needs_key("FRED", "fred_api_key"),
+    "fmp": _fmp,
+    "fred": _fred,
+    "finnhub": _finnhub,
     "twitterapi.io": _needs_key("twitterapi.io", "twitterapi_io_key"),
     "acled": _needs_key("ACLED", "acled_api_key"),
 }

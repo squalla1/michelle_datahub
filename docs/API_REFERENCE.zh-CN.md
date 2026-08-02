@@ -37,20 +37,21 @@
 ## 数据源现状(接口能取到什么)
 
 内容来自注册表的 **1232 个数据源**,已全部做过联通验证(实抓 + 接口可达性探测):
-**931 个(76%)联通正常**,其中 **491 个当前即可取数、310 个取数需付费(已验证)、
-64 个为免费官方 API**;240 个不可联通,61 个无链接可验证。这直接决定各模块接口的数据丰度:
+**931 个(76%)联通正常**,其中 **519 个当前即可取数(2026-08-02 起 FMP 付费 key
+已接入,28 个 FMP 源转为出数)、282 个取数需付费待开通、64 个为免费官方 API**;
+240 个不可联通,61 个无链接可验证。这直接决定各模块接口的数据丰度:
 
 | 模块 | 源数 | ✅可取数 | 数据现状与说明 |
 |---|---|---|---|
 | `news` | 385 | 335 | ✅ 最丰富,日增数千条 |
 | `channel` | 316 | 112 | ✅ 播客/博客/YouTube;126 个链接失效/不可达,61 个无链接 |
 | `person` | 286 | 0 | 🟡 **256 个源联通正常但需付费(twitterapi.io,$0.15/千条),开通后即有数据** |
-| `market` | 59 | 3 | 🟡 29 个需付费(FMP 等);🟢 18 个免费官方 API 联通正常 |
-| `macro` | 50 | 3 | 🟢 24 个免费官方统计 API(世行/央行等)联通正常;19 个不可联通 |
+| `market` | 59 | 24 | ✅ **FMP 已接入(2026-08-02)**:9 家交易所行情、指数/外汇/加密/商品、美债收益率曲线共 21 源实际出数;🟢 18 个免费官方 API 联通正常 |
+| `macro` | 50 | 3 | 🟢 24 个免费官方统计 API(世行/央行等)联通正常;19 个不可联通;FRED 插件已装待服务器端验证 |
 | `opinion` | 42 | 5 | ❌ 30 个不可联通(微博/知乎/Reddit 反爬) |
-| `calendar` | 39 | 8 | 🟢 11 个免费联通;🟡 7 个需付费 |
-| `company` | 33 | 12 | 🟡 另有 12 个需付费 |
-| `events` | 22 | 13 | ✅ GDELT 可用(偶发限流);🟡 4 个需付费。注:注册表在此页还登记了 GitHub/Show HN 技术事件源(条目量大),按 `source_id` 可区分 |
+| `calendar` | 39 | 13 | ✅ 含 5 个 FMP 日历源(财报/分红/IPO/经济,已接入);🟡 Finnhub 经济日历需升级套餐 |
+| `company` | 33 | 12 | 🟡 FMP key 已配,财务源待在注册表「账号」列填监控股票清单后出数;另 11 个需付费 |
+| `events` | 22 | 15 | ✅ GDELT 可用(偶发限流);✅ 2 个 FMP 事件源已接入(并购/IPO);其余 2 个需付费。注:注册表在此页还登记了 GitHub/Show HN 技术事件源(条目量大),按 `source_id` 可区分 |
 
 完整分析(失败原因、解锁路线):[SOURCES_CONNECTIVITY.zh-CN.md](SOURCES_CONNECTIVITY.zh-CN.md);
 逐源明细:[reports/connectivity_report.csv](reports/connectivity_report.csv)。
@@ -314,8 +315,8 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 | `events` | `event_type`, `actors`(string[]), `location`, `cameo_code` |
 | `calendar` | `event_date`, `calendar_type`, `symbol` |
 | `company` | `symbol`, `exchange`, `data_type`, `logo_url` |
-| `market` | `instrument`, `asset_class`, `venue` |
-| `macro` | `country`, `indicator`, `period` |
+| `market` | `instrument`, `asset_class`, `venue`, `symbol`, `price`, `change`, `volume` |
+| `macro` | `country`, `indicator`, `period`, `value` |
 | `opinion` | `platform`, `topic`, `rank`(int) |
 | `channel` | `medium`, `topic`, `lang`, `audio_url`(+`audio_mime`/`audio_duration`), `video_url`(+`video_id`) |
 | `person` | `person`, `platform`, `bio` |
@@ -326,10 +327,12 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 > 有值即返回。
 
 > **填充现状**:`region/topic/platform/medium/asset_class` 等**源侧字段**由注册表
-> 分类在入库时自动回填(含存量,2026-07-07 起);`symbol/exchange/indicator` 等
-> **数值型字段**依赖结构化数据源接入,当前普遍为空。NLP 派生字段(实体/ticker/
-> 情绪)按分工由下游引擎生成,API 不做。Google News 条目解码出的原文链接存于
-> `payload.canonical_url`。
+> 分类在入库时自动回填(含存量,2026-07-07 起)。**数值型字段自 2026-08-02 起
+> 由 FMP/FRED provider 真实填充**:market 行情条目带 `symbol/price/change/volume`,
+> calendar 条目带 `symbol/event_date` 及 EPS/分红/IPO 明细,债市带完整收益率曲线,
+> 经济日历带 `actual/estimate/previous`(需配置对应 API key)。NLP 派生字段
+> (实体/情绪)按分工由下游引擎生成,API 不做。Google News 条目解码出的原文链接
+> 存于 `payload.canonical_url`。
 
 ---
 

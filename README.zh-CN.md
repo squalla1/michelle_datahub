@@ -83,7 +83,8 @@ Excel 注册表 ──> catalog(解析 + 模块标准)
 | 官方RSS / Google News / NewsAPI·RSS 混合 / YouTube / 公众号 | `RssFetcher` | 可用 |
 | RSSHub·微博 / 雪球 / B站 / RSSHub | `RsshubFetcher` | 可用(建议自建并配置 `DATAHUB_RSSHUB_BASE_URL`) |
 | GDELT / ArXiv | `ApiFetcher` provider | 可用,免密钥 |
-| FMP / FRED / twitterapi.io / ACLED | `ApiFetcher` provider | 需 API 密钥 |
+| FMP / FRED / Finnhub | `ApiFetcher` provider | 已实现;FMP 已配 key 实际出数(2026-08-02),FRED 待服务器网络验证,Finnhub 经济日历需付费套餐 |
+| twitterapi.io / ACLED | `ApiFetcher` provider | 需 API 密钥 |
 | 其他 `* API` 方式(AKShare、EIA 等) | `ApiFetcher` | 尚未接入,当前跳过 |
 | 爬虫 / 官方(爬取) | `ScraperFetcher` | 可用(通用链接抽取) |
 | 邮件订阅 | `EmailSubscriptionFetcher` | 桩实现(需邮箱网关) |

@@ -41,22 +41,23 @@ Content is organized into **9 module types**. Every `{module}` path parameter an
 ## Data-source landscape (what the API can serve)
 
 Content comes from **1232 registered sources**, all connectivity-verified (live
-fetch + endpoint reachability probe): **931 (76%) are reachable** — 491 serve data
-right now, 310 are reachable but **pay-gated (verified)**, 64 are free official
-APIs; 240 are unreachable and 61 have no URL to test. This directly shapes how
-much data each module endpoint serves:
+fetch + endpoint reachability probe): **931 (76%) are reachable** — 519 serve data
+right now (since 2026-08-02 the paid FMP key is wired in, moving 28 FMP sources
+into production), 282 remain pay-gated, 64 are free official APIs; 240 are
+unreachable and 61 have no URL to test. This directly shapes how much data each
+module endpoint serves:
 
 | module | sources | ✅ serving data | availability notes |
 |---|---|---|---|
 | `news` | 385 | 335 | ✅ richest; thousands of new items/day |
 | `channel` | 316 | 112 | ✅ podcasts/blogs/YouTube; 126 dead/unreachable links, 61 without URLs |
 | `person` | 286 | 0 | 🟡 **256 sources reachable but paid (twitterapi.io, $0.15/1k) — data flows once subscribed** |
-| `market` | 59 | 3 | 🟡 29 pay-gated (FMP …); 🟢 18 free official APIs reachable |
-| `macro` | 50 | 3 | 🟢 24 free official statistics APIs reachable; 19 unreachable |
+| `market` | 59 | 24 | ✅ **FMP wired in (2026-08-02)**: 9 exchange quote feeds, index/forex/crypto/commodity quotes, and the US Treasury yield curve — 21 sources serving; 🟢 18 free official APIs reachable |
+| `macro` | 50 | 3 | 🟢 24 free official statistics APIs reachable; 19 unreachable; FRED provider installed, pending server-side verification |
 | `opinion` | 42 | 5 | ❌ 30 unreachable (Weibo/Zhihu/Reddit anti-bot) |
-| `calendar` | 39 | 8 | 🟢 11 free reachable; 🟡 7 pay-gated |
-| `company` | 33 | 12 | 🟡 plus 12 pay-gated |
-| `events` | 22 | 13 | ✅ GDELT works (occasional rate limits); 🟡 4 pay-gated. Note: the registry also lists a high-volume GitHub/Show HN tech-events source on this tab — filter by `source_id` to separate |
+| `calendar` | 39 | 13 | ✅ incl. 5 FMP calendars (earnings/dividends/IPO/economic, wired in); 🟡 Finnhub economic calendar needs a paid plan |
+| `company` | 33 | 12 | 🟡 FMP key configured — the financials source starts serving once a ticker watchlist is set in the registry's 账号 column; 11 others pay-gated |
+| `events` | 22 | 15 | ✅ GDELT works (occasional rate limits); ✅ 2 FMP event sources wired in (M&A/IPO); 2 others pay-gated. Note: the registry also lists a high-volume GitHub/Show HN tech-events source on this tab — filter by `source_id` to separate |
 
 Full analysis (failure taxonomy, unlock roadmap):
 [SOURCES_CONNECTIVITY.zh-CN.md](SOURCES_CONNECTIVITY.zh-CN.md); per-source detail:
@@ -324,8 +325,8 @@ Every module allows extra keys (`extra="allow"`), but these are the declared fie
 | `events` | `event_type`, `actors` (string[]), `location`, `cameo_code` |
 | `calendar` | `event_date`, `calendar_type`, `symbol` |
 | `company` | `symbol`, `exchange`, `data_type`, `logo_url` |
-| `market` | `instrument`, `asset_class`, `venue` |
-| `macro` | `country`, `indicator`, `period` |
+| `market` | `instrument`, `asset_class`, `venue`, `symbol`, `price`, `change`, `volume` |
+| `macro` | `country`, `indicator`, `period`, `value` |
 | `opinion` | `platform`, `topic`, `rank` (int) |
 | `channel` | `medium`, `topic`, `lang`, `audio_url` (+`audio_mime`/`audio_duration`), `video_url` (+`video_id`) |
 | `person` | `person`, `platform`, `bio` |
@@ -337,11 +338,14 @@ Every module allows extra keys (`extra="allow"`), but these are the declared fie
 
 > **Population status:** source-intrinsic fields (`region/topic/platform/medium/
 > asset_class` …) are auto-filled at ingest from the registry's categories
-> (including backfilled history, since 2026-07-07); numeric fields
-> (`symbol/exchange/indicator`) depend on structured sources and are mostly empty
-> for now. NLP-derived fields (entities/tickers/sentiment) are the downstream
-> engine's job, not the API's. For Google News items the decoded origin link is
-> stored in `payload.canonical_url`.
+> (including backfilled history, since 2026-07-07). **Numeric fields are filled
+> for real since 2026-08-02 by the FMP/FRED providers**: market quote items carry
+> `symbol/price/change/volume`, calendar items carry `symbol/event_date` plus
+> EPS/dividend/IPO details, bond items a full yield curve, and the economic
+> calendar `actual/estimate/previous` (requires the provider API keys).
+> NLP-derived fields (entities/sentiment) are the downstream engine's job, not
+> the API's. For Google News items the decoded origin link is stored in
+> `payload.canonical_url`.
 
 ---
 

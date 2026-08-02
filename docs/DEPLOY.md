@@ -34,9 +34,9 @@ Optional:
 |---|---|---|
 | `DATAHUB_CATALOG_PATH` | `data/….xlsx` | registry path (relative to working dir) |
 | `DATAHUB_REPORT_DIR` | `reports` | per-refresh stats reports |
-| `DATAHUB_REFRESH_ALL_HOURS` | `2` | global refresh cadence; `0` disables |
+| `DATAHUB_REFRESH_ALL_HOURS` | `4` | global refresh cadence; `0` disables |
 | `DATAHUB_RSSHUB_BASE_URL` | public instance (unreliable) | self-hosted RSSHub |
-| `DATAHUB_*_API_KEY` | empty | provider keys (twitterapi.io/FMP/FRED/ACLED) |
+| `DATAHUB_*_API_KEY` | empty | provider keys (FMP/FRED/Finnhub/twitterapi.io/ACLED …, see `.env.example`) |
 
 ## 2. Option A: Docker Compose
 

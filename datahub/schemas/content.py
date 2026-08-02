@@ -64,6 +64,11 @@ class MarketPayload(BaseModel):
     instrument: str | None = None
     asset_class: str | None = None
     venue: str | None = None
+    # structured quote fields (FMP provider, since 2026-08-02)
+    symbol: str | None = None
+    price: float | None = None
+    change: float | None = None
+    volume: float | None = None
 
 
 class MacroPayload(BaseModel):
@@ -71,6 +76,7 @@ class MacroPayload(BaseModel):
     country: str | None = None
     indicator: str | None = None
     period: str | None = None
+    value: float | None = None  # numeric observation (FRED provider)
 
 
 class OpinionPayload(BaseModel):

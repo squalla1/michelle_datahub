@@ -57,19 +57,19 @@ MODULES: tuple[ModuleSpec, ...] = (
     ModuleSpec(
         ModuleKey.COMPANY, "4_公司", "公司",
         item_title="公司名称",
-        payload_fields=("symbol", "exchange", "data_type"),
+        payload_fields=("symbol", "exchange", "data_type", "logo_url"),
         note="Company profile / financials / valuation / filings / analyst / sentiment.",
     ),
     ModuleSpec(
         ModuleKey.MARKET, "5_市场", "市场",
         item_title="可交易对象",
-        payload_fields=("instrument", "asset_class", "venue"),
+        payload_fields=("instrument", "asset_class", "venue", "symbol", "price", "change", "volume"),
         note="Primary/secondary markets, bonds, commodities, forex, crypto, prediction.",
     ),
     ModuleSpec(
         ModuleKey.MACRO, "6_宏观", "宏观",
         item_title="区域/国家指标",
-        payload_fields=("country", "indicator", "period"),
+        payload_fields=("country", "indicator", "period", "value"),
         note="Official macro releases (GDP / CPI / PMI / employment ...).",
     ),
     ModuleSpec(
@@ -81,7 +81,7 @@ MODULES: tuple[ModuleSpec, ...] = (
     ModuleSpec(
         ModuleKey.CHANNEL, "8_关键频道", "关键频道",
         item_title="频道条目",
-        payload_fields=("medium", "topic", "lang"),
+        payload_fields=("medium", "topic", "lang", "audio_url", "video_url"),
         note="Podcasts / blogs / newsletters / YouTube, by L1=medium.",
     ),
     ModuleSpec(

@@ -103,7 +103,9 @@ Package responsibilities (`datahub/`):
 - **Adding an API provider** (paid/keyed source): add a `ProviderFn` to
   `fetchers/api.py` `PROVIDERS`, keyed by a lowercase substring of the `方式` value.
   Use `_needs_key(...)` to gracefully skip until the credential is set. GDELT and
-  ArXiv are the key-free reference implementations.
+  ArXiv are the key-free reference implementations; FMP (registry-row → /stable
+  endpoint routing), FRED (series from URL/账号 column), and Finnhub are the keyed
+  ones (keys in `.env`, see `docs/ops/数据源Key接入_2026-08-02.md`).
 - **Module definitions are centralized** in `catalog/module_spec.py` and mirrored by
   `schemas/content.py` `CONTENT_SCHEMAS`. Change both together when adding/altering a
   module so the standard and its validator stay in sync.

@@ -64,8 +64,14 @@ class Settings(BaseSettings):
     # Optional external provider credentials (only needed for paid/API sources).
     fmp_api_key: str | None = None
     fred_api_key: str | None = None
+    finnhub_api_key: str | None = None
     twitterapi_io_key: str | None = None
     acled_api_key: str | None = None
+    # Keys held for future providers (no registry source uses them yet).
+    alpha_vantage_api_key: str | None = None
+    massive_api_key: str | None = None      # Massive (formerly Polygon.io)
+    newsapi_org_key: str | None = None      # newsapi.org (≠ newsapi.ai)
+    tushare_token: str | None = None
 
 
 @lru_cache

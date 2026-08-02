@@ -88,7 +88,8 @@ payload model per module on top of a shared `BaseContentItem`.
 | 官方RSS / Google News / NewsAPI·RSS hybrids / YouTube / 公众号 | `RssFetcher` | live |
 | RSSHub·微博 / 雪球 / B站 / RSSHub | `RsshubFetcher` | live (set `DATAHUB_RSSHUB_BASE_URL`) |
 | GDELT / ArXiv | `ApiFetcher` providers | live, key-free |
-| FMP / FRED / twitterapi.io / ACLED | `ApiFetcher` providers | needs API key |
+| FMP / FRED / Finnhub | `ApiFetcher` providers | implemented; FMP live with key since 2026-08-02, FRED pending server-side network check, Finnhub economic calendar needs a paid plan |
+| twitterapi.io / ACLED | `ApiFetcher` providers | needs API key |
 | Other `* API` methods (AKShare, EIA, …) | `ApiFetcher` | not yet integrated; skipped |
 | 爬虫 / 官方(爬取) | `ScraperFetcher` | live (generic link extraction) |
 | 邮件订阅 | `EmailSubscriptionFetcher` | stub (needs mailbox bridge) |

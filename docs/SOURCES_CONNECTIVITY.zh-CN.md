@@ -9,6 +9,12 @@
 > (分表版在 [`reports/连通标注_2026-07-04_分表/`](reports/连通标注_2026-07-04_分表));
 > 逐源明细 CSV:[`reports/connectivity_report.csv`](reports/connectivity_report.csv)。
 
+> **2026-08-02 更新**:FMP 付费 key 已接入,原「🟡 联通·需付费」中的 29 个 FMP 源
+> 有 28 个转为实际出数(company 财务源 1 个待在注册表「账号」列配置监控股票清单);
+> Finnhub key 已配但其经济日历接口需升级套餐;twitterapi.io(262 源)仍待商务开通。
+> 下文统计维持 2026-07-04 快照口径,本次增量详见
+> [`ops/数据源Key接入_2026-08-02.md`](ops/数据源Key接入_2026-08-02.md)。
+
 ## 标注口径
 
 | 标注 | 含义 | 验证方式 |
