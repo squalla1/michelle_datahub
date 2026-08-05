@@ -305,13 +305,19 @@ filtered). Use this for search/pagination across types.
 | `module` | query | string | — | filter by module key |
 | `source_id` | query | int | — | filter by owning source |
 | `date` | query | date | — | calendar day (UTC); no default |
-| `by` | query | `published` \| `fetched` | `published` | date field for the `date` filter |
+| `by` | query | `published` \| `fetched` | `published` | date field the `date` filter applies to (**filtering only — it does not change the sort**) |
+| `order` | query | `fetched` \| `published` | `fetched` | sort field, newest first |
 | `since` | query | datetime | — | `published_at >= since` |
 | `q` | query | string | — | substring match on `title` |
 | `limit` | query | int (1–500) | 50 | page size |
 | `offset` | query | int | 0 | pagination offset |
 
-Ordering is by `fetched_at` descending.
+Ordering is newest-first on `order` (default `fetched_at`), with `id` descending as
+the tiebreaker — a whole batch (e.g. one day's treasury curve) shares a single
+`fetched_at`, so without it the batch order would be arbitrary.
+
+Note that `published_at` carries module-specific semantics: for `calendar` items it is
+the **event date**, so freshly fetched rows can legitimately show years-old dates.
 
 **Response:** `ContentItemOut[]`
 

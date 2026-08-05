@@ -15,7 +15,7 @@ import httpx
 
 from ..config import get_settings
 from ..models import utcnow
-from .base import Fetcher, FetchResult, RawItem
+from .base import Fetcher, FetchResult, RawItem, http_options
 
 ProviderFn = Callable[[object, "ApiFetcher"], FetchResult]
 
@@ -107,7 +107,7 @@ def _parse_dt(value: str | None) -> datetime | None:
     """Parse the provider date formats into naive UTC."""
     if not value:
         return None
-    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
         try:
             return datetime.strptime(value[: len("2026-01-01 00:00:00")], fmt)
         except ValueError:
@@ -198,6 +198,9 @@ def _fmp_items(kind: str, data, cap: int) -> list[RawItem]:
                 continue
             payload = {k: v for k, v in r.items() if v is not None}
             payload.setdefault("event_date", date)
+            # The registry's L2 would otherwise label every row "美股", but these
+            # feeds are global (8031.T, DOMS.NS). The event kind is the truth.
+            payload["calendar_type"] = label
             items.append(RawItem(
                 external_id=f"{kind}:{sym}:{date}",
                 title=f"{r.get('company') or sym} {label} {date}",
@@ -211,7 +214,8 @@ def _fmp_items(kind: str, data, cap: int) -> list[RawItem]:
                 external_id=f"eco:{r.get('country')}:{event}:{date}",
                 title=f"[{r.get('country')}] {event}",
                 published_at=_parse_dt(date),
-                payload={k: v for k, v in r.items() if v is not None}))
+                payload={**{k: v for k, v in r.items() if v is not None},
+                         "calendar_type": "经济", "event_date": date}))
     elif kind == "ma":
         for r in rows[:cap]:
             target = r.get("targetedCompanyName")
@@ -222,6 +226,9 @@ def _fmp_items(kind: str, data, cap: int) -> list[RawItem]:
                 published_at=_parse_dt(r.get("transactionDate") or r.get("acceptedDate")),
                 payload={k: v for k, v in r.items() if v is not None and k != "link"}))
     elif kind == "treasury":
+        # FMP returns the window in ascending date order and lags 1-2 days —
+        # sort desc so the newest curve is the one that survives the cap.
+        rows = sorted(rows, key=lambda r: r.get("date") or "", reverse=True)
         for r in rows[:5]:  # daily curve snapshots
             date = r.get("date")
             items.append(RawItem(
@@ -259,7 +266,15 @@ def _fmp(source, fetcher: "ApiFetcher") -> FetchResult:
 
 # ---- FRED (St. Louis Fed, free key) ----------------------------------------
 
-_FRED_DEFAULT_SERIES = ("DFF", "DGS2", "DGS10", "T10Y2Y")
+# Default macro basket for generic FRED rows: rates + inflation + labour +
+# activity + money (the registry's 账号 column overrides it per row).
+_FRED_DEFAULT_SERIES = (
+    "DFF", "DGS2", "DGS10", "T10Y2Y",          # policy & curve
+    "CPIAUCSL", "CPILFESL", "PCEPILFE",        # inflation
+    "UNRATE", "PAYEMS",                        # labour
+    "INDPRO", "GDPC1", "BOPGSTB",              # activity & trade
+    "M2SL",                                    # money
+)
 _FRED_TREASURY_SERIES = ("DGS1MO", "DGS3MO", "DGS2", "DGS10", "DGS30")
 
 
@@ -330,6 +345,54 @@ def _finnhub(source, fetcher: "ApiFetcher") -> FetchResult:
     return FetchResult(items=items, status="ok")
 
 
+# ---- StockTwits (public API, no key) ---------------------------------------
+
+_STOCKTWITS_TRENDING = "https://api.stocktwits.com/api/2/streams/trending.json"
+
+
+def _stocktwits(source, fetcher: "ApiFetcher") -> FetchResult:
+    """Trending ticker chatter. Serves both registry rows carrying 方式=公开API
+    (opinion 趋势榜 and the company-side Stocktwits row); other 公开API rows are
+    reported as unmapped rather than silently skipped."""
+    if "stocktwits" not in (source.url or "").lower():
+        return FetchResult(status="skipped",
+                           note=f"no API provider plugin for '{source.method}' at {source.url}")
+    try:
+        resp = fetcher.client.get(_STOCKTWITS_TRENDING)
+        resp.raise_for_status()
+        messages = resp.json().get("messages", [])
+    except (httpx.HTTPError, ValueError) as exc:
+        return FetchResult(status="error", note=f"stocktwits: {exc}")
+
+    items: list[RawItem] = []
+    for m in messages[: fetcher.settings.max_items_per_fetch]:
+        mid, body = m.get("id"), (m.get("body") or "").strip()
+        if not mid:
+            continue
+        symbols = [s.get("symbol") for s in (m.get("symbols") or []) if s.get("symbol")]
+        user = (m.get("user") or {}).get("username")
+        payload: dict = {"platform": "StockTwits"}
+        if symbols:
+            payload["symbol"] = symbols[0]
+            payload["symbols"] = symbols
+        sentiment = ((m.get("entities") or {}).get("sentiment") or {}).get("basic")
+        if sentiment:
+            payload["sentiment"] = sentiment
+        for p in m.get("prices") or []:
+            if p.get("symbol") == payload.get("symbol") and p.get("price"):
+                payload["price"] = float(p["price"])
+                break
+        items.append(RawItem(
+            external_id=f"st:{mid}",
+            title=body[:200] or f"StockTwits {mid}",
+            url=f"https://stocktwits.com/{user}/message/{mid}" if user else None,
+            summary=body or None,
+            published_at=_parse_dt(m.get("created_at")),
+            payload=payload))
+    return FetchResult(items=items, status="ok",
+                       note=None if items else "stocktwits: empty stream")
+
+
 # method keyword (lowercase substring) -> provider function
 PROVIDERS: dict[str, ProviderFn] = {
     "gdelt": _gdelt,
@@ -339,6 +402,7 @@ PROVIDERS: dict[str, ProviderFn] = {
     "finnhub": _finnhub,
     "twitterapi.io": _needs_key("twitterapi.io", "twitterapi_io_key"),
     "acled": _needs_key("ACLED", "acled_api_key"),
+    "公开api": _stocktwits,
 }
 
 
@@ -352,11 +416,7 @@ class ApiFetcher(Fetcher):
 
     def __init__(self) -> None:
         self.settings = get_settings()
-        self.client = httpx.Client(
-            timeout=self.settings.request_timeout,
-            headers={"User-Agent": self.settings.user_agent},
-            follow_redirects=True,
-        )
+        self.client = httpx.Client(**http_options(self.settings))
 
     def supports(self, method: str | None) -> bool:
         if not super().supports(method):

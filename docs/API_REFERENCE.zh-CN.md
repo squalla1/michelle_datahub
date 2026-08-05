@@ -295,13 +295,18 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 | `module` | query | string | — | 按模块 key 过滤 |
 | `source_id` | query | int | — | 按所属源过滤 |
 | `date` | query | date | — | 日历日(UTC);无默认 |
-| `by` | query | `published` \| `fetched` | `published` | `date` 过滤所用时间字段 |
+| `by` | query | `published` \| `fetched` | `published` | `date` 过滤所用时间字段(**只影响过滤,不影响排序**) |
+| `order` | query | `fetched` \| `published` | `fetched` | 排序字段,倒序(最新在前) |
 | `since` | query | datetime | — | `published_at >= since` |
 | `q` | query | string | — | 标题子串匹配 |
 | `limit` | query | int(1–500) | 50 | 页大小 |
 | `offset` | query | int | 0 | 分页偏移 |
 
-按 `fetched_at` 倒序。
+按 `order` 字段倒序(默认 `fetched_at`),并以 `id` 倒序作为第二排序键 —— 同一批写入的
+条目(如某日的美债收益率曲线)共享同一个 `fetched_at`,没有第二排序键时批内顺序不确定。
+
+注意 `published_at` 的语义随模块而变:`calendar` 条目的 `published_at` 是**事件日期**,
+所以刚抓回来的条目也可能显示很早的日期。
 
 **响应:** `ContentItemOut[]`
 

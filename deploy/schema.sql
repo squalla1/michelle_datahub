@@ -86,9 +86,12 @@ CREATE INDEX IF NOT EXISTS ix_content_item_module       ON content_item (module)
 CREATE INDEX IF NOT EXISTS ix_content_item_published_at ON content_item (published_at);
 CREATE INDEX IF NOT EXISTS ix_content_item_fetched_at   ON content_item (fetched_at);
 
--- Optional: speeds up the per-type "today's latest N" endpoint
--- (GET /api/v1/content/{module}?date=...). Uncomment if that path is hot.
--- CREATE INDEX IF NOT EXISTS ix_content_module_published
---     ON content_item (module, published_at DESC);
+-- Per-type feed (GET /api/v1/content/{module}) — "one module, newest first".
+-- Required, not optional: without these the fallback for a module with no rows
+-- today is a full scan (person: 7.6s vs ~1.5s for populated modules).
+CREATE INDEX IF NOT EXISTS ix_content_module_fetched
+    ON content_item (module, fetched_at);
+CREATE INDEX IF NOT EXISTS ix_content_module_published
+    ON content_item (module, published_at);
 
 COMMIT;

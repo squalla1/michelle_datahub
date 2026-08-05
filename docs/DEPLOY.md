@@ -35,7 +35,9 @@ Optional:
 | `DATAHUB_CATALOG_PATH` | `data/….xlsx` | registry path (relative to working dir) |
 | `DATAHUB_REPORT_DIR` | `reports` | per-refresh stats reports |
 | `DATAHUB_REFRESH_ALL_HOURS` | `4` | global refresh cadence; `0` disables |
-| `DATAHUB_RSSHUB_BASE_URL` | public instance (unreliable) | self-hosted RSSHub |
+| `DATAHUB_RSSHUB_BASE_URL` | public instance (403s every route) | self-hosted RSSHub — required for the 52 RSSHub sources |
+| `DATAHUB_HTTP_PROXY` | empty | egress proxy for all fetches (Reddit 429s datacenter IPs) |
+| `DATAHUB_FULLTEXT_WORKERS` | `4` | concurrent article fetches; lower on a small host |
 | `DATAHUB_*_API_KEY` | empty | provider keys (FMP/FRED/Finnhub/twitterapi.io/ACLED …, see `.env.example`) |
 
 ## 2. Option A: Docker Compose

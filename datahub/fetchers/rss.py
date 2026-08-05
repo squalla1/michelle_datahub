@@ -4,13 +4,14 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from datetime import datetime
 
 import feedparser
 import httpx
 
 from ..config import get_settings
-from .base import Fetcher, FetchResult, RawItem
+from .base import Fetcher, FetchResult, RawItem, http_options
 
 
 def _entry_id(entry, source_name: str) -> str:
@@ -98,12 +99,7 @@ class RssFetcher(Fetcher):
         if not url or not url.startswith("http"):
             return FetchResult(status="skipped", note="no fetchable URL")
         try:
-            resp = httpx.get(
-                url,
-                timeout=self._settings.request_timeout,
-                headers={"User-Agent": self._settings.user_agent},
-                follow_redirects=True,
-            )
+            resp = httpx.get(url, **http_options(self._settings))
             resp.raise_for_status()
         except httpx.HTTPError as exc:
             return FetchResult(status="error", note=f"http: {exc}")
@@ -125,21 +121,85 @@ class RssFetcher(Fetcher):
                     payload=payload,
                 )
             )
-        note = None if items else "feed parsed but empty"
-        return FetchResult(items=items, status="ok", note=note)
+        if items:
+            return FetchResult(items=items, status="ok")
+        # A response that isn't a feed at all (anti-bot page, HTML homepage,
+        # Cloudflare challenge) used to be recorded as a healthy empty run —
+        # surface it as an error so the monitor shows the source is broken.
+        if not getattr(feed, "version", ""):
+            return FetchResult(status="error", note=f"not a feed ({url}); blocked page or wrong URL")
+        return FetchResult(items=[], status="ok", note="feed parsed but empty")
+
+
+# Site URL -> RSSHub route. The registry's 链接 column holds the human-facing
+# page for most RSSHub rows; RSSHub itself needs its own path, so map them.
+# `{}` is filled with the trailing id captured from the site URL.
+_RSSHUB_ROUTES: tuple[tuple[re.Pattern, str], ...] = (
+    (re.compile(r"^https?://s\.weibo\.com/top/summary"), "/weibo/search/hot"),
+    (re.compile(r"^https?://(?:www\.|m\.)?weibo\.c(?:om|n)/u/(\d+)"), "/weibo/user/{}"),
+    (re.compile(r"^https?://xueqiu\.com/u/(\d+)"), "/xueqiu/user/{}"),
+    (re.compile(r"^https?://xueqiu\.com/today"), "/xueqiu/today"),
+    (re.compile(r"^https?://xueqiu\.com/hq"), "/xueqiu/hots"),
+    (re.compile(r"^https?://space\.bilibili\.com/(\d+)"), "/bilibili/user/video/{}"),
+    (re.compile(r"^https?://www\.bilibili\.com/v/popular/all"), "/bilibili/popular/all"),
+    (re.compile(r"^https?://www\.zhihu\.com/billboard"), "/zhihu/hotlist"),
+    (re.compile(r"^https?://m\.okjike\.com/topics/(\w+)"), "/jike/topic/{}"),
+    (re.compile(r"^https?://www\.threads\.net/@([\w.]+)"), "/threads/{}"),
+    (re.compile(r"^https?://www\.pbc\.gov\.cn/?$"), "/gov/pbc"),
+)
+
+# Rows whose URL is a weibo *vanity* name (weibo.com/leijun) can't be routed:
+# RSSHub's /weibo/user/:uid takes a numeric uid only.
+_WEIBO_VANITY = re.compile(r"^https?://(?:www\.|m\.)?weibo\.c(?:om|n)/(?!u/)([\w.-]+)/?$")
 
 
 class RsshubFetcher(RssFetcher):
-    """RSSHub sources (RSSHub·微博 / 雪球 / B站(RSSHub) / RSSHub). If the row
-    only carries an RSSHub *path*, prefix the configured RSSHub base URL."""
+    """RSSHub sources (RSSHub·微博 / 雪球 / B站(RSSHub) / RSSHub).
+
+    The registry stores three shapes in the 链接 column and all three must end
+    up as `<rsshub_base_url>/<route>`:
+    - a bare RSSHub path (`/weibo/search/hot`) — prefixed;
+    - the `RSSHUB_HOST` placeholder the workbook uses — substituted;
+    - the site's own page (`https://s.weibo.com/top/summary`) — mapped via
+      `_RSSHUB_ROUTES`, otherwise the row is skipped with a reason instead of
+      silently hitting the site itself (which returns an anti-bot page)."""
 
     method_keywords = ("rsshub",)
 
-    def _resolve_url(self, source) -> str | None:
-        url = source.url
+    def _route_for(self, source) -> str | None:
+        """RSSHub path for this row, or None when it can't be routed."""
+        url = (source.url or "").strip()
+        # The method column sometimes carries the route: "RSSHub /gov/pbc".
+        for token in (source.method or "").split():
+            if token.startswith("/"):
+                return token
         if not url:
             return None
-        if url.startswith("http"):
-            return url
+        if "RSSHUB_HOST" in url:
+            return "/" + url.split("RSSHUB_HOST", 1)[1].lstrip("/")
+        if not url.startswith("http"):
+            return "/" + url.lstrip("/")
+        for pattern, route in _RSSHUB_ROUTES:
+            m = pattern.match(url)
+            if m:
+                return route.format(*m.groups()) if m.groups() else route
+        return None
+
+    def _resolve_url(self, source) -> str | None:
+        route = self._route_for(source)
+        if not route:
+            return None
         base = self._settings.rsshub_base_url.rstrip("/")
-        return f"{base}/{url.lstrip('/')}"
+        return f"{base}/{route.lstrip('/')}"
+
+    def fetch(self, source) -> FetchResult:
+        if self._route_for(source) is None:
+            url = (source.url or "").strip()
+            if _WEIBO_VANITY.match(url):
+                return FetchResult(
+                    status="skipped",
+                    note="RSSHub: 微博 route needs the numeric uid "
+                         f"(registry has the vanity name '{url}')")
+            return FetchResult(status="skipped",
+                               note=f"RSSHub: no route mapping for '{url}'")
+        return super().fetch(source)

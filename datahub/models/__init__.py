@@ -9,6 +9,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -95,6 +96,11 @@ class ContentItem(Base):
     __tablename__ = "content_item"
     __table_args__ = (
         UniqueConstraint("source_id", "external_id", name="uq_content"),
+        # Every feed query is "one module, newest first" — without this the
+        # per-type endpoint's fallback (module with no rows today) degrades into
+        # a full scan: person took 7.6s vs ~1.5s for populated modules.
+        Index("ix_content_module_fetched", "module", "fetched_at"),
+        Index("ix_content_module_published", "module", "published_at"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)

@@ -8,6 +8,20 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 
+def http_options(settings, *, user_agent: str | None = None) -> dict:
+    """Shared httpx kwargs for every outbound fetch: UA, timeout, redirects and
+    the optional egress proxy (`DATAHUB_HTTP_PROXY`). Accepted by both
+    `httpx.get(...)` and `httpx.Client(...)`."""
+    opts: dict = {
+        "timeout": settings.request_timeout,
+        "headers": {"User-Agent": user_agent or settings.user_agent},
+        "follow_redirects": True,
+    }
+    if getattr(settings, "http_proxy", None):
+        opts["proxy"] = settings.http_proxy
+    return opts
+
+
 @dataclass
 class RawItem:
     external_id: str

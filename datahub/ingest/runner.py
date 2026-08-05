@@ -132,7 +132,9 @@ def run_source(source_id: int) -> dict:
         run.status = result.status
         run.item_count = len(result.items)
         run.new_count = new_count
-        run.error = result.note if result.status in {"error", "skipped"} else None
+        # Keep the note even on a successful run: "feed parsed but empty" is the
+        # only trace left when a source silently stops producing items.
+        run.error = result.note
         run.finished_at = utcnow()
 
         try:

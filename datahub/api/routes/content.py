@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/v1/content", tags=["content"])
 _MODULE_KEYS = {m.key.value for m in MODULES}
 
 
-def _date_column(by: str):
+def _date_column(by: str, param: str = "by"):
     """Pick which timestamp the `date` filter and ordering apply to.
 
     `published` = when the item was published by the source (semantic date, but
@@ -36,7 +36,7 @@ def _date_column(by: str):
         return ContentItem.fetched_at
     if by == "published":
         return ContentItem.published_at
-    raise HTTPException(422, detail="by must be 'published' or 'fetched'")
+    raise HTTPException(422, detail=f"{param} must be 'published' or 'fetched'")
 
 
 def _day_bounds(day: date_cls) -> tuple[datetime, datetime]:
@@ -50,7 +50,8 @@ def list_content(
     module: str | None = None,
     source_id: int | None = None,
     date: date_cls | None = Query(None, description="calendar day (UTC) to filter, e.g. 2026-06-22"),
-    by: str = Query("published", description="date field: 'published' or 'fetched'"),
+    by: str = Query("published", description="date field the `date` filter applies to: 'published' or 'fetched'"),
+    order: str = Query("fetched", description="sort field: 'fetched' (default) or 'published'"),
     since: datetime | None = Query(None, description="filter published_at >= since"),
     q: str | None = Query(None, description="substring match on title"),
     limit: int = Query(50, ge=1, le=500),
@@ -58,6 +59,7 @@ def list_content(
     session: Session = Depends(get_session),
 ) -> list[ContentItem]:
     col = _date_column(by)
+    sort_col = _date_column(order, "order")
     stmt = select(ContentItem)
     if module:
         stmt = stmt.where(ContentItem.module == module)
@@ -70,7 +72,14 @@ def list_content(
         stmt = stmt.where(ContentItem.published_at >= since)
     if q:
         stmt = stmt.where(ContentItem.title.ilike(f"%{q}%"))
-    stmt = stmt.order_by(ContentItem.fetched_at.desc()).offset(offset).limit(limit)
+    # `id desc` is the tiebreaker: a whole batch (e.g. one day's treasury curve)
+    # lands with the same fetched_at, and without it the batch order is arbitrary
+    # — the newest snapshot would not reliably come first.
+    stmt = (
+        stmt.order_by(sort_col.desc().nullslast(), ContentItem.id.desc())
+        .offset(offset)
+        .limit(limit)
+    )
     return list(session.scalars(stmt))
 
 

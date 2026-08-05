@@ -14,7 +14,7 @@ import httpx
 from bs4 import BeautifulSoup
 
 from ..config import get_settings
-from .base import Fetcher, FetchResult, RawItem
+from .base import Fetcher, FetchResult, RawItem, http_options
 
 
 class ScraperFetcher(Fetcher):
@@ -27,12 +27,7 @@ class ScraperFetcher(Fetcher):
         if not source.url or not source.url.startswith("http"):
             return FetchResult(status="skipped", note="no fetchable URL")
         try:
-            resp = httpx.get(
-                source.url,
-                timeout=self._settings.request_timeout,
-                headers={"User-Agent": self._settings.user_agent},
-                follow_redirects=True,
-            )
+            resp = httpx.get(source.url, **http_options(self._settings))
             resp.raise_for_status()
         except httpx.HTTPError as exc:
             return FetchResult(status="error", note=f"http: {exc}")

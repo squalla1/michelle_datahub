@@ -64,3 +64,26 @@ def test_unknown_module_is_404(client):
 
 def test_module_isolation(client):
     assert len(client.get("/api/v1/content/events").json()) == 1
+
+
+def test_generic_endpoint_batch_order_is_deterministic(clean_db):
+    """A whole batch lands with one fetched_at (e.g. a day's treasury curve);
+    `id desc` must break the tie so the newest row of the batch comes first."""
+    stamp = datetime(2026, 8, 2, 7, 48, 59)
+    with session_scope() as s:
+        src = DataSource(module="market", tab="5_市场", name="ust", url="http://x", enabled=True)
+        s.add(src)
+        s.flush()
+        for day in (27, 28, 29, 30, 31):     # inserted oldest-first, same fetched_at
+            s.add(ContentItem(source_id=src.id, module="market", external_id=f"ust:{day}",
+                              title=f"curve 2026-07-{day}", fetched_at=stamp,
+                              published_at=datetime(2026, 7, day)))
+    client = TestClient(create_app())
+    titles = [it["title"] for it in client.get("/api/v1/content", params={"module": "market"}).json()]
+    assert titles[0] == "curve 2026-07-31"
+
+
+def test_generic_endpoint_order_by_published(client):
+    r = client.get("/api/v1/content", params={"module": "news", "order": "published", "limit": 1})
+    assert r.json()[0]["title"] == "today 0"
+    assert client.get("/api/v1/content", params={"order": "nope"}).status_code == 422

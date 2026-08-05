@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     user_agent: str = (
         "Mozilla/5.0 (compatible; MichelleDataHub/0.1; +https://example.com/bot)"
     )
+    # Egress proxy for every outbound fetch (e.g. "http://127.0.0.1:7897").
+    # Needed for sources that block datacenter IPs — Reddit answers 429 to the
+    # server's address while the same request succeeds from a residential one.
+    http_proxy: str | None = None
+    # RSSHub instance. The public rsshub.app sits behind Cloudflare and answers
+    # 403 to every route (verified 2026-08-05) — point this at a self-hosted
+    # instance for the 52 RSSHub-routed sources to produce anything.
     rsshub_base_url: str = "https://rsshub.app"
     max_items_per_fetch: int = 100
 
@@ -43,7 +50,18 @@ class Settings(BaseSettings):
     fulltext_enabled: bool = True
     fulltext_interval_minutes: int = 15   # scheduler cadence for the enrich job
     fulltext_batch_size: int = 200        # items per enrich run
+    # Concurrent article fetches. Extraction is CPU-heavy: on a small host this
+    # is what starves the API container (measured 2026-08-05 — /health, which
+    # touches no database, took 1.4-6.7s while the enrich job was running).
+    fulltext_workers: int = 4
     fulltext_max_chars: int = 200_000     # truncate extracted text beyond this
+    # Article pages are fetched with a browser UA (publishers block obvious bots;
+    # WSJ-class sites only return og:image with this one). Feeds keep `user_agent`
+    # on purpose — Reddit rate-limits browser UAs harder than bot UAs.
+    enrich_user_agent: str = (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+    )
 
     # Retention: delete content_item / fetch_run rows older than this many days
     # (by fetched_at / started_at). 0 disables purging.

@@ -56,13 +56,34 @@ def test_fred_series_resolution():
     assert _fred_series(_src("macro", account="DFF,CPIAUCSL")) == ["DFF", "CPIAUCSL"]
     # treasury keyword set
     assert "DGS30" in _fred_series(_src("market", l2="美国国债", name="FRED Treasury Rates"))
-    # generic rates default
-    assert _fred_series(_src("macro", l2="货币/利率", name="Fed FRED")) == [
-        "DFF", "DGS2", "DGS10", "T10Y2Y"]
+    # generic default basket: rates + inflation + labour + activity + money
+    default = _fred_series(_src("macro", l2="货币/利率", name="Fed FRED"))
+    assert default[:4] == ["DFF", "DGS2", "DGS10", "T10Y2Y"]
+    for series in ("CPIAUCSL", "UNRATE", "PAYEMS", "M2SL"):
+        assert series in default
 
 
 def test_parse_dt():
     assert _parse_dt("2026-07-31").day == 31
     assert _parse_dt("2026-07-31 03:00:00").hour == 3
+    assert _parse_dt("2026-08-05T08:05:15Z").hour == 8  # StockTwits ISO form
     assert _parse_dt(None) is None
     assert _parse_dt("n/a") is None
+
+
+def test_calendar_items_labelled_by_event_kind_not_registry():
+    """Registry L2 would tag every row 美股; the feeds are global (8031.T)."""
+    items = _fmp_items("earnings", [{"symbol": "8031.T", "date": "2026-08-03"}], cap=10)
+    assert items[0].payload["calendar_type"] == "财报"
+    assert items[0].payload["event_date"] == "2026-08-03"
+    assert _fmp_items("dividend", [{"symbol": "AAPL", "date": "2026-08-03"}], cap=10)[0] \
+        .payload["calendar_type"] == "分红"
+    eco = _fmp_items("economic", [{"country": "BE", "event": "CPI", "date": "2026-07-30"}], cap=10)
+    assert eco[0].payload["calendar_type"] == "经济"
+
+
+def test_treasury_newest_curve_survives_the_cap():
+    rows = [{"date": f"2026-07-{d:02d}", "month3": 3.9} for d in range(20, 32)]
+    items = _fmp_items("treasury", rows, cap=100)
+    assert [i.payload["date"] for i in items] == [
+        "2026-07-31", "2026-07-30", "2026-07-29", "2026-07-28", "2026-07-27"]

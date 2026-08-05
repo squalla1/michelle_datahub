@@ -106,6 +106,18 @@ Package responsibilities (`datahub/`):
   ArXiv are the key-free reference implementations; FMP (registry-row → /stable
   endpoint routing), FRED (series from URL/账号 column), and Finnhub are the keyed
   ones (keys in `.env`, see `docs/ops/数据源Key接入_2026-08-02.md`).
+- **All outbound HTTP** goes through `fetchers/base.py` `http_options(settings)` so a
+  single `DATAHUB_HTTP_PROXY` covers every fetcher and the enrich job. Feeds use the
+  bot `user_agent`; article extraction uses `enrich_user_agent` (a browser UA —
+  publishers block bots, while Reddit rate-limits browser UAs harder).
+- **RSSHub rows** carry three URL shapes in the registry (bare path, `RSSHUB_HOST`
+  placeholder, the site's own page). `RsshubFetcher._route_for` normalizes all three
+  via `_RSSHUB_ROUTES`; unroutable rows are `skipped` with a reason rather than
+  hitting the site itself. A non-feed response is now an `error` (it used to be
+  recorded as a healthy empty run, hiding 52 dead sources).
+- **Payload fields the registry can't know** (e.g. a calendar row's `calendar_type`)
+  must be set by the fetcher — `ingest/runner.py` `registry_payload` fills defaults
+  from the L1/L2 columns and the fetcher's values win.
 - **Module definitions are centralized** in `catalog/module_spec.py` and mirrored by
   `schemas/content.py` `CONTENT_SCHEMAS`. Change both together when adding/altering a
   module so the standard and its validator stay in sync.

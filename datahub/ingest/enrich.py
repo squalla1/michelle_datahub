@@ -25,6 +25,7 @@ import httpx
 from sqlalchemy import select
 
 from ..config import get_settings
+from ..fetchers.base import http_options
 from ..models import ContentItem
 from ..storage import session_scope
 
@@ -125,12 +126,10 @@ def enrich_fulltext(limit: int | None = None, module: str | None = None) -> dict
         return {"attempted": 0, "extracted": 0, "failed": 0}
 
     client = httpx.Client(
-        timeout=settings.request_timeout,
-        headers={"User-Agent": settings.user_agent},
-        follow_redirects=True,
+        **http_options(settings, user_agent=settings.enrich_user_agent)
     )
     try:
-        with ThreadPoolExecutor(max_workers=8) as pool:
+        with ThreadPoolExecutor(max_workers=settings.fulltext_workers) as pool:
             outs = list(
                 pool.map(lambda t: _extract(t[1], client, settings.fulltext_max_chars), targets)
             )

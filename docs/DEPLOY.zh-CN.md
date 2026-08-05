@@ -33,7 +33,9 @@ DATAHUB_DATABASE_URL=postgresql+psycopg://USER:PASS@<RDS地址>:5432/<库名>
 | `DATAHUB_CATALOG_PATH` | `data/….xlsx` | 注册表路径(相对工作目录) |
 | `DATAHUB_REPORT_DIR` | `reports` | 每轮刷新的统计报告目录 |
 | `DATAHUB_REFRESH_ALL_HOURS` | `4` | 全量刷新周期;`0` 关闭 |
-| `DATAHUB_RSSHUB_BASE_URL` | 公共实例(不可用) | 自建 RSSHub 地址 |
+| `DATAHUB_RSSHUB_BASE_URL` | 公共实例(每条路由都 403) | 自建 RSSHub 地址 — 52 个 RSSHub 源必需 |
+| `DATAHUB_HTTP_PROXY` | 空 | 所有抓取的出口代理(Reddit 对机房 IP 返回 429) |
+| `DATAHUB_FULLTEXT_WORKERS` | `4` | 正文抽取并发数;小机器调低 |
 | `DATAHUB_*_API_KEY` | 空 | provider 密钥(FMP/FRED/Finnhub/twitterapi.io/ACLED 等,见 `.env.example`) |
 
 ## 2. 方式 A:Docker Compose
