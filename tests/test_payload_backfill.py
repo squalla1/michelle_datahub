@@ -53,3 +53,46 @@ def test_run_source_merges_registry_payload_fetcher_wins(clean_db, monkeypatch):
     assert items["a"] == {"platform": "微博", "topic": "财经热搜"}
     # fetcher-provided value wins over the registry-derived one
     assert items["b"]["topic"] == "覆盖值" and items["b"]["platform"] == "微博"
+
+
+def test_calendar_type_is_the_event_kind_not_the_market():
+    """calendar_type was being filled from L2, a region/market ("全球", "美国"),
+    so 35 of 39 calendar sources grouped under a value that is not an event
+    kind. L1 carries the kind; the region moves to calendar_region."""
+    rp = runner_mod.registry_payload
+    assert rp(_src(module="calendar", l1="8. 央行日历", l2="日本")) == {
+        "calendar_type": "央行", "calendar_region": "日本"}
+    assert rp(_src(module="calendar", l1="3. IPO/上市", l2="全球"))["calendar_type"] == "IPO"
+    assert rp(_src(module="calendar", l1="9. 国债拍卖日历", l2="中国"))["calendar_type"] == "国债拍卖"
+    assert rp(_src(module="calendar", l1="6. 监管/Filing日历", l2="港交所信披"))["calendar_type"] == "监管备案"
+    # every mapped value belongs to the published domain
+    for l1 in ("1. 财报日历", "2. 分红/拆股", "4. 公司行动", "5. 公司IR事件",
+               "7. 经济数据日历", "10. 能源/商品报告日历", "11. 加密事件日历", "12. 科技/AI 活动"):
+        assert rp(_src(module="calendar", l1=l1))["calendar_type"] in runner_mod.CALENDAR_TYPES
+
+
+def test_a_future_published_at_from_a_feed_is_rejected(clean_db, monkeypatch):
+    """One Greek news feed stamps articles weeks ahead; such an item pins itself
+    to the top of every order=published stream. calendar/events keep theirs."""
+    from datetime import timedelta
+
+    from datahub.models import utcnow
+
+    ahead = utcnow() + timedelta(days=25)
+    with session_scope() as s:
+        for module, tab in (("news", "1_新闻"), ("calendar", "4_日历")):
+            s.add(DataSource(module=module, tab=tab, name=f"s-{module}", url="http://x",
+                             method="官方RSS", enabled=True))
+        s.flush()
+        ids = {d.module: d.id for d in s.query(DataSource).all()}
+
+    monkeypatch.setattr(runner_mod, "fetch_source", lambda source: FetchResult(
+        items=[RawItem(external_id="a", title="t", published_at=ahead)]))
+    run_source(ids["news"])
+    run_source(ids["calendar"])
+
+    with session_scope() as s:
+        by_module = {c.module: c.published_at for c in s.query(ContentItem).all()}
+    assert by_module["news"] is None                      # dirty timestamp dropped
+    assert by_module["calendar"] is not None              # a scheduled event
+

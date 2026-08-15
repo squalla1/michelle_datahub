@@ -13,7 +13,7 @@ from datetime import date as date_cls
 from datetime import datetime, time, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ...catalog import MODULES
@@ -39,6 +39,22 @@ def _date_column(by: str, param: str = "by"):
     raise HTTPException(422, detail=f"{param} must be 'published' or 'fetched'")
 
 
+def _event_window(stmt, event_from: date_cls | None, event_to: date_cls | None):
+    """Filter on `payload.event_date` — the *scheduled* date of a calendar item,
+    which is what a calendar page pages through (published_at mirrors it, but
+    payload is where the source's own string lives, sometimes with a time part).
+    Values are ISO, so the first 10 characters compare as dates."""
+    if event_from is None and event_to is None:
+        return stmt
+    day = func.substr(ContentItem.payload["event_date"].as_string(), 1, 10)
+    stmt = stmt.where(ContentItem.payload["event_date"].as_string().isnot(None))
+    if event_from is not None:
+        stmt = stmt.where(day >= event_from.isoformat())
+    if event_to is not None:
+        stmt = stmt.where(day <= event_to.isoformat())
+    return stmt
+
+
 def _day_bounds(day: date_cls) -> tuple[datetime, datetime]:
     """[00:00, next-day 00:00) in UTC for a calendar date."""
     start = datetime.combine(day, time.min)
@@ -53,6 +69,8 @@ def list_content(
     by: str = Query("published", description="date field the `date` filter applies to: 'published' or 'fetched'"),
     order: str = Query("fetched", description="sort field: 'fetched' (default) or 'published'"),
     since: datetime | None = Query(None, description="filter published_at >= since"),
+    event_from: date_cls | None = Query(None, description="calendar items with payload.event_date >= this day"),
+    event_to: date_cls | None = Query(None, description="calendar items with payload.event_date <= this day"),
     q: str | None = Query(None, description="substring match on title"),
     limit: int = Query(50, ge=1, le=500),
     offset: int = 0,
@@ -65,6 +83,7 @@ def list_content(
         stmt = stmt.where(ContentItem.module == module)
     if source_id:
         stmt = stmt.where(ContentItem.source_id == source_id)
+    stmt = _event_window(stmt, event_from, event_to)
     if date is not None:
         start, end = _day_bounds(date)
         stmt = stmt.where(col >= start, col < end)
@@ -88,6 +107,8 @@ def list_module_content(
     module: str,
     date: date_cls | None = Query(None, description="calendar day (UTC); defaults to today"),
     by: str = Query("published", description="date field: 'published' or 'fetched'"),
+    event_from: date_cls | None = Query(None, description="calendar items with payload.event_date >= this day"),
+    event_to: date_cls | None = Query(None, description="calendar items with payload.event_date <= this day"),
     q: str | None = Query(None, description="substring match on title"),
     limit: int = Query(50, ge=1, le=500, description="return the latest N items"),
     offset: int = 0,
@@ -101,12 +122,18 @@ def list_module_content(
     When `date` is omitted and today's window is empty (low-frequency modules —
     calendar/macro/market — can go days without new items, and dedup never
     updates `fetched_at`), the endpoint falls back to the latest N items overall
-    instead of returning `[]`. An explicit `date=` never falls back."""
+    instead of returning `[]`. An explicit `date=` never falls back.
+
+    `event_from`/`event_to` select calendar items by their scheduled date
+    (`payload.event_date`) and, being a window of their own, switch off the
+    single-day default; results then come back in ascending event order, which
+    is how a schedule reads."""
     if module not in _MODULE_KEYS:
         raise HTTPException(404, detail=f"unknown module '{module}'; one of {sorted(_MODULE_KEYS)}")
     col = _date_column(by)
     day = date or datetime.now(timezone.utc).date()
     start, end = _day_bounds(day)
+    by_event = event_from is not None or event_to is not None
 
     def _query(day_bounded: bool):
         stmt = select(ContentItem).where(ContentItem.module == module)
@@ -114,10 +141,16 @@ def list_module_content(
             stmt = stmt.where(col >= start, col < end)
         if q:
             stmt = stmt.where(ContentItem.title.ilike(f"%{q}%"))
-        order = col.desc() if day_bounded else col.desc().nullslast()
+        stmt = _event_window(stmt, event_from, event_to)
+        if by_event:
+            order = func.substr(ContentItem.payload["event_date"].as_string(), 1, 10).asc()
+        else:
+            order = col.desc() if day_bounded else col.desc().nullslast()
         stmt = stmt.order_by(order, ContentItem.id.desc()).offset(offset).limit(limit)
         return list(session.scalars(stmt))
 
+    if by_event:
+        return _query(day_bounded=date is not None)
     items = _query(day_bounded=True)
     if not items and date is None:
         items = _query(day_bounded=False)

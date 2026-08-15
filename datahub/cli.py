@@ -21,6 +21,7 @@ import time
 from .config import get_settings
 from .ingest import (
     enrich_fulltext,
+    enrich_images,
     ingest_catalog,
     purge_old_content,
     run_all_sources,
@@ -85,6 +86,7 @@ def _cmd_refresh(args) -> None:
 def _cmd_enrich(args) -> None:
     init_db()
     print(enrich_fulltext(limit=args.limit, module=args.module))
+    print(enrich_images(limit=args.limit, module=args.module))
 
 
 def _cmd_purge(args) -> None:

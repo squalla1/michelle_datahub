@@ -15,7 +15,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy import select
 
 from ..config import get_settings
-from ..ingest.enrich import enrich_fulltext
+from ..ingest.enrich import enrich_fulltext, enrich_images
 from ..ingest.retention import purge_old_content
 from ..ingest.runner import run_all_sources, run_source
 from ..models import DataSource
@@ -50,6 +50,12 @@ def _enrich_job() -> None:
         enrich_fulltext()
     except Exception:
         logger.exception("fulltext enrich job failed")
+    try:
+        # Second pass: items whose text extraction failed can still have a
+        # lead image (a paywalled page renders a teaser with og:image).
+        enrich_images()
+    except Exception:
+        logger.exception("image enrich job failed")
 
 
 def _purge_job() -> None:

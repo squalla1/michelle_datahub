@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import httpx
 from sqlalchemy import select
@@ -56,18 +56,25 @@ def _decode_gnews(url: str) -> str | None:
 
 
 def _page_meta(html: str) -> tuple[datetime | None, str | None]:
-    """(publication date, og:image) from the article page's metadata."""
+    """(publication date, og:image) from the article page's metadata.
+
+    A date is only accepted inside a plausible window. Site skeleton pages carry
+    copyright-era metadata — that is how "List of Governors" entered the央行
+    calendar stamped 1998-01-01 — and a mis-set CMS clock stamps the future."""
     date = image = None
     try:
         import trafilatura
 
-        from ..models import to_naive_utc
+        from ..models import to_naive_utc, utcnow
 
         meta = trafilatura.extract_metadata(html)
         if meta:
             image = getattr(meta, "image", None) or None
             if meta.date:
-                date = to_naive_utc(datetime.fromisoformat(meta.date))
+                parsed = to_naive_utc(datetime.fromisoformat(meta.date))
+                now = utcnow()
+                if parsed and now - timedelta(days=730) <= parsed <= now + timedelta(hours=6):
+                    date = parsed
     except Exception:
         pass
     return date, image
@@ -166,4 +173,69 @@ def enrich_fulltext(limit: int | None = None, module: str | None = None) -> dict
         "images_backfilled": imaged,
     }
     logger.info("fulltext enrich: %s", summary)
+    return summary
+
+
+def enrich_images(limit: int | None = None, module: str | None = None) -> dict:
+    """Second pass: recover a lead image for items whose *text* extraction failed.
+
+    A paywalled article still serves og:image — the page renders a teaser. The
+    first pass gives up on those items for good (fulltext ""), which left the
+    Google-News-wrapped finance sources at ~30% image coverage while the direct
+    feeds sit at 46-67%. Probing them once recovers roughly a third; the probe
+    is recorded in payload.image_probe so it is never repeated."""
+    settings = get_settings()
+    if not settings.fulltext_enabled:
+        return {"enabled": False, "attempted": 0, "images_backfilled": 0}
+    limit = limit or settings.fulltext_batch_size
+
+    with session_scope() as session:
+        stmt = (
+            select(ContentItem.id, ContentItem.url, ContentItem.payload)
+            .where(
+                ContentItem.image_url.is_(None),
+                ContentItem.fulltext == "",
+                ContentItem.payload["image_probe"].as_string().is_(None),
+            )
+            .order_by(ContentItem.id.desc())
+            .limit(limit)
+        )
+        if module:
+            stmt = stmt.where(ContentItem.module == module)
+        targets = [
+            (i, (p or {}).get("canonical_url") or u)
+            for i, u, p in session.execute(stmt)
+        ]
+    targets = [(i, u) for i, u in targets if u and u.startswith("http")]
+    if not targets:
+        return {"attempted": 0, "images_backfilled": 0}
+
+    def _image(url: str) -> str | None:
+        try:
+            resp = client.get(url)
+            resp.raise_for_status()
+        except Exception:
+            return None
+        return _page_meta(resp.text)[1]
+
+    client = httpx.Client(**http_options(settings, user_agent=settings.enrich_user_agent))
+    try:
+        with ThreadPoolExecutor(max_workers=settings.fulltext_workers) as pool:
+            images = list(pool.map(lambda t: _image(t[1]), targets))
+    finally:
+        client.close()
+
+    found = 0
+    with session_scope() as session:
+        for (item_id, _), image in zip(targets, images):
+            item = session.get(ContentItem, item_id)
+            if item is None:
+                continue
+            if image and item.image_url is None:
+                item.image_url = image
+                found += 1
+            item.payload = {**(item.payload or {}), "image_probe": "hit" if image else "miss"}
+
+    summary = {"attempted": len(targets), "images_backfilled": found}
+    logger.info("image enrich: %s", summary)
     return summary

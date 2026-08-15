@@ -32,6 +32,24 @@ class Settings(BaseSettings):
     # instance for the 52 RSSHub-routed sources to produce anything.
     rsshub_base_url: str = "https://rsshub.app"
     max_items_per_fetch: int = 100
+    # SEC requires a self-identifying UA with a contact address; the generic bot
+    # UA gets "Your Request Originates from an Undeclared Automated Tool".
+    sec_user_agent: str = "MichelleDataHub/0.1 (contact: datahub@polarisagi.com)"
+
+    # Calendar sources are forward-looking: a日历 page must answer "what is
+    # coming", so calendar providers are queried over [today-lookback,
+    # today+lookahead]. FMP truncates a calendar response at 4,000 rows in date
+    # DESC order, which silently drops the near dates — so the window is
+    # requested in chunks and merged.
+    calendar_lookback_days: int = 7
+    calendar_lookahead_days: int = 28
+    calendar_window_chunk_days: int = 7
+    # Calendars carry far more rows per fetch than a feed (global earnings alone
+    # run ~4k/month), so they get their own cap instead of max_items_per_fetch.
+    # It is deliberately above the volume of a full window: a *sampled* schedule
+    # is worse than none — the one company a user looks up is the one missing.
+    # The cap is split evenly across the windows so the retro week cannot eat it.
+    calendar_max_items: int = 20_000
 
     # Scheduling — "实时/高频" sources are polled on this interval (seconds).
     realtime_interval_seconds: int = 120
@@ -66,6 +84,10 @@ class Settings(BaseSettings):
     # Retention: delete content_item / fetch_run rows older than this many days
     # (by fetched_at / started_at). 0 disables purging.
     retention_days: int = 7
+    # An item whose source-declared published_at is further in the future than
+    # this is treated as a dirty timestamp (see runner._sanitize_published).
+    # calendar/events are exempt — future dates are the point there.
+    max_future_skew_hours: int = 6
 
     # Media URL templates (empty string disables the field).
     # Source favicon, exposed as DataSourceOut.icon_url / avatar_url; swap for a

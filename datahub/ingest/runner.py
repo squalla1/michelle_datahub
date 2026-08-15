@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy import func, select
@@ -17,6 +17,28 @@ from ..storage import session_scope
 logger = logging.getLogger("datahub.runner")
 
 _NUM_PREFIX = None  # compiled lazily
+
+# calendar_type value domain. Keys are the registry L1 categories of the
+# calendar tab; the FMP provider sets the finer per-event values (财报/分红/
+# 拆股/IPO/经济) itself and those win. Consumers can treat this list as closed.
+CALENDAR_TYPES = (
+    "财报", "分红", "拆股", "IPO", "公司行动", "公司IR", "监管备案",
+    "经济", "央行", "国债拍卖", "能源商品", "加密事件", "科技活动",
+)
+_CALENDAR_TYPE_BY_L1 = (
+    ("财报日历", "财报"),
+    ("分红", "分红"),
+    ("IPO", "IPO"),
+    ("公司行动", "公司行动"),
+    ("公司IR", "公司IR"),
+    ("监管", "监管备案"),
+    ("经济数据", "经济"),
+    ("央行", "央行"),
+    ("国债拍卖", "国债拍卖"),
+    ("能源", "能源商品"),
+    ("加密", "加密事件"),
+    ("科技", "科技活动"),
+)
 
 
 def _strip_num(text: str | None) -> str | None:
@@ -47,8 +69,14 @@ def registry_payload(source: DataSource) -> dict:
         if l2:
             out["event_type"] = l2
     elif m == "calendar":
+        # L2 is a market/region ("全球", "美国", "A股") — it was being written to
+        # calendar_type, which consumers group by. The event kind comes from L1.
+        for needle, value in _CALENDAR_TYPE_BY_L1:
+            if needle in (source.l1_category or ""):
+                out["calendar_type"] = value
+                break
         if l2:
-            out["calendar_type"] = l2
+            out["calendar_region"] = l2
     elif m == "company":
         if l2:
             out["data_type"] = l2
@@ -84,6 +112,20 @@ def registry_payload(source: DataSource) -> dict:
     return out
 
 
+def _sanitize_published(module: str, value: datetime | None, now: datetime) -> datetime | None:
+    """Drop a source-declared publication date that lies in the future.
+
+    Feeds do emit them (a mis-set CMS clock stamps an article weeks ahead) and
+    such an item pins itself to the top of every `order=published` stream.
+    calendar/events are exempt: a future date is the payload there."""
+    if value is None or module in ("calendar", "events"):
+        return value
+    skew = get_settings().max_future_skew_hours
+    if skew > 0 and value > now + timedelta(hours=skew):
+        return None
+    return value
+
+
 def run_source(source_id: int) -> dict:
     """Fetch a single source, dedup-store its items, and record a FetchRun.
 
@@ -109,6 +151,7 @@ def run_source(source_id: int) -> dict:
                 )
             )
             base_payload = registry_payload(source)
+            now = utcnow()
             for item in result.items:
                 if item.external_id in existing_ids:
                     continue
@@ -121,7 +164,9 @@ def run_source(source_id: int) -> dict:
                         url=item.url,
                         summary=item.summary,
                         image_url=item.image_url,
-                        published_at=to_naive_utc(item.published_at),
+                        published_at=_sanitize_published(
+                            source.module, to_naive_utc(item.published_at), now
+                        ),
                         # source-intrinsic fields from the registry; fetcher wins
                         payload={**base_payload, **(item.payload or {})},
                     )

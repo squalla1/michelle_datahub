@@ -87,3 +87,39 @@ def test_generic_endpoint_order_by_published(client):
     r = client.get("/api/v1/content", params={"module": "news", "order": "published", "limit": 1})
     assert r.json()[0]["title"] == "today 0"
     assert client.get("/api/v1/content", params={"order": "nope"}).status_code == 422
+
+
+def _seed_calendar():
+    """A schedule spanning last week to three weeks out."""
+    with session_scope() as s:
+        src = DataSource(module="calendar", tab="4_日历", name="cal", url="http://x", enabled=True)
+        s.add(src)
+        s.flush()
+        for day in (1, 5, 10, 20, 28):
+            s.add(ContentItem(
+                source_id=src.id, module="calendar", external_id=f"e{day}",
+                title=f"event 2026-09-{day:02d}",
+                published_at=datetime(2026, 9, day),
+                payload={"event_date": f"2026-09-{day:02d}", "calendar_type": "财报"}))
+        s.add(ContentItem(source_id=src.id, module="calendar", external_id="undated",
+                          title="no event date", payload={"calendar_type": "央行"}))
+
+
+def test_event_window_selects_a_schedule_not_a_day(clean_db):
+    """A calendar page asks "what is on between these two dates" — without this
+    the only way to reach a 4-week window was paging the whole module."""
+    _seed_calendar()
+    client = TestClient(create_app())
+    r = client.get("/api/v1/content/calendar",
+                   params={"event_from": "2026-09-05", "event_to": "2026-09-20"})
+    assert [it["title"] for it in r.json()] == [
+        "event 2026-09-05", "event 2026-09-10", "event 2026-09-20"]  # ascending: a schedule
+
+
+def test_event_window_on_the_generic_endpoint(clean_db):
+    _seed_calendar()
+    client = TestClient(create_app())
+    r = client.get("/api/v1/content", params={"module": "calendar", "event_from": "2026-09-21"})
+    assert [it["title"] for it in r.json()] == ["event 2026-09-28"]
+    # items carrying no event_date are excluded rather than sorted arbitrarily
+    assert "no event date" not in str(r.json())

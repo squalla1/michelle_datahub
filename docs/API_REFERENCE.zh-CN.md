@@ -243,12 +243,19 @@ curl localhost:8000/api/v1/modules
 | `module` | path | string | — | 9 个模块 key 之一;未知 → **404** |
 | `date` | query | date(`YYYY-MM-DD`) | 当天(UTC) | 要查询的日历日 |
 | `by` | query | `published` \| `fetched` | `published` | `date` 过滤和排序所用的时间字段 |
+| `event_from` | query | date | — | 仅日历:`payload.event_date` ≥ 该日 |
+| `event_to` | query | date | — | 仅日历:`payload.event_date` ≤ 该日 |
 | `q` | query | string | — | 标题子串匹配(不区分大小写) |
 | `limit` | query | int(1–500) | 50 | 返回最新 N 条 |
 | `offset` | query | int | 0 | 分页偏移 |
 
 按所选 `by` 字段倒序(最新在前)。注意:`by=published` 时,没有发布时间的条目
 (如爬虫抽取的链接)会被排除 —— 想拿到"当天入库的一切",用 `by=fetched`。
+
+**日程区间(calendar)**:`event_from`/`event_to` 按条目**自身的排期日期**筛选,
+而不是入库日;传了区间即不再套用"当天"默认,一次请求即可取到"未来三周有什么",
+无需全量翻页。结果按事件日期**升序**返回(日程的自然读法),无 `event_date` 的
+条目不纳入。日历窗口为**回溯 7 天 + 前瞻 28 天**。
 
 **低频回退**:不传 `date` 且当天窗口为空时(calendar/macro/market 等低频模块
 可能连续数日无新条目),接口回退返回**全库最新 N 条**而不是 `[]`;显式传
@@ -264,6 +271,8 @@ curl "localhost:8000/api/v1/content/market?date=2026-06-21"
 curl "localhost:8000/api/v1/content/person?by=fetched"
 # 在当天事件中按标题搜索
 curl "localhost:8000/api/v1/content/events?q=oil"
+# 未来三周的日历事件,按排期升序
+curl "localhost:8000/api/v1/content/calendar?event_from=2026-08-15&event_to=2026-09-05&limit=200"
 ```
 
 **响应:** `ContentItemOut[]`
@@ -298,6 +307,8 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 | `by` | query | `published` \| `fetched` | `published` | `date` 过滤所用时间字段(**只影响过滤,不影响排序**) |
 | `order` | query | `fetched` \| `published` | `fetched` | 排序字段,倒序(最新在前) |
 | `since` | query | datetime | — | `published_at >= since` |
+| `event_from` | query | date | — | `payload.event_date >= 该日`(日历) |
+| `event_to` | query | date | — | `payload.event_date <= 该日`(日历) |
 | `q` | query | string | — | 标题子串匹配 |
 | `limit` | query | int(1–500) | 50 | 页大小 |
 | `offset` | query | int | 0 | 分页偏移 |
@@ -318,10 +329,10 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 |---|---|
 | `news` | `region`, `topic`, `lang` |
 | `events` | `event_type`, `actors`(string[]), `location`, `cameo_code` |
-| `calendar` | `event_date`, `calendar_type`, `symbol` |
+| `calendar` | `event_date`, `event_timezone`, `calendar_type`, `calendar_region`, `symbol` |
 | `company` | `symbol`, `exchange`, `data_type`, `logo_url` |
 | `market` | `instrument`, `asset_class`, `venue`, `symbol`, `price`, `change`, `volume` |
-| `macro` | `country`, `indicator`, `period`, `value` |
+| `macro` | `country`, `indicator`, `period`, `value`, `unit`, `frequency` |
 | `opinion` | `platform`, `topic`, `rank`(int) |
 | `channel` | `medium`, `topic`, `lang`, `audio_url`(+`audio_mime`/`audio_duration`), `video_url`(+`video_id`) |
 | `person` | `person`, `platform`, `bio` |
@@ -330,6 +341,20 @@ curl "localhost:8000/api/v1/content/events?q=oil"
 > (YouTube 源另带 `video_id`)。`company.logo_url` 在读取时由 `symbol` 派生
 > (公开 logo CDN,模板 `DATAHUB_STOCK_LOGO_SERVICE_URL`)—— 只要 `symbol`
 > 有值即返回。
+
+> **`calendar_type` 为封闭值域**(事件种类,而非市场):
+> `财报 / 分红 / 拆股 / IPO / 公司行动 / 公司IR / 监管备案 / 经济 / 央行 /
+> 国债拍卖 / 能源商品 / 加密事件 / 科技活动`。所属市场/地区迁至 `calendar_region`
+> (`全球`、`美国`、`A股`、`港交所信披` …)。`event_timezone` 标明 `event_date`
+> 的时间基准,经济日历为 **UTC**(美国 7 月 CPI 记为 `2026-08-12 12:30:00`,
+> 即美东 08:30)。
+
+> **`asset_class` 为封闭值域**:`股票 / 指数 / 外汇 / 商品 / 加密货币 / 债券`。
+> 取自行情接口本身,不再取注册表 L1(那是"二级市场"这类市场分层)。
+> `benchmark: true` 标记各类基准 symbol,每轮必采,不受成交量排名影响。
+
+> **`macro.unit`** 由固定的"指标→单位"对照表下发(`%`、`百分点`、`千人`、
+> `十亿美元`、`指数 (1982-84=100)` …);请勿由数值反推单位。
 
 > **填充现状**:`region/topic/platform/medium/asset_class` 等**源侧字段**由注册表
 > 分类在入库时自动回填(含存量,2026-07-07 起)。**数值型字段自 2026-08-02 起
@@ -487,3 +512,5 @@ curl "localhost:8000/api/v1/content/events?q=oil"
   默认查询(当天 + `by=published`)会显示为空 —— 请用 `by=fetched`(按入库时间)
   或显式指定 `date`。
 - **保留期:** 只保留最近 7 天的内容(`DATAHUB_RETENTION_DAYS`),更早的每日清理。
+  计龄按首次入库时间;去重命中不刷新该时间,因此源里仍在提供的条目也会到期删除,
+  并在下一轮刷新时重建。

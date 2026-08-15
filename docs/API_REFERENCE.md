@@ -252,6 +252,8 @@ Latest **N** items of one module type for a given day. Defaults to **today (UTC)
 | `module` | path | string | — | one of the 9 module keys; unknown → **404** |
 | `date` | query | date (`YYYY-MM-DD`) | today (UTC) | calendar day to return |
 | `by` | query | `published` \| `fetched` | `published` | which timestamp `date` filters and ordering uses |
+| `event_from` | query | date | — | calendar only: items whose `payload.event_date` is on/after this day |
+| `event_to` | query | date | — | calendar only: items whose `payload.event_date` is on/before this day |
 | `q` | query | string | — | case-insensitive substring match on `title` |
 | `limit` | query | int (1–500) | 50 | return the latest N |
 | `offset` | query | int | 0 | pagination offset |
@@ -259,6 +261,12 @@ Latest **N** items of one module type for a given day. Defaults to **today (UTC)
 Ordering is newest-first on the chosen `by` field. Note: with `by=published`, items
 without a publish timestamp (e.g. scraped links) are excluded — use `by=fetched` to
 include everything ingested that day.
+
+**Event window (calendar):** `event_from`/`event_to` select by the item's *scheduled*
+date rather than by ingest day, and replace the single-day default — one request
+returns "the next three weeks" instead of paging the whole module. Results come back
+in **ascending** event order, which is how a schedule reads. Items with no
+`event_date` are excluded. The calendar is kept from 7 days back to 28 days ahead.
 
 **Low-frequency fallback:** when `date` is omitted and today's window is empty
 (calendar/macro/market can go days without new items), the endpoint returns the
@@ -274,6 +282,8 @@ curl "localhost:8000/api/v1/content/market?date=2026-06-21"
 curl "localhost:8000/api/v1/content/person?by=fetched"
 # title search within today's events
 curl "localhost:8000/api/v1/content/events?q=oil"
+# the coming three weeks of calendar events, in schedule order
+curl "localhost:8000/api/v1/content/calendar?event_from=2026-08-15&event_to=2026-09-05&limit=200"
 ```
 
 **Response:** `ContentItemOut[]`
@@ -308,6 +318,8 @@ filtered). Use this for search/pagination across types.
 | `by` | query | `published` \| `fetched` | `published` | date field the `date` filter applies to (**filtering only — it does not change the sort**) |
 | `order` | query | `fetched` \| `published` | `fetched` | sort field, newest first |
 | `since` | query | datetime | — | `published_at >= since` |
+| `event_from` | query | date | — | `payload.event_date >= this day` (calendar) |
+| `event_to` | query | date | — | `payload.event_date <= this day` (calendar) |
 | `q` | query | string | — | substring match on `title` |
 | `limit` | query | int (1–500) | 50 | page size |
 | `offset` | query | int | 0 | pagination offset |
@@ -329,13 +341,28 @@ Every module allows extra keys (`extra="allow"`), but these are the declared fie
 |---|---|
 | `news` | `region`, `topic`, `lang` |
 | `events` | `event_type`, `actors` (string[]), `location`, `cameo_code` |
-| `calendar` | `event_date`, `calendar_type`, `symbol` |
+| `calendar` | `event_date`, `event_timezone`, `calendar_type`, `calendar_region`, `symbol` |
 | `company` | `symbol`, `exchange`, `data_type`, `logo_url` |
 | `market` | `instrument`, `asset_class`, `venue`, `symbol`, `price`, `change`, `volume` |
-| `macro` | `country`, `indicator`, `period`, `value` |
+| `macro` | `country`, `indicator`, `period`, `value`, `unit`, `frequency` |
 | `opinion` | `platform`, `topic`, `rank` (int) |
 | `channel` | `medium`, `topic`, `lang`, `audio_url` (+`audio_mime`/`audio_duration`), `video_url` (+`video_id`) |
 | `person` | `person`, `platform`, `bio` |
+
+> **`calendar_type` is a closed set** — the event kind, not the market:
+> `财报 / 分红 / 拆股 / IPO / 公司行动 / 公司IR / 监管备案 / 经济 / 央行 /
+> 国债拍卖 / 能源商品 / 加密事件 / 科技活动`. The market or region the row belongs
+> to moved to `calendar_region` (`全球`, `美国`, `A股`, `港交所信披` …).
+> `event_timezone` states the basis of `event_date`; economic-calendar events are
+> **UTC** (July US CPI is stamped `2026-08-12 12:30:00` = 08:30 ET).
+
+> **`asset_class` is a closed set**: `股票 / 指数 / 外汇 / 商品 / 加密货币 / 债券`.
+> It comes from the quote endpoint, not from the registry's L1 (which is a market
+> segment such as 二级市场). `benchmark: true` marks the pinned reference symbols
+> of each class — they are ingested every run regardless of turnover.
+
+> **`macro.unit`** is served from a fixed indicator→unit table (`%`, `百分点`,
+> `千人`, `十亿美元`, `指数 (1982-84=100)` …); never infer a unit from the number.
 
 > **Media fields:** `audio_url`/`video_url` come from podcast/video feed
 > enclosures (YouTube feeds also set `video_id`). `company.logo_url` is derived

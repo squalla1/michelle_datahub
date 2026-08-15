@@ -93,5 +93,11 @@ CREATE INDEX IF NOT EXISTS ix_content_module_fetched
     ON content_item (module, fetched_at);
 CREATE INDEX IF NOT EXISTS ix_content_module_published
     ON content_item (module, published_at);
+-- Calendar window queries (?event_from=&event_to=) compare the ISO date prefix.
+-- The expression must match what the ORM emits (a portable JSON string read
+-- renders as a cast on PostgreSQL) or the planner will not use the index.
+CREATE INDEX IF NOT EXISTS ix_content_event_date
+    ON content_item ((substr(CAST(payload ->> 'event_date' AS VARCHAR), 1, 10)))
+    WHERE payload ? 'event_date';
 
 COMMIT;

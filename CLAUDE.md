@@ -121,6 +121,28 @@ Package responsibilities (`datahub/`):
 - **Module definitions are centralized** in `catalog/module_spec.py` and mirrored by
   `schemas/content.py` `CONTENT_SCHEMAS`. Change both together when adding/altering a
   module so the standard and its validator stay in sync.
+- **Retention ages by `fetched_at`, and dedup never refreshes it.** An item the
+  source still serves is therefore deleted `retention_days` after it was *first*
+  seen and rebuilt at the next fetch — a known, deliberately unchanged behaviour
+  (2026-08-15): it is why a slow-moving series (a monthly FRED observation) has a
+  ~3.5h hole every 7 days. Do not "fix" it without a decision on history depth.
+- **Calendars are forward-looking.** FMP calendar endpoints are queried over
+  `[today-calendar_lookback_days, today+calendar_lookahead_days]` in
+  `calendar_window_chunk_days` slices — one wide request is truncated at 4,000 rows
+  in date-DESC order and silently loses the near dates. The cap
+  (`calendar_max_items`) is split evenly across the slices, never spent globally.
+- **Closed payload vocabularies** live next to the code that emits them:
+  `ingest/runner.py` `CALENDAR_TYPES` (event kind; the market/region moved to
+  `calendar_region`) and `fetchers/api.py` `_FMP_QUOTE_KINDS` (asset class +
+  benchmark symbols). Extend the constant and the docs' value-domain table together.
+- **Quote batches keep their benchmarks.** Top-N-by-volume alone dropped EURUSD on a
+  thin day and never ingested USDJPY (FMP reports volume 0 for it); the pinned list
+  is ingested every run and the rest of the cap is filled by volume.
+- **The generic scraper only stores content links** — chrome regions, off-site links
+  and server default pages are dropped (`fetchers/scraper.py`), and JS-rendered
+  sources are `skipped` with the interface they'd need rather than storing their
+  shell. Per-host parsers go in `_SITE_HANDLERS` (SEC EDGAR uses the Atom output;
+  `sec_user_agent` is required or SEC serves a block page).
 - **Dedup** is `(source_id, external_id)`; RSS uses entry id/guid/link, others hash.
   Catalog upsert keys on `(module, name, url)` and also de-dups exact repeats within
   a single workbook (the spreadsheet contains some).
