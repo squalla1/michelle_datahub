@@ -47,7 +47,19 @@ docker compose run --rm ingest        # 一次:建表 + 载入注册表
 docker compose up -d api scheduler
 ```
 
-注册表(Excel)更新后:
+拉取新**代码**后 —— 这一步最容易漏。`git pull` 改的是源码目录,不是运行中的容器;
+只跑 `ingest` 会用旧镜像重载注册表,线上仍是旧代码:
+
+```bash
+git pull
+cd deploy
+docker compose build api scheduler      # 用新源码重建镜像
+docker compose up -d api scheduler      # 重建两个容器
+docker compose ps                       # 两个都 Up,Created 时间是刚刚
+curl -s localhost:8000/openapi.json | grep -c event_from   # 非 0 即新代码已生效
+```
+
+更新 Excel 注册表后(不含代码变更):
 
 ```bash
 docker compose run --rm ingest && docker compose restart scheduler

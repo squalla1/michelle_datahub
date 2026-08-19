@@ -49,7 +49,20 @@ docker compose run --rm ingest        # once: create tables + load registry
 docker compose up -d api scheduler
 ```
 
-After updating the Excel registry:
+After pulling new **code** — this is the step that gets missed. `git pull`
+changes the source tree, not the running containers; `ingest` alone reloads the
+registry from a stale image and leaves the old code serving:
+
+```bash
+git pull
+cd deploy
+docker compose build api scheduler      # rebuild the image from the new source
+docker compose up -d api scheduler      # recreate both containers
+docker compose ps                       # both Up, recent Created timestamps
+curl -s localhost:8000/openapi.json | grep -c event_from   # non-zero = new code live
+```
+
+After updating the Excel registry (no code change):
 
 ```bash
 docker compose run --rm ingest && docker compose restart scheduler
