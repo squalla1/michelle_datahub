@@ -355,6 +355,9 @@ Every module allows extra keys (`extra="allow"`), but these are the declared fie
 > to moved to `calendar_region` (`全球`, `美国`, `A股`, `港交所信披` …).
 > `event_timezone` states the basis of `event_date`; economic-calendar events are
 > **UTC** (July US CPI is stamped `2026-08-12 12:30:00` = 08:30 ET).
+> **`event_date` is guaranteed present** on every `calendar` item — an item
+> without one is not stored, so a calendar feed never carries a site's own
+> navigation links.
 
 > **`asset_class` is a closed set**: `股票 / 指数 / 外汇 / 商品 / 加密货币 / 债券`.
 > It comes from the quote endpoint, not from the registry's L1 (which is a market

@@ -133,6 +133,10 @@ def _edgar_items(source, settings) -> FetchResult:
 
             published = to_naive_utc(_dt(*e.updated_parsed[:6]))
         payload = {"form_type": form.strip() or None, "companyName": company, "cik": cik}
+        # This is a calendar row: the filing date is the event date, and an
+        # item without one is dropped downstream as "not an event".
+        if published:
+            payload["event_date"] = published.strftime("%Y-%m-%d %H:%M:%S")
         items.append(RawItem(
             external_id=e.get("id") or e.get("link") or title,
             title=f"{company or rest.strip()} {form.strip()}".strip(),

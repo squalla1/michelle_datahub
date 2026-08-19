@@ -348,6 +348,8 @@ curl "localhost:8000/api/v1/content/calendar?event_from=2026-08-15&event_to=2026
 > (`全球`、`美国`、`A股`、`港交所信披` …)。`event_timezone` 标明 `event_date`
 > 的时间基准,经济日历为 **UTC**(美国 7 月 CPI 记为 `2026-08-12 12:30:00`,
 > 即美东 08:30)。
+> **`event_date` 必然存在**:calendar 模块的条目若无 `event_date` 一律不入库,
+> 因此日历接口不会再混入站点自身的导航/栏目链接。
 
 > **`asset_class` 为封闭值域**:`股票 / 指数 / 外汇 / 商品 / 加密货币 / 债券`。
 > 取自行情接口本身,不再取注册表 L1(那是"二级市场"这类市场分层)。

@@ -113,17 +113,25 @@ def registry_payload(source: DataSource) -> dict:
 
 
 def _sanitize_published(module: str, value: datetime | None, now: datetime) -> datetime | None:
-    """Drop a source-declared publication date that lies in the future.
+    """Normalize a source-declared publication date that lies in the future.
 
-    Feeds do emit them (a mis-set CMS clock stamps an article weeks ahead) and
-    such an item pins itself to the top of every `order=published` stream.
+    Nothing can be published after the fetch that discovered it, yet feeds emit
+    such stamps and the item then pins itself to the top of every
+    `order=published` stream. Two magnitudes, two treatments:
+      * a small overshoot is a source-side clock/timezone error (Bild runs
+        ~1.5h ahead, i.e. CEST written as UTC) — clamp it to `now`, which keeps
+        a usable, correctly ordered date;
+      * beyond `max_future_skew_hours` the value is nonsense (an article dated
+        weeks ahead) — drop it.
     calendar/events are exempt: a future date is the payload there."""
     if value is None or module in ("calendar", "events"):
+        return value
+    if value <= now:
         return value
     skew = get_settings().max_future_skew_hours
     if skew > 0 and value > now + timedelta(hours=skew):
         return None
-    return value
+    return now
 
 
 def run_source(source_id: int) -> dict:
@@ -141,6 +149,7 @@ def run_source(source_id: int) -> dict:
 
         result = fetch_source(source)
         new_count = 0
+        dropped_no_event = 0
 
         if result.status == "ok":
             existing_ids = set(
@@ -155,6 +164,15 @@ def run_source(source_id: int) -> dict:
             for item in result.items:
                 if item.external_id in existing_ids:
                     continue
+                payload = {**base_payload, **(item.payload or {})}
+                # A calendar entry without a date is not an event. Every API
+                # calendar provider carries one; the scraper-backed rows that
+                # do not are the site's own navigation ("Speeches", "Our
+                # people") and search-form links, which a date filter cannot
+                # catch because their date is always "today".
+                if source.module == "calendar" and not payload.get("event_date"):
+                    dropped_no_event += 1
+                    continue
                 session.add(
                     ContentItem(
                         source_id=source.id,
@@ -168,7 +186,7 @@ def run_source(source_id: int) -> dict:
                             source.module, to_naive_utc(item.published_at), now
                         ),
                         # source-intrinsic fields from the registry; fetcher wins
-                        payload={**base_payload, **(item.payload or {})},
+                        payload=payload,
                     )
                 )
                 existing_ids.add(item.external_id)
@@ -180,6 +198,9 @@ def run_source(source_id: int) -> dict:
         # Keep the note even on a successful run: "feed parsed but empty" is the
         # only trace left when a source silently stops producing items.
         run.error = result.note
+        if result.status == "ok" and dropped_no_event:
+            note = f"calendar: dropped {dropped_no_event} item(s) without event_date"
+            run.error = f"{run.error}; {note}" if run.error else note
         run.finished_at = utcnow()
 
         try:

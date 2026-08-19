@@ -131,6 +131,16 @@ Package responsibilities (`datahub/`):
   `calendar_window_chunk_days` slices — one wide request is truncated at 4,000 rows
   in date-DESC order and silently loses the near dates. The cap
   (`calendar_max_items`) is split evenly across the slices, never spent globally.
+- **A calendar item must carry `event_date`, or it is not stored** (`ingest/runner.py`).
+  Every API calendar provider sets one; the scraper-backed rows that did not were
+  the sites' own navigation ("Speeches", "Our people") and EDGAR search-form links,
+  which no date filter can catch because their date is always *today*. The drop
+  count goes into the run's note, so a source that yields only chrome shows up in
+  the run log instead of looking like a healthy empty fetch.
+- **A future `published_at` is normalized by magnitude** (`_sanitize_published`):
+  within `max_future_skew_hours` it is a source clock/timezone error (Bild runs
+  ~1.5h ahead) and is clamped to the fetch time; beyond it the value is nonsense
+  and is dropped. calendar/events are exempt — a future date is the payload there.
 - **Closed payload vocabularies** live next to the code that emits them:
   `ingest/runner.py` `CALENDAR_TYPES` (event kind; the market/region moved to
   `calendar_region`) and `fetchers/api.py` `_FMP_QUOTE_KINDS` (asset class +
